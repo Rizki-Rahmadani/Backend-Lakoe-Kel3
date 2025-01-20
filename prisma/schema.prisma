@@ -12,238 +12,239 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-model User {
-  id           String       @id @unique
-  Email        String       @unique
-  phone_number String       @unique
-  Fullname     String
-  Password     String
-  profile_id   Profiles?    @relation(fields: [profilesId], references: [id])
-  role_id      Roles?       @relation(fields: [rolesId], references: [id])
-  profilesId   String?
-  rolesId      String?
-  Carts        Carts[]
-  Cart_items   Cart_items[]
-  Invoices     Invoices[]
-  Payments     Payments[]
-}
 
-model Profiles {
-  id         String   @id @unique @default(cuid())
-  user_id    String?
-  locations  Location @relation(fields: [locationId], references: [id])
-  User       User[]
-  locationId String
-}
+// model User {
+//   id           String       @id @unique
+//   Email        String       @unique
+//   phone_number String       @unique
+//   Fullname     String
+//   Password     String
+//   profile_id   Profiles?    @relation(fields: [profilesId], references: [id])
+//   role_id      Roles?       @relation(fields: [rolesId], references: [id])
+//   profilesId   String?
+//   rolesId      String?
+//   Carts        Carts[]
+//   Cart_items   Cart_items[]
+//   Invoices     Invoices[]
+//   Payments     Payments[]
+// }
 
-model Roles {
-  id   String  @id @unique @default(cuid())
-  name String?
-  User User[]
-}
+// model Profiles {
+//   id         String   @id @unique @default(cuid())
+//   user_id    String?
+//   locations  Location @relation(fields: [locationId], references: [id])
+//   User       User[]
+//   locationId String
+// }
 
-model Product {
-  id            String       @id @unique @default(cuid())
-  name          String
-  description   String?
-  attachments   Bytes
-  is_active     Boolean?     @default(false)
-  variants      Variants?
-  size          String?
-  minimum_order Int?
-  store_id      Stores?      @relation(fields: [storesId], references: [id])
-  storesId      String?
-  Categories    Categories[]
-}
+// model Roles {
+//   id   String  @id @unique @default(cuid())
+//   name String?
+//   User User[]
+// }
 
-model Stores {
-  id                    String                  @id @unique @default(cuid())
-  name                  String                  @unique
-  slogan                String?
-  description           String?
-  domain                String?
-  logo_attachment       Bytes?
-  banner_attachment     Bytes?
-  Product               Product[]
-  bank_accounts         bank_accounts[]
-  Location              Location[]
-  Carts                 Carts[]
-  Cart_items            Cart_items[]
-  Stores_on_decorations Stores_on_decorations[]
-  Operation_hours       Operation_hours[]
-  Message_templates     Message_templates[]
-}
+// model Product {
+//   id            String       @id @unique @default(cuid())
+//   name          String
+//   description   String?
+//   attachments   Bytes
+//   is_active     Boolean?     @default(false)
+//   variants      Variants?
+//   size          String?
+//   minimum_order Int?
+//   store_id      Stores?      @relation(fields: [storesId], references: [id])
+//   storesId      String?
+//   Categories    Categories[]
+// }
 
-model bank_accounts {
-  id         String  @id @unique @default(cuid())
-  bank       String
-  acc_number String
-  acc_name   String
-  store_id   Stores? @relation(fields: [storesId], references: [id])
-  storesId   String?
-}
+// model Stores {
+//   id                    String                  @id @unique @default(cuid())
+//   name                  String                  @unique
+//   slogan                String?
+//   description           String?
+//   domain                String?
+//   logo_attachment       Bytes?
+//   banner_attachment     Bytes?
+//   Product               Product[]
+//   bank_accounts         bank_accounts[]
+//   Location              Location[]
+//   Carts                 Carts[]
+//   Cart_items            Cart_items[]
+//   Stores_on_decorations Stores_on_decorations[]
+//   Operation_hours       Operation_hours[]
+//   Message_templates     Message_templates[]
+// }
 
-model Location {
-  id               String    @id @unique @default(cuid())
-  name             String
-  address          String
-  postal_code      String
-  city_district    String
-  store_id         Stores?   @relation(fields: [storesId], references: [id])
-  profile_id       Profiles?
-  is_main_location Boolean?  @default(false)
-  longitude        String
-  latitude         String
-  storesId         String?
-}
+// model bank_accounts {
+//   id         String  @id @unique @default(cuid())
+//   bank       String
+//   acc_number String
+//   acc_name   String
+//   store_id   Stores? @relation(fields: [storesId], references: [id])
+//   storesId   String?
+// }
 
-model Variant_option_values {
-  id                String          @id @unique @default(cuid())
-  sku               String
-  weight            String
-  stock             Int
-  price             Int
-  is_active         Boolean         @default(false)
-  variant_option_id Variant_options @relation(fields: [variant_optionsId], references: [id])
-  variant_optionsId String
-  Cart_items        Cart_items[]
-}
+// model Location {
+//   id               String    @id @unique @default(cuid())
+//   name             String
+//   address          String
+//   postal_code      String
+//   city_district    String
+//   store_id         Stores?   @relation(fields: [storesId], references: [id])
+//   profile_id       Profiles?
+//   is_main_location Boolean?  @default(false)
+//   longitude        String
+//   latitude         String
+//   storesId         String?
+// }
 
-model Variant_options {
-  id                    String                  @id @unique @default(cuid())
-  name                  String
-  variant_id            Variants                @relation(fields: [variantsId], references: [id])
-  Variant_option_values Variant_option_values[]
-  variantsId            String
-}
+// model Variant_option_values {
+//   id                String          @id @unique @default(cuid())
+//   sku               String
+//   weight            String
+//   stock             Int
+//   price             Int
+//   is_active         Boolean         @default(false)
+//   variant_option_id Variant_options @relation(fields: [variant_optionsId], references: [id])
+//   variant_optionsId String
+//   Cart_items        Cart_items[]
+// }
 
-model Variants {
-  id              String            @id @unique @default(cuid())
-  name            String
-  is_active       Boolean           @default(false)
-  product_id      Product           @relation(fields: [productId], references: [id])
-  Variant_options Variant_options[]
-  productId       String
-}
+// model Variant_options {
+//   id                    String                  @id @unique @default(cuid())
+//   name                  String
+//   variant_id            Variants                @relation(fields: [variantsId], references: [id])
+//   Variant_option_values Variant_option_values[]
+//   variantsId            String
+// }
 
-model Categories {
-  id         String  @id @unique @default(cuid())
-  name       String
-  product_id Product @relation(fields: [productId], references: [id])
-  productId  String
-}
+// model Variants {
+//   id              String            @id @unique @default(cuid())
+//   name            String
+//   is_active       Boolean           @default(false)
+//   product_id      Product           @relation(fields: [productId], references: [id])
+//   Variant_options Variant_options[]
+//   productId       String
+// }
 
-model Carts {
-  id         String       @id @unique @default(cuid())
-  prices     Int
-  discount   String?
-  user_id    User         @relation(fields: [userId], references: [id])
-  store_id   Stores       @relation(fields: [storesId], references: [id])
-  userId     String
-  storesId   String
-  Cart_items Cart_items[]
-  Invoices   Invoices[]
-}
+// model Categories {
+//   id         String  @id @unique @default(cuid())
+//   name       String
+//   product_id Product @relation(fields: [productId], references: [id])
+//   productId  String
+// }
 
-model Cart_items {
-  id                      String                @id @unique @default(cuid())
-  qty                     Int
-  price                   Int
-  cart_id                 Carts                 @relation(fields: [cartsId], references: [id])
-  user_id                 User                  @relation(fields: [userId], references: [id])
-  store_id                Stores                @relation(fields: [storesId], references: [id])
-  variant_option_value_id Variant_option_values @relation(fields: [variant_option_valuesId], references: [id])
-  cartsId                 String
-  userId                  String
-  storesId                String
-  variant_option_valuesId String
-}
+// model Carts {
+//   id         String       @id @unique @default(cuid())
+//   prices     Int
+//   discount   String?
+//   user_id    User         @relation(fields: [userId], references: [id])
+//   store_id   Stores       @relation(fields: [storesId], references: [id])
+//   userId     String
+//   storesId   String
+//   Cart_items Cart_items[]
+//   Invoices   Invoices[]
+// }
 
-model Invoices {
-  id                   String                 @id @unique @default(cuid())
-  prices               Int
-  status               Boolean                @default(false)
-  receiver_longitude   String
-  receiver_latitude    String
-  receiver_district    String
-  receiver_phone       String
-  receiver_address     String
-  receiver_name        String
-  invoice_number       String
-  cart_id              Carts                  @relation(fields: [cartsId], references: [id])
-  user_id              User                   @relation(fields: [userId], references: [id])
-  courier_id           Couriers
-  payment_id           Payments               @relation(fields: [paymentsId], references: [id])
-  cartsId              String
-  userId               String
-  paymentsId           String
-  Confirmation_payment Confirmation_payment[]
-  Invoice_histories    Invoice_histories[]
-}
+// model Cart_items {
+//   id                      String                @id @unique @default(cuid())
+//   qty                     Int
+//   price                   Int
+//   cart_id                 Carts                 @relation(fields: [cartsId], references: [id])
+//   user_id                 User                  @relation(fields: [userId], references: [id])
+//   store_id                Stores                @relation(fields: [storesId], references: [id])
+//   variant_option_value_id Variant_option_values @relation(fields: [variant_option_valuesId], references: [id])
+//   cartsId                 String
+//   userId                  String
+//   storesId                String
+//   variant_option_valuesId String
+// }
 
-model Confirmation_payment {
-  id         String   @id @unique @default(cuid())
-  amount     Int
-  bank       String
-  invoice_id Invoices @relation(fields: [invoicesId], references: [id])
-  invoicesId String
-}
+// model Invoices {
+//   id                   String                 @id @unique @default(cuid())
+//   prices               Int
+//   status               Boolean                @default(false)
+//   receiver_longitude   String
+//   receiver_latitude    String
+//   receiver_district    String
+//   receiver_phone       String
+//   receiver_address     String
+//   receiver_name        String
+//   invoice_number       String
+//   cart_id              Carts                  @relation(fields: [cartsId], references: [id])
+//   user_id              User                   @relation(fields: [userId], references: [id])
+//   courier_id           Couriers
+//   payment_id           Payments               @relation(fields: [paymentsId], references: [id])
+//   cartsId              String
+//   userId               String
+//   paymentsId           String
+//   Confirmation_payment Confirmation_payment[]
+//   Invoice_histories    Invoice_histories[]
+// }
 
-model Invoice_histories {
-  id         String    @id @unique @default(cuid())
-  status     Boolean   @default(false)
-  invoice_id Invoices  @relation(fields: [invoicesId], references: [id])
-  created_at DateTime? @default(now())
-  invoicesId String
-}
+// model Confirmation_payment {
+//   id         String   @id @unique @default(cuid())
+//   amount     Int
+//   bank       String
+//   invoice_id Invoices @relation(fields: [invoicesId], references: [id])
+//   invoicesId String
+// }
 
-model Payments {
-  id                   String   @id @unique @default(cuid())
-  bank                 String
-  amount               Int
-  status               Boolean  @default(false)
-  invoice_id           Invoices
-  user_id              User     @relation(fields: [userId], references: [id])
-  moota_transaction_id String?
-  userId               String
-}
+// model Invoice_histories {
+//   id         String    @id @unique @default(cuid())
+//   status     Boolean   @default(false)
+//   invoice_id Invoices  @relation(fields: [invoicesId], references: [id])
+//   created_at DateTime? @default(now())
+//   invoicesId String
+// }
 
-model Couriers {
-  id                   String   @id @unique @default(cuid())
-  courier_code         String
-  courier_service_name String
-  courier_service_code String
-  price                Int
-  invoice_id           Invoices @relation(fields: [invoicesId], references: [id])
-  order_id             String
-  invoicesId           String
-}
+// model Payments {
+//   id                   String   @id @unique @default(cuid())
+//   bank                 String
+//   amount               Int
+//   status               Boolean  @default(false)
+//   invoice_id           Invoices
+//   user_id              User     @relation(fields: [userId], references: [id])
+//   moota_transaction_id String?
+//   userId               String
+// }
 
-model Decoration {
-  id   String @id @unique @default(cuid())
-  type String
-}
+// model Couriers {
+//   id                   String   @id @unique @default(cuid())
+//   courier_code         String
+//   courier_service_name String
+//   courier_service_code String
+//   price                Int
+//   invoice_id           Invoices @relation(fields: [invoicesId], references: [id])
+//   order_id             String
+//   invoicesId           String
+// }
 
-model Stores_on_decorations {
-  id       String @id @unique @default(cuid())
-  store_id Stores @relation(fields: [storesId], references: [id])
-  storesId String
-}
+// model Decoration {
+//   id   String @id @unique @default(cuid())
+//   type String
+// }
 
-model Operation_hours {
-  id       String  @id @unique @default(cuid())
-  day      String
-  open_at  String
-  close_at String
-  is_off   Boolean
-  store_id Stores  @relation(fields: [storesId], references: [id])
-  storesId String
-}
+// model Stores_on_decorations {
+//   id       String @id @unique @default(cuid())
+//   store_id Stores @relation(fields: [storesId], references: [id])
+//   storesId String
+// }
 
-model Message_templates {
-  id       String @id @unique @default(cuid())
-  name     String
-  content  String
-  store_id Stores @relation(fields: [storesId], references: [id])
-  storesId String
-}
+// model Operation_hours {
+//   id       String  @id @unique @default(cuid())
+//   day      String
+//   open_at  String
+//   close_at String
+//   is_off   Boolean
+//   store_id Stores  @relation(fields: [storesId], references: [id])
+//   storesId String
+// }
+
+// model Message_templates {
+//   id       String @id @unique @default(cuid())
+//   name     String
+//   content  String
+//   store_id Stores @relation(fields: [storesId], references: [id])
+//   storesId String
+// }
