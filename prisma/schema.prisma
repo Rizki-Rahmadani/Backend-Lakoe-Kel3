@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id           String       @id @unique
+  id           String       @id @unique @default(cuid())
   email        String       @unique
   phone_number String       @unique
   fullname     String
   password     String
-  profile_id   Profiles?    @relation(fields: [profilesId], references: [id])
+  profile_id   Profiles?
   role_id      Roles?       @relation(fields: [rolesId], references: [id])
   profilesId   String?
   rolesId      String?
@@ -24,11 +24,11 @@ model User {
 }
 
 model Profiles {
-  id         String   @id @unique @default(cuid())
-  user_id    String?
-  locations  Location @relation(fields: [locationId], references: [id])
-  User       User[]
-  locationId String   @unique
+  id         String     @id @unique @default(cuid())
+  user_id    String     @unique
+  locations  Location[]
+  User       User       @relation(fields: [user_id], references: [id])
+  locationId String     @unique
 }
 
 model Roles {
@@ -85,11 +85,12 @@ model Location {
   postal_code      String
   city_district    String
   store_id         Stores?   @relation(fields: [storesId], references: [id])
-  profile_id       Profiles?
+  profile_id       Profiles? @relation(fields: [profilesId], references: [id])
   is_main_location Boolean?  @default(false)
   longitude        String
   latitude         String
   storesId         String?
+  profilesId       String?
 }
 
 model Variant_option_values {
