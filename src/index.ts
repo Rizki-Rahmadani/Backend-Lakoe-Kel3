@@ -24,6 +24,29 @@ app.get('/cart', (req, res)=>{
     */
 })
 
+app.get('/couriers', (req, res)=>{
+    /*
+        #swagger.tags = ['couriers']
+        #swagger.description = "to display courier data."
+    */
+})
+
+app.get('/categories', (req, res)=>{
+    /*
+        #swagger.tags = ['categories']
+        #swagger.description = "to display categories"
+    */
+})
+
+app.get('/product', (req, res)=>{
+    /*
+        #swagger.tags = ['product']
+        #swagger.description = "to get all products"
+    */
+})
+
+
+
 app.get('/invoice', (req, res) => {
     /* 
         #swagger.tags ['invoice']
@@ -48,4 +71,4 @@ app.get('/stores', (req, res)=>{
 
 app.listen(3000, () => {
     console.log("Server running at http://localhost:3000");
-  });
+});
