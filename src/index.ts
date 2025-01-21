@@ -4,6 +4,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerDoc from "./swagger/swagger-output.json";
 import { createProduct, getAllProduct } from "./controllers/product.controller";
 import { upload } from "./middlewares/upload-file";
+import { createStore, getAllStore } from "./controllers/store.controller";
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc, {
     explorer: true,
@@ -73,8 +74,13 @@ app.get('/invoice', (req, res) => {
         }
     */
 })
-
-app.get('/stores', (req, res)=>{
+app.post('/stores', upload.fields([{name: 'logo_attachment', maxCount: 1}, {name: 'banner_attachment', maxCount: 1}]), createStore,(req, res)=>{
+    /*
+        #swagger.tags["stores"]
+        #swagger.description = "to display all stores"
+    */
+})
+app.get('/stores', getAllStore, (req, res)=>{
     /*
         #swagger.tags["stores"]
         #swagger.description = "to display all stores"
