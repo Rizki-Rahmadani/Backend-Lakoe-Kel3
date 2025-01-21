@@ -2,6 +2,8 @@ import  express from "express"
 export const app = express();
 import swaggerUi from "swagger-ui-express";
 import swaggerDoc from "./swagger/swagger-output.json";
+import { createProduct, getAllProduct } from "./controllers/product.controller";
+import { upload } from "./middlewares/upload-file";
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc, {
     explorer: true,
@@ -11,7 +13,9 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc, {
     }
 }))
 
-
+app.get("/", (req, res)=> {
+    res.send("hello");
+})
 
 app.get('/users', (req, res) => {
     /* #swagger.tags = ['Users'] */
@@ -38,12 +42,20 @@ app.get('/categories', (req, res)=>{
     */
 })
 
-app.get('/product', (req, res)=>{
+app.post('/product', upload.single("attachments"), createProduct, (req, res)=> {
     /*
         #swagger.tags = ['product']
-        #swagger.description = "to get all products"
+        #swagger.description = "to create all products"
     */
 })
+
+app.get('/product', getAllProduct, (req, res)=> {
+    /*
+        #swagger.tags = ['product']
+        #swagger.description = "to display all products"
+    */
+})
+
 
 
 
