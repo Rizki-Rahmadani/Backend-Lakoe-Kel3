@@ -1,8 +1,16 @@
-import  express from "express"
+import  express, { Request, Response }from "express"
 export const app = express();
+import dotenv from 'dotenv';
 import swaggerUi from "swagger-ui-express";
 import swaggerDoc from "./swagger/swagger-output.json";
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import router from "./routes/v1/index.route";
 
+app.use(bodyParser.json());
+app.use(cors());
+dotenv.config();
+const PORT = process.env.PORT;
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc, {
     explorer: true,
     swaggerOptions: {
@@ -11,8 +19,10 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc, {
     }
 }))
 
-
-
+app.use('/api', router);
+app.get('/', (request: Request, response: Response) => {
+    response.status(200).send('Hello World');
+  });
 app.get('/users', (req, res) => {
     /* #swagger.tags = ['Users'] */
 })
@@ -27,7 +37,7 @@ app.get('/cart', (req, res)=>{
 app.get('/invoice', (req, res) => {
     /* 
         #swagger.tags ['invoice']
-        #swagger.description = "to get user invoice history"
+        #swagger.description = "to get user invoice history"    
     */
 
     /*
@@ -46,6 +56,10 @@ app.get('/stores', (req, res)=>{
     */
 })
 
-app.listen(3000, () => {
-    console.log("Server running at http://localhost:3000");
+app
+  .listen(PORT, () => {
+    console.log('Server running at PORT:', PORT);
+  })
+  .on('error', (error) => {
+    throw new Error(error.message);
   });
