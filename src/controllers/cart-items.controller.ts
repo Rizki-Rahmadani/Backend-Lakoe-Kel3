@@ -82,7 +82,7 @@ export const getAllCartItems = async (req: Request, res: Response) => {
 
 export const getCartItemById = async (req: Request, res: Response) => {
   /*  
-        #swagger.tags = ['Carts-Item']
+        #swagger.tags = ['Cart-Item']
         #swagger.requestBody = {
             required: true,
             content: {
@@ -121,7 +121,7 @@ export const getCartItemById = async (req: Request, res: Response) => {
 
 export const updateCartItem = async (req: Request, res: Response) => {
   /*  
-        #swagger.tags = ['Carts-Item']
+        #swagger.tags = ['Cart-Item']
         #swagger.requestBody = {
             required: true,
             content: {
@@ -161,7 +161,7 @@ export const updateCartItem = async (req: Request, res: Response) => {
 
 export const deleteCartItem = async (req: Request, res: Response) => {
   /*  
-        #swagger.tags = ['Carts-Item']
+        #swagger.tags = ['Cart-Item']
         #swagger.requestBody = {
             required: true,
             content: {
