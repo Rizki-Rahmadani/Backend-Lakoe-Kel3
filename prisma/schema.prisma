@@ -41,7 +41,7 @@ model Product {
   id            String       @id @unique @default(cuid())
   name          String
   description   String?
-  attachments   Bytes
+  attachments   String
   is_active     Boolean?     @default(false)
   variants      Variants?
   size          String?
@@ -57,8 +57,8 @@ model Stores {
   slogan                String?
   description           String?
   domain                String?
-  logo_attachment       Bytes?
-  banner_attachment     Bytes?
+  logo_attachment       String?
+  banner_attachment     String?
   Product               Product[]
   bank_accounts         bank_accounts[]
   Location              Location[]
