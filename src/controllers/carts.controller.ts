@@ -3,6 +3,19 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 export const createCart = async (req: Request, res: Response) => {
+  /*  
+        #swagger.tags = ['Carts']
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/CreateCartsDTO"
+                    }  
+                }
+            }
+        } 
+    */
   try {
     const { prices, discount, userId, storesId } = req.body;
     if (!prices || !userId || !storesId) {
@@ -34,6 +47,10 @@ export const createCart = async (req: Request, res: Response) => {
 };
 
 export const getAllCarts = async (req: Request, res: Response) => {
+  /*  
+        #swagger.tags = ['Carts']
+        #swagger.description = "to display all cart"
+    */
   try {
     const carts = await prisma.carts.findMany();
     res.status(200).json({
@@ -46,6 +63,19 @@ export const getAllCarts = async (req: Request, res: Response) => {
 };
 
 export const getCartById = async (req: Request, res: Response) => {
+  /*  
+        #swagger.tags = ['Carts']
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/ShowCartsbyIdDTO"
+                    }  
+                }
+            }
+        } 
+    */
   try {
     const { id } = req.params;
     const cart = await prisma.carts.findUnique({
@@ -70,6 +100,19 @@ export const getCartById = async (req: Request, res: Response) => {
 };
 
 export const updateCart = async (req: Request, res: Response) => {
+  /*  
+        #swagger.tags = ['Carts']
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/UpdateCartsDTO"
+                    }  
+                }
+            }
+        } 
+    */
   try {
     const { id } = req.params;
     const { prices, discount, userId, storesId } = req.body;
@@ -100,6 +143,19 @@ export const updateCart = async (req: Request, res: Response) => {
 };
 
 export const deleteCart = async (req: Request, res: Response) => {
+  /*  
+        #swagger.tags = ['Carts']
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/DeleteCartsDTO"
+                    }  
+                }
+            }
+        } 
+    */
   try {
     const { id } = req.params;
     await prisma.carts.delete({
