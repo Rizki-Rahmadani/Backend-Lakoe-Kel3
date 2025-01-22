@@ -5,6 +5,7 @@ import swaggerDoc from "./swagger/swagger-output.json";
 import { createProduct, getAllProduct } from "./controllers/product.controller";
 import { upload } from "./middlewares/upload-file";
 import { createStore, getAllStore } from "./controllers/store.controller";
+import api_router from "./routes/route_manager";
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc, {
     explorer: true,
@@ -13,6 +14,7 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc, {
         displayRequestDuration: true
     }
 }))
+app.use("/api", api_router);
 
 app.get("/", (req, res)=> {
     res.send("hello");
@@ -43,19 +45,6 @@ app.get('/categories', (req, res)=>{
     */
 })
 
-app.post('/product', upload.single("attachments"), createProduct, (req, res)=> {
-    /*
-        #swagger.tags = ['product']
-        #swagger.description = "to create all products"
-    */
-})
-
-app.get('/product', getAllProduct, (req, res)=> {
-    /*
-        #swagger.tags = ['product']
-        #swagger.description = "to display all products"
-    */
-})
 
 
 
@@ -74,18 +63,7 @@ app.get('/invoice', (req, res) => {
         }
     */
 })
-app.post('/stores', upload.fields([{name: 'logo_attachment', maxCount: 1}, {name: 'banner_attachment', maxCount: 1}]), createStore,(req, res)=>{
-    /*
-        #swagger.tags["stores"]
-        #swagger.description = "to display all stores"
-    */
-})
-app.get('/stores', getAllStore, (req, res)=>{
-    /*
-        #swagger.tags["stores"]
-        #swagger.description = "to display all stores"
-    */
-})
+
 
 app.listen(3000, () => {
     console.log("Server running at http://localhost:3000");
