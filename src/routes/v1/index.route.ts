@@ -2,9 +2,13 @@ import express from 'express';
 import authRoute from './auth.route';
 import roleRoute from './role.route';
 import profileRoute from './profile.route';
+import cartsRoute from './carts.route';
+import cartsitemsRoute from './carts-items.route';
 const router = express.Router();
 
-router.use('/role', roleRoute)
+router.use('/role', roleRoute);
 router.use('/auth', authRoute);
-router.use('/profile', profileRoute)
+router.use('/profile', profileRoute);
+router.use('/carts', cartsRoute);
+router.use('/cart-items', cartsitemsRoute);
 export default router;

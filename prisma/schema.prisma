@@ -132,7 +132,7 @@ model Categories {
 model Carts {
   id         String       @id @unique @default(cuid())
   prices     Int
-  discount   String?
+  discount   Int?
   user_id    User         @relation(fields: [userId], references: [id])
   store_id   Stores       @relation(fields: [storesId], references: [id])
   userId     String
