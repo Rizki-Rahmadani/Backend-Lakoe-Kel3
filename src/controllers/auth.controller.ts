@@ -11,6 +11,19 @@ const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
 
 export async function register(req: Request, res: Response) {
+  /*  
+      #swagger.tags = ['Auth']
+      #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/RegisterDTO"
+                    }  
+                }
+            }
+        } 
+    */
   const { fullname, email, phone_number, password, role_id } = req.body;
 
   if (!fullname || !email || !phone_number || !password) {
@@ -47,7 +60,7 @@ export async function register(req: Request, res: Response) {
         email,
         phone_number,
         password: hashedPassword,
-        rolesId: role_id
+        rolesId: role_id,
       },
     });
 
@@ -58,6 +71,19 @@ export async function register(req: Request, res: Response) {
 }
 
 export async function login(req: Request, res: Response) {
+  /*  
+      #swagger.tags = ['Auth']
+      #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/LoginDTO"
+                    }  
+                }
+            }
+        } 
+    */
   const { email, password } = req.body;
 
   if (!email || !password) {
