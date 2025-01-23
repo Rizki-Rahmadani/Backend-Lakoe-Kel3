@@ -9,6 +9,7 @@ import app_product from './product.route';
 
 import cartsRoute from './carts.route';
 import cartsitemsRoute from './carts-items.route';
+import categoryRoute from './category.route';
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.use('/profile', profileRoute);
 router.use('/message', authentication, app_message);
 router.use('/stores', app_store);
 router.use('/product', app_product);
-
+router.use('/category', categoryRoute);
 router.use('/carts', cartsRoute);
 router.use('/cart-items', cartsitemsRoute);
 
