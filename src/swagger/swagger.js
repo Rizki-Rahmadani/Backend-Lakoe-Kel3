@@ -160,6 +160,47 @@ const doc = {
           }
         }
       },
+      CreateCategoryDTO: {
+        type: "object",
+        properties: {
+          name:{
+            type:"string"
+          },
+          productId:{
+            type:"string"
+          }
+        },
+      },
+      UpdateCategoryDTO: {
+        type: "object",
+        properties: {
+          id:{
+            type:"string"
+          },
+          name:{
+            type:"string"
+          },
+          productId:{
+            type:"string"
+          }
+        },
+      },
+      DeleteCategoryDTO: {
+        type: "object",
+        properties: {
+          id:{
+            type:"string"
+          }
+        },
+      },
+      ShowCategorybyIdDTO:{
+        type:"object",
+        properties:{
+          id:{
+            type:"string"
+          }
+        }
+      },
       LoginDTO: {
         type: "object",
         properties: {
