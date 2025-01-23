@@ -11,7 +11,7 @@ const router = express.Router();
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
 router.use('/profile', profileRoute);
-router.use('/message', authentication, app_message);
+router.use('/message', app_message);
 router.use('/stores', app_store);
 router.use('/product', app_product);
 export default router;
