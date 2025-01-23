@@ -43,7 +43,7 @@ model Product {
   description   String?
   attachments   String
   is_active     Boolean?     @default(false)
-  variants      Variants?
+  variants      Variants[]
   size          String?
   minimum_order Int?
   store_id      Stores?      @relation(fields: [storesId], references: [id], onDelete: SetNull, onUpdate: Cascade)
@@ -96,7 +96,7 @@ model Location {
 model Variant_option_values {
   id                String          @id @unique @default(cuid())
   sku               String
-  weight            String
+  weight            Int
   stock             Int
   price             Int
   is_active         Boolean         @default(false)
@@ -119,7 +119,7 @@ model Variants {
   is_active       Boolean           @default(false)
   product_id      Product           @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Variant_options Variant_options[]
-  productId       String            @unique
+  productId       String
 }
 
 model Categories {

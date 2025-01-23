@@ -1,3 +1,4 @@
+const { profile } = require("console");
 const { type } = require("os");
 
 const swaggerAutogen = require("swagger-autogen")({
@@ -207,8 +208,29 @@ const doc = {
           name:{
             type:"string"
           },
-          productId:{
+          address:{
             type:"string"
+          },
+          postal_code:{
+            type:"string"
+          },
+          city_district:{
+            type:"string"
+          },
+          longitude:{
+            type:"string"
+          },
+          latitude:{
+            type:"string"
+          },
+          storesId:{
+            type:"string"
+          },
+          profilesId:{
+            type:"string"
+          },
+          is_main_location:{
+            type:"boolean"
           }
         },
       },
@@ -221,8 +243,29 @@ const doc = {
           name:{
             type:"string"
           },
-          productId:{
+          address:{
             type:"string"
+          },
+          postal_code:{
+            type:"string"
+          },
+          city_district:{
+            type:"string"
+          },
+          longitude:{
+            type:"string"
+          },
+          latitude:{
+            type:"string"
+          },
+          storesId:{
+            type:"string"
+          },
+          profilesId:{
+            type:"string"
+          },
+          is_main_location:{
+            type:"boolean"
           }
         },
       },
