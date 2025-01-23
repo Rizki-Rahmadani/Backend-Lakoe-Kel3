@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 export const createCartItem = async (req: Request, res: Response) => {
   /*  
-        #swagger.tags = ['Carts-Item']
+        #swagger.tags = ['Cart-Item']
         #swagger.requestBody = {
             required: true,
             content: {

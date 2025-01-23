@@ -201,6 +201,47 @@ const doc = {
           }
         }
       },
+      CreateLocationDTO: {
+        type: "object",
+        properties: {
+          name:{
+            type:"string"
+          },
+          productId:{
+            type:"string"
+          }
+        },
+      },
+      UpdateLocationDTO: {
+        type: "object",
+        properties: {
+          id:{
+            type:"string"
+          },
+          name:{
+            type:"string"
+          },
+          productId:{
+            type:"string"
+          }
+        },
+      },
+      DeleteLocationDTO: {
+        type: "object",
+        properties: {
+          id:{
+            type:"string"
+          }
+        },
+      },
+      ShowLocationbyIdDTO:{
+        type:"object",
+        properties:{
+          id:{
+            type:"string"
+          }
+        }
+      },
       LoginDTO: {
         type: "object",
         properties: {
