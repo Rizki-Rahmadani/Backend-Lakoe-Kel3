@@ -52,13 +52,6 @@ app.get('/invoice', (req, res) => {
     */
 });
 
-app.get('/stores', (req, res) => {
-  /*
-        #swagger.tags["stores"]
-        #swagger.description = "to display all stores"
-    */
-});
-
 app
   .listen(PORT, () => {
     console.log('Server running at PORT:', PORT);
