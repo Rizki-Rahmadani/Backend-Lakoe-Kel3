@@ -4,6 +4,7 @@ import {
   createProduct,
   deleteProduct,
   getAllProduct,
+  search,
   toggleActive,
   updateProduct,
 } from '../../controllers/product.controller';
@@ -40,6 +41,13 @@ app_product.put('/toggle', toggleActive, (req, res) => {
         #swagger.tags = ['product']
         #swagger.description = "to display all products"
     */
+});
+
+app_product.get('/search', search, (req, res) => {
+  /*
+          #swagger.tags = ['product']
+          #swagger.description = "to display all products"
+      */
 });
 
 app_product.put(
