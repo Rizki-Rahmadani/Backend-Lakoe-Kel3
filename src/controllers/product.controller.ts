@@ -86,7 +86,7 @@ export async function getAllProduct(
 }
 
 export async function toggleActive(req: Request, res: Response) {
-  const id = 'cm68nestw0001tavonmecjgo5'; // `id` is a string
+  const id = 'cm68t7p9i0004tamc2c78objf'; // `id` is a string
 
   try {
     if (!id) {
@@ -189,13 +189,50 @@ export async function updateProduct(
       },
     });
 
-    res
-      .status(201)
-      .json({
-        message: 'successfully updated product information: ',
-        updated: updatedProduct,
-      });
+    res.status(201).json({
+      message: 'successfully updated product information: ',
+      updated: updatedProduct,
+    });
   } catch (error) {
     res.status(500).json({ message: 'error update product', error });
+  }
+}
+
+export async function search(req: Request, res: Response) {
+  const { query } = req.query;
+
+  if (typeof query !== 'string' || !query.trim()) {
+    return res.status(400).json({ error: 'Search query is required' });
+  }
+
+  try {
+    const allProduct = await prisma.product.findMany({
+      where: {
+        OR: [{ name: { contains: query, mode: 'insensitive' } }],
+        is_active: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        attachments: true,
+        variants: true,
+        size: true,
+        minimum_order: true,
+      },
+    });
+
+    const formattedProduct = allProduct.map((product) => {
+      return {
+        ...product,
+      };
+    });
+
+    res.status(200).json({ message: 'product fetched: ', formattedProduct });
+
+    //   res.json(product);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
   }
 }
