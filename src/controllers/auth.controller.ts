@@ -24,13 +24,28 @@ export async function register(req: Request, res: Response) {
             }
         } 
     */
-  const { fullname, email, phone_number, password, role_id } = req.body;
+  const { fullname, email, phone_number, password } = req.body;
 
   if (!fullname || !email || !phone_number || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
+    const addroles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'seller', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!addroles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ email }, { phone_number }],
@@ -42,16 +57,16 @@ export async function register(req: Request, res: Response) {
         .status(400)
         .json({ message: 'Email or phone number already exists' });
     }
-    let userRole = null;
-    if (role_id) {
-      userRole = await prisma.roles.findUnique({
-        where: { id: role_id },
-      });
+    // let userRole = null;
+    // if (role_id) {
+    //   userRole = await prisma.roles.findUnique({
+    //     where: { id: role_id },
+    //   });
 
-      if (!userRole) {
-        return res.status(400).json({ message: 'Invalid role_id' });
-      }
-    }
+    //   if (!userRole) {
+    //     return res.status(400).json({ message: 'Invalid role_id' });
+    //   }
+    // }
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     const newUser = await prisma.user.create({
@@ -60,7 +75,7 @@ export async function register(req: Request, res: Response) {
         email,
         phone_number,
         password: hashedPassword,
-        rolesId: role_id,
+        rolesId: addroles.id,
       },
     });
 
