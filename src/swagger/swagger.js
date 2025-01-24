@@ -1,334 +1,379 @@
-const { profile } = require("console");
-const { type } = require("os");
+const { profile } = require('console');
+const { type } = require('os');
 
-const swaggerAutogen = require("swagger-autogen")({
-    openapi: "3.0.0",
-    autoHeaders: false,
-  });
+const swaggerAutogen = require('swagger-autogen')({
+  openapi: '3.0.0',
+  autoHeaders: false,
+});
 
 const doc = {
   info: {
     title: 'Lakoe app',
-    description: 'Lakoe app is platform for trade'
+    description: 'Lakoe app is platform for trade',
   },
   host: 'localhost:3000',
   components: {
-    "@schemas": {
+    '@schemas': {
       CreateRolesDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          name:{
-            type:"string"
-          }
+          name: {
+            type: 'string',
+          },
         },
       },
       DeleteRoleDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          id:{
-            type:"string"
-          }
+          id: {
+            type: 'string',
+          },
         },
       },
-      GetRoleDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      GetRoleDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
       CreateProfileDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          user_id:{
-            type:"string"
+          user_id: {
+            type: 'string',
           },
-          locationid:{
-            type:"string"
-          }
+          locationid: {
+            type: 'string',
+          },
         },
       },
       CreateCartsDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          userId:{
-            type:"string"
+          userId: {
+            type: 'string',
           },
-          prices:{
-            type:"integer"
+          prices: {
+            type: 'integer',
           },
-          discount:{
-            type:"integer"
+          discount: {
+            type: 'integer',
           },
-          storesId:{
-            type:"string"
-          }
+          storesId: {
+            type: 'string',
+          },
         },
       },
-      DeleteCartsDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      DeleteCartsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
-      ShowCartsbyIdDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      ShowCartsbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
-      UpdateCartsDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
+      UpdateCartsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
           },
-          userId:{
-            type:"string"
+          userId: {
+            type: 'string',
           },
-          prices:{
-            type:"integer"
+          prices: {
+            type: 'integer',
           },
-          discount:{
-            type:"integer"
+          discount: {
+            type: 'integer',
           },
-          storesId:{
-            type:"string"
-          }
-        }
+          storesId: {
+            type: 'string',
+          },
+        },
       },
       CreateCartItemsDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          qty:{
-            type:"integer"
+          qty: {
+            type: 'integer',
           },
-          price:{
-            type:"integer"
+          price: {
+            type: 'integer',
           },
-          cartId:{
-            type:"string"
+          cartId: {
+            type: 'string',
           },
-          storesId:{
-            type:"string"
+          storesId: {
+            type: 'string',
           },
-          variantOptionValueId:{
-            type:"string"
-          }
+          variantOptionValueId: {
+            type: 'string',
+          },
         },
       },
-      DeleteCartItemsDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      DeleteCartItemsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
-      ShowCartItemsbyIdDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      ShowCartItemsbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
-      UpdateCartItemsDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
+      UpdateCartItemsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
           },
-          qty:{
-            type:"integer"
+          qty: {
+            type: 'integer',
           },
-          price:{
-            type:"integer"
+          price: {
+            type: 'integer',
           },
-          cartId:{
-            type:"string"
+          cartId: {
+            type: 'string',
           },
-          storesId:{
-            type:"string"
+          storesId: {
+            type: 'string',
           },
-          variantOptionValueId:{
-            type:"string"
-          }
-        }
+          variantOptionValueId: {
+            type: 'string',
+          },
+        },
       },
       CreateCategoryDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          name:{
-            type:"string"
+          name: {
+            type: 'string',
           },
-          productId:{
-            type:"string"
-          }
+          productId: {
+            type: 'string',
+          },
         },
       },
       UpdateCategoryDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          id:{
-            type:"string"
+          id: {
+            type: 'string',
           },
-          name:{
-            type:"string"
+          name: {
+            type: 'string',
           },
-          productId:{
-            type:"string"
-          }
+          productId: {
+            type: 'string',
+          },
         },
       },
       DeleteCategoryDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          id:{
-            type:"string"
-          }
+          id: {
+            type: 'string',
+          },
         },
       },
-      ShowCategorybyIdDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      ShowCategorybyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
       CreateLocationDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          name:{
-            type:"string"
+          name: {
+            type: 'string',
           },
-          address:{
-            type:"string"
+          address: {
+            type: 'string',
           },
-          postal_code:{
-            type:"string"
+          postal_code: {
+            type: 'string',
           },
-          city_district:{
-            type:"string"
+          city_district: {
+            type: 'string',
           },
-          longitude:{
-            type:"string"
+          longitude: {
+            type: 'string',
           },
-          latitude:{
-            type:"string"
+          latitude: {
+            type: 'string',
           },
-          storesId:{
-            type:"string"
+          storesId: {
+            type: 'string',
           },
-          profilesId:{
-            type:"string"
+          profilesId: {
+            type: 'string',
           },
-          is_main_location:{
-            type:"boolean"
-          }
+          is_main_location: {
+            type: 'boolean',
+          },
         },
       },
       UpdateLocationDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          id:{
-            type:"string"
+          id: {
+            type: 'string',
           },
-          name:{
-            type:"string"
+          name: {
+            type: 'string',
           },
-          address:{
-            type:"string"
+          address: {
+            type: 'string',
           },
-          postal_code:{
-            type:"string"
+          postal_code: {
+            type: 'string',
           },
-          city_district:{
-            type:"string"
+          city_district: {
+            type: 'string',
           },
-          longitude:{
-            type:"string"
+          longitude: {
+            type: 'string',
           },
-          latitude:{
-            type:"string"
+          latitude: {
+            type: 'string',
           },
-          storesId:{
-            type:"string"
+          storesId: {
+            type: 'string',
           },
-          profilesId:{
-            type:"string"
+          profilesId: {
+            type: 'string',
           },
-          is_main_location:{
-            type:"boolean"
-          }
+          is_main_location: {
+            type: 'boolean',
+          },
         },
       },
       DeleteLocationDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          id:{
-            type:"string"
-          }
+          id: {
+            type: 'string',
+          },
         },
       },
-      ShowLocationbyIdDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      ShowLocationbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      CreatevariantDTO: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          productId: {
+            type: 'string',
+          },
+          is_active: {
+            type: 'boolean',
+          },
+        },
+      },
+      ShowvariantbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdatevariantDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          },
+          productId: {
+            type: 'string',
+          },
+          is_active: {
+            type: 'boolean',
+          },
+        },
+      },
+      DeletevariantDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
       LoginDTO: {
-        type: "object",
+        type: 'object',
         properties: {
           email: {
-            type: "string",
+            type: 'string',
           },
           password: {
-            type: "string",
-            format: "password",
+            type: 'string',
+            format: 'password',
           },
         },
       },
-      
+
       RegisterDTO: {
-        type: "object",
+        type: 'object',
         properties: {
           fullname: {
-            type: "string",
+            type: 'string',
           },
           email: {
-            type: "string",
+            type: 'string',
           },
           phone_number: {
-            type: "string",
+            type: 'string',
           },
           password: {
-            type: "string",
-            format: "password",
+            type: 'string',
+            format: 'password',
           },
-          
         },
       },
     },
-    // securitySchemes: {
-    //   bearerAuth: {
-    //     type: "http",
-    //     scheme: "bearer",
-    //   },
-    // },
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+      },
+    },
   },
 };
 
 const outputFile = './swagger-output.json';
-const routes = ["../index.ts"];
-
+const routes = ['../index.ts'];
 
 swaggerAutogen(outputFile, routes, doc);

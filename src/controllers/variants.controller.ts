@@ -101,6 +101,19 @@ export async function getAllVariants(req: Request, res: Response) {
   }
 }
 export const updateVariant = async (req: Request, res: Response) => {
+  /*  
+        #swagger.tags = ['variant']
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/UpdatevariantDTO"
+                    }  
+                }
+            }
+        } 
+    */
   try {
     const { id } = req.params;
     const { name, is_active } = req.body;

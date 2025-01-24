@@ -21,53 +21,6 @@
         }
       }
     },
-    "/cart": {
-      "get": {
-        "tags": [
-          "carts"
-        ],
-        "description": "to display users items",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/invoice": {
-      "get": {
-        "tags": [],
-        "description": "to get user invoice history",
-        "parameters": [
-          {
-            "name": "obj",
-            "in": "body",
-            "description": "user invoice.",
-            "required": false,
-            "schema": {
-              "type": "object",
-              "properties": {}
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/stores": {
-      "get": {
-        "tags": [],
-        "description": "to display all stores",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/role/": {
       "get": {
         "tags": [
@@ -229,6 +182,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -362,6 +318,188 @@
                 "$ref": "#/components/schemas/CreateProfileDTO"
               }
             }
+          }
+        }
+      }
+    },
+    "/api/product/": {
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "storesId": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "description": "to display all products",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "description": "to display all products",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/product/toggle": {
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "description": "to display all products",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/product/search": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "description": "to display all products",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/product/update": {
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "description": "to display all products",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  },
+                  "size": {
+                    "example": "any"
+                  },
+                  "minimum_order": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/product/{{where{id:id}": {
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "parameters": [
+          {
+            "name": null,
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }
@@ -680,6 +818,177 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateCategoryDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/variant/": {
+      "get": {
+        "tags": [
+          "variant"
+        ],
+        "description": "to display all variant",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/variant/{id}": {
+      "get": {
+        "tags": [
+          "variant"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShowvariantbyIdDTO"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "variant"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeletevariantDTO"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "variant"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatevariantDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/variant/create/{productId}": {
+      "post": {
+        "tags": [
+          "variant"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatevariantDTO"
               }
             }
           }
@@ -1152,7 +1461,7 @@
         }
       }
     },
-    "/api/locations/create/{productId}": {
+    "/api/locations/create/{store_id}": {
       "post": {
         "tags": [
           "Location"
@@ -1160,7 +1469,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "productId",
+            "name": "store_id",
             "in": "path",
             "required": true,
             "schema": {
@@ -1171,9 +1480,6 @@
         "responses": {
           "201": {
             "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
           },
           "401": {
             "description": "Unauthorized"
@@ -1202,6 +1508,12 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
     "schemas": {
       "CreateRolesDTO": {
         "type": "object",
@@ -1467,6 +1779,53 @@
         }
       },
       "ShowLocationbyIdDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "CreatevariantDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ShowvariantbyIdDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdatevariantDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DeletevariantDTO": {
         "type": "object",
         "properties": {
           "id": {

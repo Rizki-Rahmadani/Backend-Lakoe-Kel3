@@ -29,27 +29,6 @@ app.get('/', (request: Request, response: Response) => {
 });
 
 
-app.get('/cart', (req, res) => {
-  /*
-        #swagger.tags = ['carts']
-        #swagger.description = "to display users items"
-    */
-});
-
-app.get('/invoice', (req, res) => {
-  /* 
-        #swagger.tags ['invoice']
-        #swagger.description = "to get user invoice history"    
-    */
-  /*
-        #swagger.parameters['obj] = {
-            in: 'body',
-            description: 'user invoice.',
-            required: false
-        }
-    */
-});
-
 app
   .listen(PORT, () => {
     console.log('Server running at PORT:', PORT);
