@@ -18,6 +18,7 @@ export const createLocations = async (req: Request, res: Response) => {
         } 
     */
   try {
+    const { store_id } = req.params;
     const {
       name,
       address,
@@ -25,35 +26,32 @@ export const createLocations = async (req: Request, res: Response) => {
       city_district,
       latitude,
       longitude,
-      store_id,
       profile_id,
       is_main_location,
     } = req.body;
-    if (
-      !name ||
-      !address ||
-      !postal_code ||
-      !city_district ||
-      !latitude ||
-      !longitude ||
-      !store_id ||
-      !profile_id ||
-      !is_main_location
-    ) {
-      return res.status(400).json({ error: 'All fields required' });
-    }
+    // if (
+    //   !name ||
+    //   !address ||
+    //   !postal_code ||
+    //   !city_district ||
+    //   !latitude ||
+    //   !longitude ||
+    //   !is_main_location
+    // ) {
+    //   return res.status(400).json({ error: 'All fields required' });
+    // }
     const checkStore = await prisma.stores.findUnique({
       where: { id: store_id },
     });
-    const checkProfile = await prisma.profiles.findUnique({
-      where: { id: profile_id },
-    });
+    // const checkProfile = await prisma.profiles.findUnique({
+    //   where: { id: profile_id },
+    // });
     if (!checkStore) {
       return res.status(404).json({ error: "Store doesn't exist" });
     }
-    if (!checkProfile) {
-      return res.status(404).json({ error: "Profile doesn't exist" });
-    }
+    // if (!checkProfile) {
+    //   return res.status(404).json({ error: "Profile doesn't exist" });
+    // }
     const newLocation = await prisma.location.create({
       data: {
         name,
@@ -63,7 +61,7 @@ export const createLocations = async (req: Request, res: Response) => {
         longitude,
         latitude,
         storesId: store_id,
-        profilesId: profile_id,
+
         is_main_location,
       },
     });

@@ -6,7 +6,7 @@ const locationRoute = express.Router();
 locationRoute.get('/', authentication, location.getAllLocation);
 locationRoute.get('/:id', authentication, location.getLocationsById);
 locationRoute.post(
-  '/create/:productId',
+  '/create/:store_id',
   authentication,
   location.createLocations,
 );
