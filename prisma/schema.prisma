@@ -13,8 +13,8 @@ model User {
   phone_number String       @unique
   fullname     String
   password     String
+  role_id      Roles?       @relation(fields: [rolesId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   profile_id   Profiles?
-  role_id      Roles?       @relation(fields: [rolesId], references: [id])
   profilesId   String?
   rolesId      String?
   Carts        Carts[]
@@ -27,7 +27,7 @@ model Profiles {
   id         String     @id @unique @default(cuid())
   user_id    String     @unique
   locations  Location[]
-  User       User       @relation(fields: [user_id], references: [id])
+  User       User       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   locationId String     @unique
 }
 
@@ -41,12 +41,12 @@ model Product {
   id            String       @id @unique @default(cuid())
   name          String
   description   String?
-  attachments   Bytes
+  attachments   String
   is_active     Boolean?     @default(false)
-  variants      Variants?
+  variants      Variants[]
   size          String?
   minimum_order Int?
-  store_id      Stores?      @relation(fields: [storesId], references: [id])
+  store_id      Stores?      @relation(fields: [storesId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   storesId      String?
   Categories    Categories[]
 }
@@ -57,8 +57,8 @@ model Stores {
   slogan                String?
   description           String?
   domain                String?
-  logo_attachment       Bytes?
-  banner_attachment     Bytes?
+  logo_attachment       String?
+  banner_attachment     String?
   Product               Product[]
   bank_accounts         bank_accounts[]
   Location              Location[]
@@ -74,7 +74,7 @@ model bank_accounts {
   bank       String
   acc_number String
   acc_name   String
-  store_id   Stores? @relation(fields: [storesId], references: [id])
+  store_id   Stores? @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   storesId   String?
 }
 
@@ -84,8 +84,8 @@ model Location {
   address          String
   postal_code      String
   city_district    String
-  store_id         Stores?   @relation(fields: [storesId], references: [id])
-  profile_id       Profiles? @relation(fields: [profilesId], references: [id])
+  store_id         Stores?   @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  profile_id       Profiles? @relation(fields: [profilesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   is_main_location Boolean?  @default(false)
   longitude        String
   latitude         String
@@ -96,11 +96,11 @@ model Location {
 model Variant_option_values {
   id                String          @id @unique @default(cuid())
   sku               String
-  weight            String
+  weight            Int
   stock             Int
   price             Int
   is_active         Boolean         @default(false)
-  variant_option_id Variant_options @relation(fields: [variant_optionsId], references: [id])
+  variant_option_id Variant_options @relation(fields: [variant_optionsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   variant_optionsId String
   Cart_items        Cart_items[]
 }
@@ -108,7 +108,7 @@ model Variant_option_values {
 model Variant_options {
   id                    String                  @id @unique @default(cuid())
   name                  String
-  variant_id            Variants                @relation(fields: [variantsId], references: [id])
+  variant_id            Variants                @relation(fields: [variantsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Variant_option_values Variant_option_values[]
   variantsId            String
 }
@@ -117,22 +117,22 @@ model Variants {
   id              String            @id @unique @default(cuid())
   name            String
   is_active       Boolean           @default(false)
-  product_id      Product           @relation(fields: [productId], references: [id])
+  product_id      Product           @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   Variant_options Variant_options[]
-  productId       String            @unique
+  productId       String
 }
 
 model Categories {
   id         String  @id @unique @default(cuid())
   name       String
-  product_id Product @relation(fields: [productId], references: [id])
+  product_id Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   productId  String
 }
 
 model Carts {
   id         String       @id @unique @default(cuid())
   prices     Int
-  discount   String?
+  discount   Int?
   user_id    User         @relation(fields: [userId], references: [id])
   store_id   Stores       @relation(fields: [storesId], references: [id])
   userId     String
@@ -145,10 +145,10 @@ model Cart_items {
   id                      String                @id @unique @default(cuid())
   qty                     Int
   price                   Int
-  cart_id                 Carts                 @relation(fields: [cartsId], references: [id])
-  user_id                 User                  @relation(fields: [userId], references: [id])
-  store_id                Stores                @relation(fields: [storesId], references: [id])
-  variant_option_value_id Variant_option_values @relation(fields: [variant_option_valuesId], references: [id])
+  cart_id                 Carts                 @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  store_id                Stores                @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  variant_option_value_id Variant_option_values @relation(fields: [variant_option_valuesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   cartsId                 String
   userId                  String
   storesId                String
@@ -166,13 +166,14 @@ model Invoices {
   receiver_address     String
   receiver_name        String
   invoice_number       String
-  cart_id              Carts                  @relation(fields: [cartsId], references: [id])
-  user_id              User                   @relation(fields: [userId], references: [id])
+  cart_id              Carts                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id              User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  payment_id           Payments?              @relation(fields: [paymentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courier_id           Couriers?
-  payment_id           Payments?              @relation(fields: [paymentsId], references: [id]) // Make optional
   cartsId              String
   userId               String
   paymentsId           String                 @unique
+  courierId            String
   Confirmation_payment Confirmation_payment[]
   Invoice_histories    Invoice_histories[]
 }
@@ -181,14 +182,14 @@ model Confirmation_payment {
   id         String   @id @unique @default(cuid())
   amount     Int
   bank       String
-  invoice_id Invoices @relation(fields: [invoicesId], references: [id])
+  invoice_id Invoices @relation(fields: [invoicesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   invoicesId String
 }
 
 model Invoice_histories {
   id         String    @id @unique @default(cuid())
   status     Boolean   @default(false)
-  invoice_id Invoices  @relation(fields: [invoicesId], references: [id])
+  invoice_id Invoices  @relation(fields: [invoicesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at DateTime? @default(now())
   invoicesId String
 }
@@ -199,7 +200,7 @@ model Payments {
   amount               Int
   status               Boolean   @default(false)
   invoice_id           Invoices? @relation
-  user_id              User      @relation(fields: [userId], references: [id])
+  user_id              User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   moota_transaction_id String?
   userId               String
   invoicesId           String    @unique
@@ -211,7 +212,7 @@ model Couriers {
   courier_service_name String
   courier_service_code String
   price                Int
-  invoice_id           Invoices @relation(fields: [invoicesId], references: [id])
+  invoice_id           Invoices @relation(fields: [invoicesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   order_id             String
   invoicesId           String   @unique
 }
@@ -223,7 +224,7 @@ model Decoration {
 
 model Stores_on_decorations {
   id       String @id @unique @default(cuid())
-  store_id Stores @relation(fields: [storesId], references: [id])
+  store_id Stores @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   storesId String
 }
 
@@ -233,7 +234,7 @@ model Operation_hours {
   open_at  String
   close_at String
   is_off   Boolean
-  store_id Stores  @relation(fields: [storesId], references: [id])
+  store_id Stores  @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   storesId String
 }
 
@@ -241,6 +242,6 @@ model Message_templates {
   id       String @id @unique @default(cuid())
   name     String
   content  String
-  store_id Stores @relation(fields: [storesId], references: [id])
+  store_id Stores @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   storesId String
 }

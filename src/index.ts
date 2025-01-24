@@ -27,9 +27,7 @@ app.use('/api', router);
 app.get('/', (request: Request, response: Response) => {
   response.status(200).send('Hello World');
 });
-app.get('/users', (req, res) => {
-  /* #swagger.tags = ['Users'] */
-});
+
 
 app.get('/cart', (req, res) => {
   /*
