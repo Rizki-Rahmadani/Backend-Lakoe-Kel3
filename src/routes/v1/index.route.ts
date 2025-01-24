@@ -1,7 +1,8 @@
 import express from 'express';
 import authRoute from './auth.route';
 import roleRoute from './role.route';
-import profileRoute from './profile.route';
+import 
+Route from './profile.route';
 
 import app_message from './message.route';
 import locationRoute from './locations.route';
@@ -19,8 +20,10 @@ const router = express.Router();
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
 router.use('/profile', profileRoute);
+
 router.use('/product', authentication, app_product);
 router.use('/message', authentication, app_message);
+
 router.use('/stores', app_store);
 router.use('/category', categoryRoute);
 router.use('/variant', variantRoutes);
