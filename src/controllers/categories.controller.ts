@@ -18,31 +18,50 @@ export const createCategories = async (req: Request, res: Response) => {
         } 
     */
   try {
-    const { name } = req.body;
+    const { name, parentId } = req.body; // Include parentId in the request body
     const { productId } = req.params;
+
     if (!name || !productId) {
       return res.status(400).json({ error: 'All fields required' });
     }
+
     const checkProduct = await prisma.product.findUnique({
       where: { id: productId },
     });
+
     if (!checkProduct) {
       return res.status(404).json({ error: "Product doesn't exist" });
     }
-    const categories = await prisma.categories.create({
-      data: {
-        name,
-        productId,
-      },
+
+    const categoryData: any = {
+      name,
+      productId,
+    };
+
+    if (parentId) {
+      const checkParentCategory = await prisma.categories.findUnique({
+        where: { id: parentId },
+      });
+
+      if (!checkParentCategory) {
+        return res.status(404).json({ error: "Parent category doesn't exist" });
+      }
+
+      categoryData.parentId = parentId;
+    }
+
+    const category = await prisma.categories.create({
+      data: categoryData,
     });
+
     res.status(201).json({
       message: 'Category created successfully',
-      data: categories,
+      category: category,
     });
   } catch (error) {
     res
       .status(500)
-      .json({ error: 'An error occurred while creating the Category' });
+      .json({ error: 'An error occurred while creating the category' });
   }
 };
 export async function getCategoryById(req: Request, res: Response) {
