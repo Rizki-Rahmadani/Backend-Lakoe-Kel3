@@ -332,6 +332,102 @@ const doc = {
           },
         },
       },
+      CreateVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          variantId: {
+            type: 'string',
+          },
+          
+        },
+      },
+      ShowVariantOptionsbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdateVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          }
+        },
+      },
+      DeleteVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      CreateVariantOptionValuesDTO: {
+        type: 'object',
+        properties: {
+          sku: {
+            type: 'string',
+          },
+          weight: {
+            type: 'integer',
+          },
+          stock: {
+            type: 'integer',
+          },
+          price: {
+            type: 'integer',
+          },
+          variant_optionsId: {
+            type: 'string',
+          },
+          
+        },
+      },
+      ShowVariantOptionValuesbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdateVariantOptionValuesDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          sku: {
+            type: 'string',
+          },
+          weight: {
+            type: 'integer',
+          },
+          stock: {
+            type: 'integer',
+          },
+          price: {
+            type: 'integer',
+          },
+        },
+      },
+      DeleteVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
       LoginDTO: {
         type: 'object',
         properties: {
