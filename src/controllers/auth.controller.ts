@@ -24,9 +24,9 @@ export async function register(req: Request, res: Response) {
             }
         } 
     */
-  const { fullname, email, phone_number, password } = req.body;
+  const { fullname, email, password } = req.body;
 
-  if (!fullname || !email || !phone_number || !password) {
+  if (!fullname || !email || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -48,7 +48,7 @@ export async function register(req: Request, res: Response) {
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [{ email }, { phone_number }],
+        OR: [{ email }],
       },
     });
 
@@ -73,7 +73,6 @@ export async function register(req: Request, res: Response) {
       data: {
         fullname,
         email,
-        phone_number,
         password: hashedPassword,
         rolesId: addroles.id,
       },
