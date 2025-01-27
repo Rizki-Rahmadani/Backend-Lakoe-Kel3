@@ -158,7 +158,7 @@ export async function updateProduct(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
-  const id = 'cm68nestw0001tavonmecjgo5';
+  const { id } = req.body;
   const { name, description, size, minimum_order } = req.body;
   try {
     let productExist = await prisma.product.findUnique({
