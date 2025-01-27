@@ -86,7 +86,7 @@ export async function getAllProduct(
 }
 
 export async function toggleActive(req: Request, res: Response) {
-  const id = 'cm68t7p9i0004tamc2c78objf'; // `id` is a string
+  const { id } = req.body; // `id` is a string
 
   try {
     if (!id) {
@@ -122,7 +122,7 @@ export async function deleteProduct(
   res: Response,
   next: NextFunction,
 ) {
-  const id = 'cm68nestw0001tavonmecjgo5';
+  const { id } = req.body;
   try {
     const productExist = await prisma.product.findUnique({
       where: { id: id },
