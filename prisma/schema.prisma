@@ -13,7 +13,7 @@ model User {
   phone_number String       @unique
   fullname     String
   password     String
-  role_id      Roles?       @relation(fields: [rolesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  role_id      Roles?       @relation(fields: [rolesId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   profile_id   Profiles?
   profilesId   String?
   rolesId      String?
@@ -146,8 +146,8 @@ model Variants {
 model Categories {
   id         String       @id @unique @default(cuid())
   name       String
-  product_id Product      @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  productId  String
+  product_id Product?     @relation(fields: [productId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  productId  String?
   parentId   String?
   parent     Categories?  @relation("CategoryParent", fields: [parentId], references: [id])
   children   Categories[] @relation("CategoryParent")

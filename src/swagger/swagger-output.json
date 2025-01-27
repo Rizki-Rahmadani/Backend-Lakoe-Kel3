@@ -31,12 +31,6 @@
           "200": {
             "description": "OK"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
           "404": {
             "description": "Not Found"
           },
@@ -65,12 +59,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -109,12 +97,6 @@
           "200": {
             "description": "OK"
           },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
           "404": {
             "description": "Not Found"
           },
@@ -146,12 +128,6 @@
           },
           "400": {
             "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -386,6 +362,20 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -407,6 +397,20 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -462,6 +466,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "example": "any"
+                  },
                   "name": {
                     "example": "any"
                   },
@@ -504,6 +511,167 @@
         }
       }
     },
+    "/api/message/": {
+      "post": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "storesId": {
+                    "example": "any"
+                  },
+                  "content": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/message/detail": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/message/edit": {
+      "put": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "any"
+                  },
+                  "name": {
+                    "example": "any"
+                  },
+                  "content": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/message/delete": {
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/message/{{where{id:id}}": {
+      "delete": {
+        "tags": [
+          "product"
+        ],
+        "description": "to create all products",
+        "parameters": [
+          {
+            "name": null,
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/stores/": {
       "post": {
         "tags": [],
@@ -523,6 +691,9 @@
                 "type": "object",
                 "properties": {
                   "name": {
+                    "example": "any"
+                  },
+                  "username": {
                     "example": "any"
                   },
                   "slogan": {
@@ -989,6 +1160,328 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreatevariantDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/variant-options/": {
+      "get": {
+        "tags": [
+          "Variant-Options"
+        ],
+        "description": "to display all variant",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/variant-options/{id}": {
+      "get": {
+        "tags": [
+          "Variant-Options"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShowVariantOptionsbyIdDTO"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Variant-Options"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteVariantOptionsDTO"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Variant-Options"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVariantOptionsDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/variant-options/create/": {
+      "post": {
+        "tags": [
+          "Variant-Options"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVariantOptionsDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/variant-option-values/": {
+      "get": {
+        "tags": [
+          "Variant-Option-Values"
+        ],
+        "description": "to display all variant",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/variant-option-values/{id}": {
+      "get": {
+        "tags": [
+          "Variant-Option-Values"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShowVariantOptionValuesbyIdDTO"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Variant-Option-Values"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteVariantOptionsDTO"
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Variant-Option-Values"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVariantOptionValuesDTO"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/variant-option-values/create/": {
+      "post": {
+        "tags": [
+          "Variant-Option-Values"
+        ],
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVariantOptionValuesDTO"
               }
             }
           }
@@ -1830,6 +2323,92 @@
         "properties": {
           "id": {
             "type": "string"
+          }
+        }
+      },
+      "CreateVariantOptionsDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "variantId": {
+            "type": "string"
+          }
+        }
+      },
+      "ShowVariantOptionsbyIdDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateVariantOptionsDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "DeleteVariantOptionsDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateVariantOptionValuesDTO": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "integer"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "variant_optionsId": {
+            "type": "string"
+          }
+        }
+      },
+      "ShowVariantOptionValuesbyIdDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateVariantOptionValuesDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "integer"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "integer"
           }
         }
       },
