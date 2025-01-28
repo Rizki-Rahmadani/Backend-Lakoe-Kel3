@@ -10,7 +10,7 @@ datasource db {
 model User {
   id           String       @id @unique @default(cuid())
   email        String       @unique
-  phone_number String       @unique
+  phone_number String?      @unique
   fullname     String
   password     String
   role_id      Roles?       @relation(fields: [rolesId], references: [id], onDelete: SetNull, onUpdate: Cascade)
