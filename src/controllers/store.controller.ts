@@ -8,7 +8,7 @@ export async function createStore(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
-  const { name, slogan, description, domain } = req.body;
+  const { name, username, slogan, description, domain } = req.body;
 
   if (!name) {
     res.status(400).json({ message: 'store must contain a name.' });
@@ -38,6 +38,7 @@ export async function createStore(
 
     const data = {
       name,
+      username,
       slogan,
       description,
       domain,
