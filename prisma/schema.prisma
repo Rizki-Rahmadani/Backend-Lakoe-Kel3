@@ -23,6 +23,7 @@ model User {
   Payments     Payments[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  store        Stores?      @relation
 }
 
 model Profiles {
@@ -78,6 +79,8 @@ model Stores {
   Message_templates     Message_templates[]
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
+  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId                String                  @unique
 }
 
 model bank_accounts {
@@ -144,15 +147,14 @@ model Variants {
 }
 
 model Categories {
-  id         String       @id @unique @default(cuid())
-  name       String
-  product_id Product?     @relation(fields: [productId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  productId  String?
-  parentId   String?
-  parent     Categories?  @relation("CategoryParent", fields: [parentId], references: [id])
-  children   Categories[] @relation("CategoryParent")
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id        String       @id @unique @default(cuid())
+  name      String
+  products  Product[]
+  parentId  String?
+  parent    Categories?  @relation("CategoryParent", fields: [parentId], references: [id])
+  children  Categories[] @relation("CategoryParent")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 }
 
 model Carts {
