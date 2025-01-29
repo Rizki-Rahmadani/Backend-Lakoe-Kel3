@@ -3,15 +3,11 @@ import { Request, Response, NextFunction } from 'express';
 import { uploadToCloudinary } from '../controllers/upload.controller';
 const prisma = new PrismaClient();
 
-export async function createStore(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  const { name, username, slogan, description, domain } = req.body;
+export async function createStore(req: Request, res: Response) {
+  const { name, username, slogan, description, domain, userId } = req.body;
 
-  if (!name) {
-    res.status(400).json({ message: 'store must contain a name.' });
+  if (!name || !userId) {
+    res.status(400).json({ message: 'Fields are required' });
   }
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
@@ -19,6 +15,18 @@ export async function createStore(
   let bannerUrl = '';
 
   try {
+    const findUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!findUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const checkAvail = await prisma.stores.findUnique({
+      where: { userId: userId },
+    });
+    if (checkAvail) {
+      return res.status(403).json({ message: 'User already has stores' });
+    }
     if (files) {
       if (files.logo_attachment) {
         const uploadResult = await uploadToCloudinary(
@@ -44,15 +52,18 @@ export async function createStore(
       domain,
       logo_attachment: logoUrl,
       banner_attachment: bannerUrl,
+      userId,
     };
 
     const newProduct = await prisma.stores.create({
       data: data,
     });
 
-    res.status(200).json({ message: 'store created', store: newProduct });
+    return res
+      .status(200)
+      .json({ message: 'store created', store: newProduct });
   } catch (error) {
-    res.send(500).json({ message: 'error creating store.', error });
+    return res.send(500).json({ message: 'error creating store.', error });
   }
 }
 
@@ -85,13 +96,22 @@ export async function getAllStore(
   }
 }
 
-export async function updateStore(req: Request, res: Response): Promise<void> {
-  const { name, slogan, description, domain } = req.body;
-  const id = 'cm67kbwty0000tans24i0bo4a';
+export async function updateStore(req: Request, res: Response) {
+  const { name, slogan, description, domain, userId } = req.body;
+  const { id } = req.params;
   try {
-    let storeExist = await prisma.stores.findUnique({
+    const storeExist = await prisma.stores.findUnique({
       where: { id: id },
     });
+    if (!storeExist) {
+      return res.status(404).json({ message: 'store not found' });
+    }
+    const findUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (storeExist?.userId && findUser?.id != storeExist?.userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     let logoUrl = storeExist?.logo_attachment;
     let bannerUrl = storeExist?.banner_attachment;
@@ -125,19 +145,32 @@ export async function updateStore(req: Request, res: Response): Promise<void> {
       where: { id: id },
       data: data,
     });
-    res.status(200).json({ message: 'updated store: ', store: updatedStore });
+    return res
+      .status(200)
+      .json({ message: 'updated store: ', store: updatedStore });
   } catch (error) {
-    res.status(500).json({ message: 'error on updating store: ', error });
+    return res
+      .status(500)
+      .json({ message: 'error on updating store: ', error });
   }
 }
 
 export async function deleteStore(req: Request, res: Response) {
-  const id = 'cm67kbwty0000tans24i0bo4a';
+  const { id } = req.params;
+  const { userId } = req.body;
   try {
+    if (!userId) {
+      return res.status(400).json({ message: 'user id required' });
+    }
     const storeExist = await prisma.stores.findUnique({
       where: { id: id },
     });
-
+    const findUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (storeExist?.userId && findUser?.id != storeExist?.userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
     //   console.log(id)
 
     if (!storeExist) {
