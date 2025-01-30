@@ -1,16 +1,18 @@
 import express from 'express';
 export const app_store = express();
-
+import { authentication } from '../../middlewares/authmiddleware';
 import { upload } from '../../middlewares/upload-file';
 import {
   createStore,
   deleteStore,
   getAllStore,
   updateStore,
+  getStoreByLogin,
 } from '../../controllers/store.controller';
 
 app_store.post(
   '/',
+  authentication,
   upload.fields([
     { name: 'logo_attachment', maxCount: 1 },
     { name: 'banner_attachment', maxCount: 1 },
@@ -23,7 +25,7 @@ app_store.post(
     */
   },
 );
-
+app_store.get('/current-store', authentication, getStoreByLogin);
 app_store.get('/', getAllStore, (req, res) => {
   /*
         #swagger.tags["stores"]
@@ -32,7 +34,8 @@ app_store.get('/', getAllStore, (req, res) => {
 });
 
 app_store.put(
-  '/update',
+  '/update/:id',
+  authentication,
   upload.fields([
     { name: 'logo_attachment', maxCount: 1 },
     { name: 'banner_attachment', maxCount: 1 },
@@ -45,7 +48,7 @@ app_store.put(
     */
   },
 );
-app_store.delete('/', deleteStore, (req, res) => {
+app_store.delete('/:id', authentication, deleteStore, (req, res) => {
   /*
         #swagger.tags["stores"]
         #swagger.description = "to display all stores"

@@ -27,30 +27,7 @@ app.use('/api', router);
 app.get('/', (request: Request, response: Response) => {
   response.status(200).send('Hello World');
 });
-app.get('/users', (req, res) => {
-  /* #swagger.tags = ['Users'] */
-});
 
-app.get('/cart', (req, res) => {
-  /*
-        #swagger.tags = ['carts']
-        #swagger.description = "to display users items"
-    */
-});
-
-app.get('/invoice', (req, res) => {
-  /* 
-        #swagger.tags ['invoice']
-        #swagger.description = "to get user invoice history"    
-    */
-  /*
-        #swagger.parameters['obj] = {
-            in: 'body',
-            description: 'user invoice.',
-            required: false
-        }
-    */
-});
 
 app
   .listen(PORT, () => {

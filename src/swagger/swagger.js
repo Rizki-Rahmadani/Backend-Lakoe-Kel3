@@ -1,97 +1,475 @@
-const { type } = require("os");
+const { profile } = require('console');
+const { type } = require('os');
 
-const swaggerAutogen = require("swagger-autogen")({
-    openapi: "3.0.0",
-    autoHeaders: false,
-  });
+const swaggerAutogen = require('swagger-autogen')({
+  openapi: '3.0.0',
+  autoHeaders: false,
+});
 
 const doc = {
   info: {
     title: 'Lakoe app',
-    description: 'Lakoe app is platform for trade'
+    description: 'Lakoe app is platform for trade',
   },
   host: 'localhost:3000',
   components: {
-    "@schemas": {
+    '@schemas': {
       CreateRolesDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          name:{
-            type:"string"
-          }
+          name: {
+            type: 'string',
+          },
         },
       },
       DeleteRoleDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          id:{
-            type:"string"
-          }
+          id: {
+            type: 'string',
+          },
         },
       },
-      GetRoleDTO:{
-        type:"object",
-        properties:{
-          id:{
-            type:"string"
-          }
-        }
+      GetRoleDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
       },
       CreateProfileDTO: {
-        type: "object",
+        type: 'object',
         properties: {
-          user_id:{
-            type:"string"
+          user_id: {
+            type: 'string',
           },
-          locationid:{
-            type:"string"
-          }
-        },
-      },
-      LoginDTO: {
-        type: "object",
-        properties: {
-          email: {
-            type: "string",
-          },
-          password: {
-            type: "string",
-            format: "password",
+          locationid: {
+            type: 'string',
           },
         },
       },
-      
-      RegisterDTO: {
-        type: "object",
+      CreateCartsDTO: {
+        type: 'object',
         properties: {
-          fullname: {
-            type: "string",
+          userId: {
+            type: 'string',
           },
-          email: {
-            type: "string",
+          prices: {
+            type: 'integer',
           },
-          phone_number: {
-            type: "string",
+          discount: {
+            type: 'integer',
           },
-          password: {
-            type: "string",
-            format: "password",
+          storesId: {
+            type: 'string',
+          },
+        },
+      },
+      DeleteCartsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      ShowCartsbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdateCartsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          userId: {
+            type: 'string',
+          },
+          prices: {
+            type: 'integer',
+          },
+          discount: {
+            type: 'integer',
+          },
+          storesId: {
+            type: 'string',
+          },
+        },
+      },
+      CreateCartItemsDTO: {
+        type: 'object',
+        properties: {
+          qty: {
+            type: 'integer',
+          },
+          price: {
+            type: 'integer',
+          },
+          cartId: {
+            type: 'string',
+          },
+          storesId: {
+            type: 'string',
+          },
+          variantOptionValueId: {
+            type: 'string',
+          },
+        },
+      },
+      DeleteCartItemsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      ShowCartItemsbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdateCartItemsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          qty: {
+            type: 'integer',
+          },
+          price: {
+            type: 'integer',
+          },
+          cartId: {
+            type: 'string',
+          },
+          storesId: {
+            type: 'string',
+          },
+          variantOptionValueId: {
+            type: 'string',
+          },
+        },
+      },
+      CreateCategoryDTO: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          productId: {
+            type: 'string',
+          },
+        },
+      },
+      UpdateCategoryDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          },
+          productId: {
+            type: 'string',
+          },
+        },
+      },
+      DeleteCategoryDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      ShowCategorybyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      CreateLocationDTO: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          address: {
+            type: 'string',
+          },
+          postal_code: {
+            type: 'string',
+          },
+          city_district: {
+            type: 'string',
+          },
+          longitude: {
+            type: 'string',
+          },
+          latitude: {
+            type: 'string',
+          },
+          storesId: {
+            type: 'string',
+          },
+          profilesId: {
+            type: 'string',
+          },
+          is_main_location: {
+            type: 'boolean',
+          },
+        },
+      },
+      UpdateLocationDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          },
+          address: {
+            type: 'string',
+          },
+          postal_code: {
+            type: 'string',
+          },
+          city_district: {
+            type: 'string',
+          },
+          longitude: {
+            type: 'string',
+          },
+          latitude: {
+            type: 'string',
+          },
+          storesId: {
+            type: 'string',
+          },
+          profilesId: {
+            type: 'string',
+          },
+          is_main_location: {
+            type: 'boolean',
+          },
+        },
+      },
+      DeleteLocationDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      ShowLocationbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      CreatevariantDTO: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          productId: {
+            type: 'string',
+          },
+          is_active: {
+            type: 'boolean',
+          },
+        },
+      },
+      ShowvariantbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdatevariantDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          },
+          productId: {
+            type: 'string',
+          },
+          is_active: {
+            type: 'boolean',
+          },
+        },
+      },
+      DeletevariantDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      CreateVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          variantId: {
+            type: 'string',
           },
           
         },
       },
+      ShowVariantOptionsbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdateVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          }
+        },
+      },
+      DeleteVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      CreateVariantOptionValuesDTO: {
+        type: 'object',
+        properties: {
+          sku: {
+            type: 'string',
+          },
+          weight: {
+            type: 'integer',
+          },
+          stock: {
+            type: 'integer',
+          },
+          price: {
+            type: 'integer',
+          },
+          variant_optionsId: {
+            type: 'string',
+          },
+          
+        },
+      },
+      ShowVariantOptionValuesbyIdDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      UpdateVariantOptionValuesDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+          sku: {
+            type: 'string',
+          },
+          weight: {
+            type: 'integer',
+          },
+          stock: {
+            type: 'integer',
+          },
+          price: {
+            type: 'integer',
+          },
+        },
+      },
+      DeleteVariantOptionsDTO: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+      LoginDTO: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+          },
+          password: {
+            type: 'string',
+            format: 'password',
+          },
+        },
+      },
+
+      RegisterDTO: {
+        type: 'object',
+        properties: {
+          fullname: {
+            type: 'string',
+          },
+          email: {
+            type: 'string',
+          },
+          phone_number: {
+            type: 'string',
+          },
+          password: {
+            type: 'string',
+            format: 'password',
+          },
+        },
+      },
     },
-    // securitySchemes: {
-    //   bearerAuth: {
-    //     type: "http",
-    //     scheme: "bearer",
-    //   },
-    // },
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+      },
+    },
   },
 };
 
 const outputFile = './swagger-output.json';
-const routes = ["../index.ts"];
-
+const routes = ['../index.ts'];
 
 swaggerAutogen(outputFile, routes, doc);

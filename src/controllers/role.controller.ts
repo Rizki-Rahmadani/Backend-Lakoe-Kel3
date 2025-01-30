@@ -21,9 +21,10 @@ export async function createRole(req: Request, res: Response) {
     return res.status(400).json({ message: 'All fields are required' });
   }
   try {
-    const existingRole = await prisma.roles.findUnique({
-      where: name,
+    const existingRole = await prisma.roles.findFirst({
+      where: { name: name },
     });
+
     if (existingRole) {
       return res.status(400).json({ error: 'Role already exists' });
     }
@@ -33,7 +34,7 @@ export async function createRole(req: Request, res: Response) {
       },
     });
 
-    return res.status(201).json(role);
+    return res.status(201).json({ message: 'Success add role', role: role });
   } catch (error) {
     return res.status(500).json({ error: 'Error creating role' });
   }
