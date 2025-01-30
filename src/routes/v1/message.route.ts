@@ -9,39 +9,14 @@ import {
   getMessageDetailed,
 } from '../../controllers/message.controller';
 
-app_message.post('/', createMessage, (req, res) => {
-  /*
-        #swagger.tags = ['product']
-        #swagger.description = "to create all products"
-    */
-});
+app_message.post('/create-message', createMessage);
 
-app_message.get('/', getMessage, (req, res) => {
-  /*
-          #swagger.tags = ['product']
-          #swagger.description = "to create all products"
-      */
-});
+app_message.get('/get-message', getMessage);
 
-app_message.get('/detail', getMessageDetailed, (req, res) => {
-  /*
-          #swagger.tags = ['product']
-          #swagger.description = "to create all products"
-      */
-});
+app_message.get('/detail-message', getMessageDetailed);
 
-app_message.put('/edit', editMessage, (req, res) => {
-  /*
-          #swagger.tags = ['product']
-          #swagger.description = "to create all products"
-      */
-});
+app_message.put('/update-message', editMessage);
 
-app_message.delete('/delete', deleteMessage, (req, res) => {
-  /*
-          #swagger.tags = ['product']
-          #swagger.description = "to create all products"
-      */
-});
+app_message.delete('/delete-message', deleteMessage);
 
 export default app_message;

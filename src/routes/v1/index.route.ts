@@ -6,6 +6,8 @@ import app_message from './message.route';
 import app_store from './store.route';
 import { authentication } from '../../middlewares/authmiddleware';
 import app_product from './product.route';
+import app_bank from './bank.route';
+import app_hour from './operation_hour.route';
 const router = express.Router();
 
 router.use('/role', roleRoute);
@@ -14,4 +16,6 @@ router.use('/profile', profileRoute);
 router.use('/message', app_message);
 router.use('/stores', app_store);
 router.use('/product', app_product);
+router.use('/bank', app_bank);
+router.use('/operation-hour', app_hour);
 export default router;
