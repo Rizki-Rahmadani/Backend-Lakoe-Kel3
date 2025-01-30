@@ -68,9 +68,10 @@ export async function createStore(req: Request, res: Response) {
 }
 
 export async function getStoreByLogin(req: Request, res: Response) {
-  const { userId } = (req as any).user.id;
+  const userId = (req as any).user.id;
+
   try {
-    const findStore = await prisma.stores.findFirst({
+    const findStore = await prisma.stores.findUnique({
       where: { userId: userId },
     });
     if (!findStore) {
@@ -111,19 +112,23 @@ export async function getAllStore(
 }
 
 export async function updateStore(req: Request, res: Response) {
-  const { name, slogan, description, domain, userId } = req.body;
-  const { id } = req.params;
+  const { name, slogan, description, domain } = req.body;
+  const userId = (req as any).user.id;
+
   try {
     const storeExist = await prisma.stores.findUnique({
-      where: { id: id },
+      where: { userId: userId },
     });
     if (!storeExist) {
       return res.status(404).json({ message: 'store not found' });
     }
-    const findUser = await prisma.user.findUnique({
+    const findUser = await prisma.user.findFirst({
       where: { id: userId },
     });
     if (storeExist?.userId && findUser?.id != storeExist?.userId) {
+      console.log(userId);
+      console.log(storeExist.userId);
+      console.log(findUser);
       return res.status(401).json({ message: 'Unauthorized' });
     }
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
@@ -156,7 +161,7 @@ export async function updateStore(req: Request, res: Response) {
     };
 
     let updatedStore = await prisma.stores.update({
-      where: { id: id },
+      where: { userId: userId },
       data: data,
     });
     return res
