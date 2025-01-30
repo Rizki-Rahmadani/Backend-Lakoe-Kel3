@@ -7,6 +7,7 @@ import {
   deleteStore,
   getAllStore,
   updateStore,
+  getStoreByLogin,
 } from '../../controllers/store.controller';
 
 app_store.post(
@@ -24,7 +25,7 @@ app_store.post(
     */
   },
 );
-
+app_store.get('/current-store', authentication, getStoreByLogin);
 app_store.get('/', getAllStore, (req, res) => {
   /*
         #swagger.tags["stores"]

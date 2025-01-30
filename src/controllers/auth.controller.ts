@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { createStore } from './store.controller';
 
 const SECRET_KEY =
   process.env.SECRET_KEY || 'aksjdkl2aj3djaklfji32dj2dj9ld92jd92j';
@@ -76,9 +77,32 @@ export async function register(req: Request, res: Response) {
         password: hashedPassword,
         rolesId: addroles.id,
       },
+      select: {
+        fullname: true,
+        email: true,
+      },
     });
 
-    res.status(201).json({ message: 'User registered', user: newUser });
+    const findRegister = await prisma.user.findUnique({
+      where: { email: email },
+      select: { id: true },
+    });
+    function formatString(input: string): string {
+      return input.toLowerCase().replace(/\s+/g, '');
+    }
+    const addstore = await prisma.stores.create({
+      data: {
+        name: fullname,
+        username: formatString(fullname),
+        userId: findRegister!.id,
+      },
+    });
+
+    res.status(201).json({
+      message: 'User & store registered',
+      user: newUser,
+      store: addstore,
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error registering user', error });
   }
