@@ -59,26 +59,30 @@ export async function getAllProduct(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const allProduct = prisma.product.findMany({
-      // where: {
-      //   is_active: false
-      // },
+    const allProduct = await prisma.product.findMany({
       select: {
         id: true,
         name: true,
         description: true,
         attachments: true,
+        is_active: true,
+        variants: {
+          select: {
+            id: true,
+            name: true,
+            Variant_options: {
+              select: {
+                name: true, // Hanya mengambil nama dari Variant_options
+              },
+            },
+          },
+        },
       },
     });
 
-    const formattedProducts = (await allProduct).map((product) => {
-      return {
-        ...product,
-      };
-    });
     res.status(200).json({
-      message: 'successfully fetch products',
-      product: formattedProducts,
+      message: 'successfully fetched products',
+      product: allProduct,
     });
   } catch (error) {
     res.status(500).json({ message: 'failed to get all products', error });
