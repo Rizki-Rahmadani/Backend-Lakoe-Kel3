@@ -11,55 +11,19 @@ import {
 import { upload } from '../../middlewares/upload-file';
 
 app_product.post(
-  '/',
+  '/create-product',
   upload.single('attachments'),
   createProduct,
-  (req, res) => {
-    /*
-        #swagger.tags = ['product']
-        #swagger.description = "to create all products"
-    */
-  },
 );
 
-app_product.get('/', getAllProduct, (req, res) => {
-  /*
-        #swagger.tags = ['product']
-        #swagger.description = "to display all products"
-    */
-});
+app_product.get('/get-product', getAllProduct);
 
-app_product.delete('/', deleteProduct, (req, res) => {
-  /*
-        #swagger.tags = ['product']
-        #swagger.description = "to display all products"
-    */
-});
+app_product.delete('/delete-product', deleteProduct);
 
-app_product.put('/toggle', toggleActive, (req, res) => {
-  /*
-        #swagger.tags = ['product']
-        #swagger.description = "to display all products"
-    */
-});
+app_product.put('/toggle-product', toggleActive);
 
-app_product.get('/search', search, (req, res) => {
-  /*
-          #swagger.tags = ['product']
-          #swagger.description = "to display all products"
-      */
-});
+app_product.get('/search-product', search);
 
-app_product.put(
-  '/update',
-  upload.single('attachments'),
-  updateProduct,
-  (req, res) => {
-    /*
-        #swagger.tags = ['product']
-        #swagger.description = "to display all products"
-    */
-  },
-);
+app_product.put('/update-product', upload.single('attachments'), updateProduct);
 
 export default app_product;
