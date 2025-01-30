@@ -67,6 +67,20 @@ export async function createStore(req: Request, res: Response) {
   }
 }
 
+export async function getStoreByLogin(req: Request, res: Response) {
+  const { userId } = (req as any).user.id;
+  try {
+    const findStore = await prisma.stores.findFirst({
+      where: { userId: userId },
+    });
+    if (!findStore) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+    return res.status(200).json({ message: 'Store Found', store: findStore });
+  } catch (error) {
+    return res.status(500).json({ message: 'error fetching store', error });
+  }
+}
 export async function getAllStore(
   req: Request,
   res: Response,
