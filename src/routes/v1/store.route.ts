@@ -34,7 +34,7 @@ app_store.get('/', getAllStore, (req, res) => {
 });
 
 app_store.put(
-  '/update/:id',
+  '/update',
   authentication,
   upload.fields([
     { name: 'logo_attachment', maxCount: 1 },
