@@ -31,6 +31,7 @@ export async function getMessage(req: Request, res: Response) {
   try {
     const message_data = await prisma.message_templates.findMany({
       select: {
+        id: true,
         name: true,
         content: true,
       },
