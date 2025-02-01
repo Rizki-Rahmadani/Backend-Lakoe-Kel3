@@ -9,11 +9,20 @@ export async function createProduct(
   req: Request,
   res: Response,
   next: NextFunction,
-): Promise<void> {
-  const { name, storesId, description } = req.body;
+) {
+  const { name, description, categoryIds, subcategoryIds } = req.body;
+  const userId = (req as any).user.id;
   let imagePath = ''; // Default to an empty string
 
   try {
+    const checkStore = await prisma.stores.findUnique({
+      where: { userId: userId },
+      select: { id: true },
+    });
+    if (!checkStore) {
+      res.status(404).json({ message: 'Store not found' });
+      return;
+    }
     // Upload the file to Cloudinary if it exists
     if (req.file) {
       const uploadResult = await uploadToCloudinary(req.file, 'product');
@@ -26,18 +35,106 @@ export async function createProduct(
       res.status(400).json({ message: 'All fields are required' });
       return; // Explicitly terminate the function after sending a response
     }
+    // Parse categoryIds if passed as a stringified array
+    let categoryIdsArray: string[] = [];
+    if (categoryIds) {
+      if (typeof categoryIds === 'string') {
+        try {
+          categoryIdsArray = JSON.parse(categoryIds);
+        } catch (error) {
+          return res
+            .status(400)
+            .json({
+              message:
+                'Invalid categoryIds format. Ensure it is a valid JSON array string.',
+            });
+        }
+      } else {
+        categoryIdsArray = categoryIds;
+      }
+    }
+
+    // Ensure subcategoryIds is a valid array
+    let subcategoryIdsArray: string[] = [];
+    if (subcategoryIds) {
+      if (typeof subcategoryIds === 'string') {
+        try {
+          subcategoryIdsArray = JSON.parse(subcategoryIds);
+        } catch (error) {
+          return res
+            .status(400)
+            .json({
+              message:
+                'Invalid subcategoryIds format. Ensure it is a valid JSON array string.',
+            });
+        }
+      } else {
+        subcategoryIdsArray = subcategoryIds;
+      }
+    }
+
+    // Validate that the categoryIds are valid
+    if (categoryIdsArray.length > 0) {
+      const categories = await prisma.categories.findMany({
+        where: {
+          id: { in: categoryIdsArray },
+          parentId: null, // Ensure these are top-level categories (no parent)
+        },
+      });
+
+      if (categories.length !== categoryIdsArray.length) {
+        res
+          .status(400)
+          .json({ message: 'One or more category IDs are invalid' });
+        return;
+      }
+    }
+
+    // Validate that the subcategoryIds are valid and belong to the correct parent category
+    if (subcategoryIdsArray.length > 0) {
+      const subcategories = await prisma.categories.findMany({
+        where: {
+          id: { in: subcategoryIdsArray },
+          parentId: { not: null }, // Ensure these are subcategories (have a parentId)
+        },
+      });
+
+      if (subcategories.length !== subcategoryIdsArray.length) {
+        res
+          .status(400)
+          .json({
+            message: 'One or more subcategory IDs are invalid or do not exist',
+          });
+        return;
+      }
+    }
 
     // Prepare data for database insertion
     const data = {
       name,
-      storesId: storesId, // Ensure storesId is a number if required by your schema
+      store_id: {
+        connect: {
+          id: checkStore.id, // Connect the product to the store using the store's ID
+        },
+      },
       description,
-      attachments: imagePath, // Save the uploaded image URL
+      attachments: imagePath,
+      Categories: {
+        connect: [...categoryIdsArray, ...subcategoryIdsArray].map(
+          (id: string) => ({ id }),
+        ),
+      },
     };
 
     // Create the product in the database
     const newProduct = await prisma.product.create({
       data: data,
+      select: {
+        id: true,
+        name: true,
+        attachments: true,
+        Categories: true,
+      },
     });
 
     // Send success response

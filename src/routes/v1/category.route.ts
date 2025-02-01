@@ -5,11 +5,7 @@ const categoryRoute = express.Router();
 
 categoryRoute.get('/', authentication, categories.getAllCategories);
 categoryRoute.get('/:id', authentication, categories.getCategoryById);
-categoryRoute.post(
-  '/create/:productId',
-  authentication,
-  categories.createCategories,
-);
+categoryRoute.post('/create', authentication, categories.createCategories);
 categoryRoute.put('/:id', authentication, categories.updateCategories);
 categoryRoute.delete('/:id', authentication, categories.deleteCategory);
 

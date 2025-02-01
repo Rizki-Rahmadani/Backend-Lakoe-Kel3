@@ -19,23 +19,13 @@ export const createCategories = async (req: Request, res: Response) => {
     */
   try {
     const { name, parentId } = req.body; // Include parentId in the request body
-    const { productId } = req.params;
 
-    if (!name || !productId) {
+    if (!name) {
       return res.status(400).json({ error: 'All fields required' });
-    }
-
-    const checkProduct = await prisma.product.findUnique({
-      where: { id: productId },
-    });
-
-    if (!checkProduct) {
-      return res.status(404).json({ error: "Product doesn't exist" });
     }
 
     const categoryData: any = {
       name,
-      productId,
     };
 
     if (parentId) {
