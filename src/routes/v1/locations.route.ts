@@ -12,5 +12,9 @@ locationRoute.post(
 );
 locationRoute.put('/:id', authentication, location.updateLocation);
 locationRoute.delete('/:id', authentication, location.deleteLocation);
+locationRoute.get('/api/provinces', authentication, location.dataProvinces);
+locationRoute.get('/api/cities/:id', authentication, location.dataCities);
+locationRoute.get('/api/districts/:id', authentication, location.dataDistricts);
+locationRoute.get('/api/villages/:id', authentication, location.dataVillages);
 
 export default locationRoute;

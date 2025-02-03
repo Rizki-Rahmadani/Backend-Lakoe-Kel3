@@ -213,3 +213,82 @@ export const deleteLocation = async (req: Request, res: Response) => {
       .json({ error: 'An error occurred while deleting the location' });
   }
 };
+
+export const dataProvinces = async (req: Request, res: Response) => {
+  try {
+    // Bangun URL dinamis untuk API eksternal
+    const apiUrl = `https://wilayah.id/api/provinces.json`;
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch from external API with status ${response.status}`,
+      );
+    }
+    const data = await response.json();
+
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching provinces:', error);
+    res.status(500).json({ error: 'Failed to fetch provinces dynamically' });
+  }
+};
+
+export const dataCities = async (req: Request, res: Response) => {
+  try {
+    const { id: provinceCode } = req.params; // Ambil provinceCode dari parameter URL
+    const apiUrl = `https://wilayah.id/api/regencies/${provinceCode}.json`; // API eksternal dengan parameter provinceCode
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch from external API with status ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+    res.json(data); // Kirimkan data ke client
+  } catch (error) {
+    console.error('Error fetching cities:', error);
+    res.status(500).json({ error: 'Failed to fetch cities from external API' });
+  }
+};
+
+export const dataDistricts = async (req: Request, res: Response) => {
+  try {
+    const { id: cityCode } = req.params; // Ambil provinceCode dari parameter URL
+    const apiUrl = `https://wilayah.id/api/districts/${cityCode}.json`; // API eksternal dengan parameter provinceCode
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch from external API with status ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+    res.json(data); // Kirimkan data ke client
+  } catch (error) {
+    console.error('Error fetching cities:', error);
+    res.status(500).json({ error: 'Failed to fetch cities from external API' });
+  }
+};
+
+export const dataVillages = async (req: Request, res: Response) => {
+  try {
+    const { id: districtCode } = req.params; // Ambil districtCode dari parameter URL
+    const apiUrl = `https://wilayah.id/api/villages/${districtCode}.json`; // API eksternal dengan parameter provinceCode
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch from external API with status ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+    res.json(data); // Kirimkan data ke client
+  } catch (error) {
+    console.error('Error fetching cities:', error);
+    res.status(500).json({ error: 'Failed to fetch cities from external API' });
+  }
+};
