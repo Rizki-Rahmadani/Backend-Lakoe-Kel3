@@ -17,7 +17,7 @@ import cartsRoute from './carts.route';
 import cartsitemsRoute from './carts-items.route';
 import categoryRoute from './category.route';
 import variantRoutes from './variants.route';
-
+import orderRoute from './order.route';
 const router = express.Router();
 
 router.use('/role', roleRoute);
@@ -30,7 +30,7 @@ router.use('/message', authentication, app_message);
 router.use('/stores', app_store);
 router.use('/bank', app_bank);
 router.use('/operation-hour', app_hour);
-
+router.use('/order', orderRoute);
 router.use('/category', categoryRoute);
 router.use('/variant', variantRoutes);
 router.use('/variant-options', variantOptionRoutes);
