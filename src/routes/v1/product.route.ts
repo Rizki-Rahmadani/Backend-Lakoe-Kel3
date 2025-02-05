@@ -7,17 +7,14 @@ import {
   search,
   toggleActive,
   updateProduct,
+  getProductbyStore,
 } from '../../controllers/product.controller';
 import { upload } from '../../middlewares/upload-file';
 
-app_product.post(
-  '/create-product',
-  upload.single('attachments'),
-  createProduct,
-);
+app_product.post('/create-product', upload.array('attachments'), createProduct);
 
 app_product.get('/get-product', getAllProduct);
-
+app_product.get('/check-product', getProductbyStore);
 app_product.delete('/delete-product', deleteProduct);
 
 app_product.put('/toggle-product', toggleActive);
