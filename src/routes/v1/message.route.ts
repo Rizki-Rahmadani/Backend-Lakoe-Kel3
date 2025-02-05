@@ -13,7 +13,7 @@ app_message.post('/create-message', createMessage);
 
 app_message.get('/get-message', getMessage);
 
-app_message.get('/detail-message', getMessageDetailed);
+app_message.post('/detail-message', getMessageDetailed);
 
 app_message.put('/update-message', editMessage);
 
