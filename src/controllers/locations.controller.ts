@@ -111,11 +111,11 @@ export const createLocation = async (req: Request, res: Response) => {
 
     const data = await biteShip.json(); // Parse response JSON dari Biteship API
 
-        // Perbarui lokasi dengan biteshipId
-        // const updatedLocation = await prisma.location.update({
-        //   where: { id: newLocation.id },
-        //   data: { biteshipId: biteshipData.id },
-        // });
+    // Perbarui lokasi dengan biteshipId
+    // const updatedLocation = await prisma.location.update({
+    //   where: { id: newLocation.id },
+    //   data: { biteshipId: biteshipData.id },
+    // });
 
     // Kirim response ke client
     return res.status(201).json({
@@ -132,7 +132,6 @@ export const createLocation = async (req: Request, res: Response) => {
 };
 
 // export const createLocation = async (req: Request, res: Response) => {
-
 
 //   try {
 //     const {userId} = (req as any).user.id
@@ -163,7 +162,6 @@ export const createLocation = async (req: Request, res: Response) => {
 //       latitude,
 //       longitude,
 //     } = req.body;
-
 
 //     // Hitung jumlah lokasi terkait
 //     const locationCount = await prisma.location.count({
@@ -274,7 +272,6 @@ export const searchLocation = async (req: Request, res: Response) => {
   }
 };
 
-
 export async function getLocationsById(req: Request, res: Response) {
   /*  
         #swagger.tags = ['Location']
@@ -314,9 +311,8 @@ export async function getAllLocation(req: Request, res: Response) {
         #swagger.description = "to display all Location"
     */
   const userId = (req as any).user.id;
-  console.log(userId)
+  console.log(userId);
   try {
-  
     const findStore = await prisma.stores.findUnique({
       where: { userId: userId },
     });
@@ -328,7 +324,6 @@ export async function getAllLocation(req: Request, res: Response) {
     const location = await prisma.location.findMany({
       where: { storesId: findStore.id },
     });
-    
 
     if (location.length === 0) {
       return res.status(404).json({ error: 'No Locations found' });
@@ -341,7 +336,6 @@ export async function getAllLocation(req: Request, res: Response) {
     return res.status(500).json({ error: 'Error fetching locations' });
   }
 }
-
 
 export const updateLocation = async (req: Request, res: Response) => {
   /*  
@@ -400,7 +394,6 @@ export const updateLocation = async (req: Request, res: Response) => {
       .json({ error: 'An error occurred while updating the location' });
   }
 };
-
 
 export const deleteLocation = async (req: Request, res: Response) => {
   /*  

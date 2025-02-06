@@ -91,6 +91,12 @@ export async function register(req: Request, res: Response) {
     function formatString(input: string): string {
       return input.toLowerCase().replace(/\s+/g, '');
     }
+    const findStore = await prisma.stores.findUnique({
+      where: { username: formatString(fullname) },
+    });
+    if (findStore) {
+      return res.status(403).json({ message: 'Store Name already taken' });
+    }
     const addstore = await prisma.stores.create({
       data: {
         name: fullname,
