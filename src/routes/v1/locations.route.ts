@@ -3,14 +3,11 @@ import * as location from '../../controllers/locations.controller';
 import { authentication } from '../../middlewares/authmiddleware';
 const locationRoute = express.Router();
 
+locationRoute.post('/create',authentication,location.createLocation);
 locationRoute.get('/', authentication, location.getAllLocation);
 locationRoute.get('/search', authentication, location.searchLocation);
 locationRoute.get('/:id', authentication, location.getLocationsById);
-locationRoute.post(
-  '/create/:store_id',
-  authentication,
-  location.createLocation,
-);
+
 // locationRoute.post('/create/buyer/:product_id', location.createLocationBiteshipBuyer);
 locationRoute.put('/:id', authentication, location.updateLocation);
 
