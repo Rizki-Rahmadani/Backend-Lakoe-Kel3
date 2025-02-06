@@ -48,7 +48,7 @@ model Product {
   id            String       @id @unique @default(cuid())
   name          String
   description   String?
-  attachments   String
+  attachments   String[]
   is_active     Boolean?     @default(false)
   variants      Variants[]
   size          String?

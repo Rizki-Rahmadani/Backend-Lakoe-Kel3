@@ -12,7 +12,12 @@ import {
 } from '../../controllers/product.controller';
 import { upload } from '../../middlewares/upload-file';
 import { authentication } from '../../middlewares/authmiddleware';
-app_product.post('/create-product', upload.array('attachments'), createProduct);
+app_product.post(
+  '/create-product',
+  authentication,
+  upload.array('attachments'),
+  createProduct,
+);
 
 app_product.get('/get-product', getAllProduct);
 app_product.get('/check-product', authentication, getProductbyStore);
@@ -26,7 +31,7 @@ app_product.get('/search-product', search);
 app_product.put(
   '/update-product',
   authentication,
-  upload.single('attachments'),
+  upload.array('attachments'),
   updateProduct,
 );
 

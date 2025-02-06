@@ -12,7 +12,7 @@ export async function createProduct(
 ) {
   const { name, description, categoryIds, subcategoryIds } = req.body;
   const userId = (req as any).user.id;
-  let imagePath = ''; // Default to an empty string
+  let imagePaths: string[] = []; // Default to an empty string
 
   try {
     const checkStore = await prisma.stores.findUnique({
@@ -24,14 +24,17 @@ export async function createProduct(
       return;
     }
     // Upload the file to Cloudinary if it exists
-    if (req.file) {
-      const uploadResult = await uploadToCloudinary(req.file, 'product');
-      imagePath = uploadResult.url; // Use the secure URL from Cloudinary
+    if (req.files && Array.isArray(req.files)) {
+      // Loop through all the files in req.files and upload them to Cloudinary
+      for (const file of req.files) {
+        const uploadResult = await uploadToCloudinary(file, 'product');
+        imagePaths.push(uploadResult.url); // Store the Cloudinary URL for each uploaded file
+      }
     }
-    console.log('The image path:', imagePath);
+    console.log('The image path:', imagePaths);
 
     // Validate input fields
-    if (!name || !imagePath) {
+    if (!name || !imagePaths) {
       res.status(400).json({ message: 'All fields are required' });
       return; // Explicitly terminate the function after sending a response
     }
@@ -112,7 +115,7 @@ export async function createProduct(
         },
       },
       description,
-      attachments: imagePath,
+      attachments: imagePaths,
       Categories: {
         connect: [...categoryIdsArray, ...subcategoryIdsArray].map(
           (id: string) => ({ id }),
@@ -307,11 +310,11 @@ export async function updateProduct(
       res.status(404).json({ message: 'product not found' });
     }
 
-    let imagePath = productExist?.attachments;
+    let imagePath: string[] = productExist?.attachments || [];
 
     if (req.file) {
       const uploadResult = await uploadToCloudinary(req.file, 'product');
-      imagePath = uploadResult.url;
+      imagePath = [...imagePath, uploadResult.url];
       // res.status(200).json({message: "success on update"})
     }
 
