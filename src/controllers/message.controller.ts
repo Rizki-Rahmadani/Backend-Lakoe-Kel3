@@ -4,18 +4,25 @@ import { uploadToCloudinary } from '../controllers/upload.controller';
 const prisma = new PrismaClient();
 
 export async function createMessage(req: Request, res: Response) {
-  const { name, storesId, content } = req.body;
+  const { name, content } = req.body;
+  const userId = (req as any).user.id;
+  const storeExist = await prisma.stores.findUnique({
+    where: { userId: userId },
+  });
   //   const userId = (req as any).user.fullname;
 
   if (!content || !name) {
     return res.status(400).json({ message: 'Content is required' });
+  }
+  if (!storeExist) {
+    return res.status(404).json({ message: 'store not found' });
   }
 
   try {
     const message_data = await prisma.message_templates.create({
       data: {
         name,
-        storesId,
+        storesId: storeExist.id,
         content,
       },
     });
@@ -27,13 +34,25 @@ export async function createMessage(req: Request, res: Response) {
 
 export async function getMessage(req: Request, res: Response) {
   // const {id} = req.body;
-
+  const userId = (req as any).user.id;
   try {
+    const findStore = await prisma.stores.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    if (!findStore) {
+      return res.status(404).json({ message: 'store not found' });
+    }
     const message_data = await prisma.message_templates.findMany({
+      where: {
+        storesId: findStore.id,
+      },
       select: {
         id: true,
         name: true,
         content: true,
+        // storesId: true
       },
     });
     res.status(201).json({ message: 'Message displayed', message_data });
@@ -43,8 +62,8 @@ export async function getMessage(req: Request, res: Response) {
 }
 
 export async function getMessageDetailed(req: Request, res: Response) {
-  const { id, productId, userId } = req.body;
-
+  const { id, productId } = req.body;
+  const userId = (req as any).user.id;
   try {
     let message_data = await prisma.message_templates.findUnique({
       where: {
