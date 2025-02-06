@@ -167,6 +167,26 @@ export async function getProductbyStore(req: Request, res: Response) {
     res.status(500).json({ message: 'failed to get all products', error });
   }
 }
+export async function getProductforName(req: Request, res: Response) {
+  const { username } = req.params;
+  try {
+    const getStore = await prisma.stores.findUnique({
+      where: { username: username },
+    });
+    if (!getStore) {
+      return res.status(404).json({ message: 'Store Not Found' });
+    }
+    const product = await prisma.product.findMany({
+      where: { storesId: getStore.id },
+    });
+    res.status(200).json({
+      message: 'successfully fetched products',
+      product: product,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'failed to get all products', error });
+  }
+}
 export async function getAllProduct(
   req: Request,
   res: Response,

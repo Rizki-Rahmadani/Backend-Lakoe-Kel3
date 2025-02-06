@@ -63,7 +63,7 @@ model Product {
 model Stores {
   id                    String                  @id @unique @default(cuid())
   name                  String
-  username              String
+  username              String                  @unique
   slogan                String?
   description           String?
   domain                String?
