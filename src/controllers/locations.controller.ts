@@ -82,7 +82,7 @@ export const createLocation = async (req: Request, res: Response) => {
     const biteShip = await fetch(apiBiteship, {
       method: `POST`,
       headers: {
-        Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
+        Authorization: `Bearer ${process.env.VITE_API_BITESHIP_TEST}`, // Pastikan API key valid
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -115,14 +115,13 @@ export const createLocation = async (req: Request, res: Response) => {
       });
     }
 
-    const data = await biteShip.json(); // Parse response JSON dari Biteship API
+    // const data = await biteShip.json(); // Parse response JSON dari Biteship API
 
     // Perbarui lokasi dengan biteshipId
     // const updatedLocation = await prisma.location.update({
     //   where: { id: newLocation.id },
     //   data: { biteshipId: biteshipData.id },
     // });
-
 
     // Kirim response ke client
     return res.status(201).json({
@@ -342,7 +341,7 @@ export const updateLocation = async (req: Request, res: Response) => {
 
     // Cari lokasi dan store terkait
     const findLocation = await prisma.location.findUnique({
-      where: {id},
+      where: { id },
     });
 
     if (!findLocation) {
@@ -353,9 +352,9 @@ export const updateLocation = async (req: Request, res: Response) => {
 
     const findUser = await prisma.user.findUnique({
       where: { id: userId },
-    })
+    });
     const findStore = await prisma.stores.findUnique({
-      where: {userId},
+      where: { userId },
     });
 
     if (!findStore) {
@@ -425,11 +424,9 @@ export const updateLocation = async (req: Request, res: Response) => {
         longitude: parseFloat(longitude),
         type: 'origin',
       });
-      
+
       console.log('Biteship response status:', biteShipResponse.status);
       console.log('Biteship response body:', biteshipData);
-
-      
 
       // Perbarui biteshipId di database setelah berhasil update dari Biteship
       await prisma.location.update({
@@ -450,7 +447,9 @@ export const updateLocation = async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error('Error details:', error); // Tambahkan ini
-    res.status(500).json({ error: 'An error occurred while updating the location' });
+    res
+      .status(500)
+      .json({ error: 'An error occurred while updating the location' });
   }
 };
 
