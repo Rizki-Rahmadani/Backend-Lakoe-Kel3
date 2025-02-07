@@ -10,7 +10,17 @@ export async function createProduct(
   res: Response,
   next: NextFunction,
 ) {
-  const { name, description, categoryIds, subcategoryIds } = req.body;
+  const {
+    name,
+    description,
+    minimum_order,
+    length,
+    height,
+    width,
+    weight,
+    categoryIds,
+    subcategoryIds,
+  } = req.body;
   const userId = (req as any).user.id;
   let imagePaths: string[] = []; // Default to an empty string
 
@@ -115,6 +125,11 @@ export async function createProduct(
         },
       },
       description,
+      minimum_order,
+      weight,
+      height,
+      length,
+      width,
       attachments: imagePaths,
       Categories: {
         connect: [...categoryIdsArray, ...subcategoryIdsArray].map(
@@ -300,7 +315,8 @@ export async function updateProduct(
   next: NextFunction,
 ): Promise<void> {
   const { id } = req.body;
-  const { name, description, size, minimum_order } = req.body;
+  const { name, description, minimum_order, length, height, width, weight } =
+    req.body;
   try {
     let productExist = await prisma.product.findUnique({
       where: { id: id },
@@ -325,7 +341,9 @@ export async function updateProduct(
         name: name, // Keep existing content if not updated
         attachments: imagePath, // Update the image if changed
         description: description || productExist?.description,
-        size: size || productExist?.size,
+        length: length || productExist?.length,
+        width: width || productExist?.width,
+        weight: weight || productExist?.weight,
         minimum_order: parseInt(minimum_order) || productExist?.minimum_order,
       },
     });
@@ -358,7 +376,10 @@ export async function search(req: Request, res: Response) {
         description: true,
         attachments: true,
         variants: true,
-        size: true,
+        weight: true,
+        length: true,
+        width: true,
+        height: true,
         minimum_order: true,
       },
     });
