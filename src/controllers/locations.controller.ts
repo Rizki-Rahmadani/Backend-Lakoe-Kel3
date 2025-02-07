@@ -44,8 +44,6 @@ export const createLocation = async (req: Request, res: Response) => {
     const {
       name,
       postal_code,
-      contact_name,
-      contact_phone,
       address,
       village,
       district,
@@ -90,13 +88,21 @@ export const createLocation = async (req: Request, res: Response) => {
       body: JSON.stringify({
         name: newLocation.name,
         postal_code: newLocation.postal_code,
-        contact_name: contact_name,
-        contact_phone: contact_phone,
+        contact_name: newLocation.name,
+        contact_phone: findUser.phone_number,
         address: `${newLocation.address}, ${newLocation.city_district}`,
         latitude: parseFloat(latitude), // Pastikan angka
         longitude: parseFloat(longitude), // Pastikan angka
         type: 'origin',
       }),
+    });
+
+    const data = await biteShip.json(); // Parse response JSON dari Biteship API
+
+    // Perbarui lokasi dengan biteshipId
+    const updatedLocation = await prisma.location.update({
+      where: { id: newLocation.id },
+      data: { biteshipId: data.id },
     });
 
     // Handle response dari Biteship API
@@ -109,18 +115,10 @@ export const createLocation = async (req: Request, res: Response) => {
       });
     }
 
-    const data = await biteShip.json(); // Parse response JSON dari Biteship API
-
-        // Perbarui lokasi dengan biteshipId
-        // const updatedLocation = await prisma.location.update({
-        //   where: { id: newLocation.id },
-        //   data: { biteshipId: biteshipData.id },
-        // });
-
     // Kirim response ke client
     return res.status(201).json({
       message: 'Location created successfully',
-      location: newLocation,
+      location: updatedLocation,
       biteshipData: data,
     });
   } catch (error) {
@@ -132,7 +130,6 @@ export const createLocation = async (req: Request, res: Response) => {
 };
 
 // export const createLocation = async (req: Request, res: Response) => {
-
 
 //   try {
 //     const {userId} = (req as any).user.id
@@ -163,7 +160,6 @@ export const createLocation = async (req: Request, res: Response) => {
 //       latitude,
 //       longitude,
 //     } = req.body;
-
 
 //     // Hitung jumlah lokasi terkait
 //     const locationCount = await prisma.location.count({
@@ -274,49 +270,14 @@ export const searchLocation = async (req: Request, res: Response) => {
   }
 };
 
-
-export async function getLocationsById(req: Request, res: Response) {
-  /*  
-        #swagger.tags = ['Location']
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/ShowLocationbyIdDTO"
-                    }  
-                }
-            }
-        } 
-    */
-  const { id } = req.params;
-
-  try {
-    const location = await prisma.location.findUnique({
-      where: { id },
-    });
-
-    if (!location) {
-      return res.status(404).json({ error: 'Location not found' });
-    }
-
-    return res
-      .status(200)
-      .json({ messages: 'Success Get Location', location: location });
-  } catch (error) {
-    return res.status(500).json({ error: 'Error fetching location' });
-  }
-}
-
 export async function getAllLocation(req: Request, res: Response) {
   /*  
         #swagger.tags = ['Location']
         #swagger.description = "to display all Location"
     */
   const userId = (req as any).user.id;
-  console.log(userId)
+  console.log(userId);
   try {
-  
     const findStore = await prisma.stores.findUnique({
       where: { userId: userId },
     });
@@ -328,7 +289,6 @@ export async function getAllLocation(req: Request, res: Response) {
     const location = await prisma.location.findMany({
       where: { storesId: findStore.id },
     });
-    
 
     if (location.length === 0) {
       return res.status(404).json({ error: 'No Locations found' });
@@ -341,7 +301,6 @@ export async function getAllLocation(req: Request, res: Response) {
     return res.status(500).json({ error: 'Error fetching locations' });
   }
 }
-
 
 export const updateLocation = async (req: Request, res: Response) => {
   /*  
@@ -359,45 +318,130 @@ export const updateLocation = async (req: Request, res: Response) => {
     */
   try {
     const { id } = req.params;
+    const userId = (req as any).user?.id;
     const {
       name,
-      address,
       postal_code,
-      city_district,
+      address,
+      village,
+      district,
+      city,
+      province,
       latitude,
       longitude,
-      store_id,
-      profile_id,
-      is_main_location,
     } = req.body;
-    const findId = await prisma.location.findUnique({
-      where: { id: id },
+
+    // Cari lokasi dan store terkait
+    const findLocation = await prisma.location.findUnique({
+      where: {id},
     });
-    if (!findId) {
-      return res.status(404).json({ error: 'Location not found' });
+
+    if (!findLocation) {
+      return res.status(404).json({
+        error: 'Location not found',
+      });
     }
-    const updatedlocation = await prisma.location.update({
+
+    const findUser = await prisma.user.findUnique({
+      where: { id: userId },
+    })
+    const findStore = await prisma.stores.findUnique({
+      where: {userId},
+    });
+
+    if (!findStore) {
+      return res.status(404).json({
+        error: 'Store not found',
+      });
+    }
+
+    // Update lokasi di database
+    const updatedLocation = await prisma.location.update({
       where: { id },
       data: {
         name,
         address,
-        postal_code,
-        city_district,
-        longitude,
-        latitude,
-        storesId: store_id,
-        profilesId: profile_id,
-        is_main_location,
+        postal_code: postal_code.toString(),
+        city_district: `${village}, ${district}, ${city}, ${province}`,
+        longitude: longitude.toString(),
+        latitude: latitude.toString(),
+        storesId: findStore.id,
       },
     });
-    res.status(200).json({
-      message: 'Location updated successfully',
-      location: updatedlocation,
-    });
+
+    // Cek apakah ada biteshipId, jika ada, update di Biteship
+    const biteshipId = findLocation.biteshipId;
+    console.log('Biteship ID:', biteshipId);
+    if (biteshipId) {
+      const apiBiteship = `https://api.biteship.com/v1/locations/${biteshipId}`;
+
+      console.log('Biteship API Key:', process.env.API_BITESHIP_TEST);
+      // Buat request ke Biteship API untuk mengupdate lokasi
+      const biteShipResponse = await fetch(apiBiteship, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: updatedLocation.name,
+          postal_code: updatedLocation.postal_code,
+          contact_name: updatedLocation.name,
+          contact_phone: findUser?.phone_number,
+          address: `${updatedLocation.address}, ${updatedLocation.city_district}`,
+          latitude: parseFloat(latitude), // Pastikan angka
+          longitude: parseFloat(longitude), // Pastikan angka
+          type: 'origin',
+        }),
+      });
+
+      // Cek apakah update ke Biteship berhasil
+      if (!biteShipResponse.ok) {
+        const errorDetails = await biteShipResponse.text(); // Membaca body sebagai teks (hanya sekali)
+        console.error('Error from Biteship API:', errorDetails);
+        return res.status(biteShipResponse.status).json({
+          message: `Failed to update location on Biteship`,
+          error: errorDetails, // Kirim error ke client
+        });
+      }
+      const biteshipData = await biteShipResponse.json();
+
+      console.log('Request body to Biteship:', {
+        name: updatedLocation.name,
+        postal_code: updatedLocation.postal_code,
+        contact_name: updatedLocation.name,
+        contact_phone: findUser?.phone_number,
+        address: `${updatedLocation.address}, ${updatedLocation.city_district}`,
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+        type: 'origin',
+      });
+      
+      console.log('Biteship response status:', biteShipResponse.status);
+      console.log('Biteship response body:', biteshipData);
+
+      
+
+      // Perbarui biteshipId di database setelah berhasil update dari Biteship
+      await prisma.location.update({
+        where: { id },
+        data: { biteshipId: biteshipData.id },
+      });
+
+      // Kirim response ke client dengan data dari Biteship
+      return res.status(200).json({
+        message: 'Location updated successfully',
+        location: updatedLocation,
+        biteshipData,
+      });
+    } else {
+      return res.status(400).json({
+        error: 'No Biteship ID found for the location',
+      });
+    }
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: 'An error occurred while updating the location' });
+    console.error('Error details:', error); // Tambahkan ini
+    res.status(500).json({ error: 'An error occurred while updating the location' });
   }
 };
 
@@ -418,11 +462,27 @@ export const deleteLocation = async (req: Request, res: Response) => {
     */
   try {
     const { id } = req.params;
-    await prisma.location.delete({
+    const findLocation = await prisma.location.delete({
       where: { id },
     });
+
+    const biteshipId = findLocation.biteshipId;
+    const apiBiteship = `https://api.biteship.com/v1/locations/${biteshipId}`;
+
+    // Buat request ke Biteship API
+    const biteShip = await fetch(apiBiteship, {
+      method: `DELETE`,
+      headers: {
+        Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await biteShip.json();
+
     res.status(200).json({
       message: 'Locations deleted successfully',
+      biteshipResponse: data,
     });
   } catch (error) {
     res
@@ -430,6 +490,35 @@ export const deleteLocation = async (req: Request, res: Response) => {
       .json({ error: 'An error occurred while deleting the location' });
   }
 };
+
+// export const deleteLocation = async (req: Request, res: Response) => {
+//   /*
+//         #swagger.tags = ['Location']
+//         #swagger.requestBody = {
+//             required: true,
+//             content: {
+//                 "application/json": {
+//                     schema: {
+//                         $ref: "#/components/schemas/DeleteLocationDTO"
+//                     }
+//                 }
+//             }
+//         }
+//     */
+//   try {
+//     const { id } = req.params;
+//     await prisma.location.delete({
+//       where: { id },
+//     });
+//     res.status(200).json({
+//       message: 'Locations deleted successfully',
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ error: 'An error occurred while deleting the location' });
+//   }
+// };
 
 export const dataProvinces = async (req: Request, res: Response) => {
   try {
@@ -509,3 +598,36 @@ export const dataVillages = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to fetch cities from external API' });
   }
 };
+
+export async function getLocationsById(req: Request, res: Response) {
+  /*  
+        #swagger.tags = ['Location']
+        #swagger.requestBody = {
+            required: true,
+            content: {
+                "application/json": {
+                    schema: {
+                        $ref: "#/components/schemas/ShowLocationbyIdDTO"
+                    }  
+                }
+            }
+        } 
+    */
+  const { id } = req.params;
+
+  try {
+    const location = await prisma.location.findUnique({
+      where: { id },
+    });
+
+    if (!location) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+
+    return res
+      .status(200)
+      .json({ messages: 'Success Get Location', location: location });
+  } catch (error) {
+    return res.status(500).json({ error: 'Error fetching location' });
+  }
+}
