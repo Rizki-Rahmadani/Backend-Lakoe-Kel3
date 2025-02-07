@@ -8,19 +8,31 @@ import {
   toggleActive,
   updateProduct,
   getProductbyStore,
+  getProductforName,
 } from '../../controllers/product.controller';
 import { upload } from '../../middlewares/upload-file';
-
-app_product.post('/create-product', upload.array('attachments'), createProduct);
+import { authentication } from '../../middlewares/authmiddleware';
+app_product.post(
+  '/create-product',
+  authentication,
+  upload.array('attachments'),
+  createProduct,
+);
 
 app_product.get('/get-product', getAllProduct);
-app_product.get('/check-product', getProductbyStore);
-app_product.delete('/delete-product', deleteProduct);
+app_product.get('/check-product', authentication, getProductbyStore);
+app_product.get('/get-product/:username', getProductforName);
+app_product.delete('/delete-product', authentication, deleteProduct);
 
-app_product.put('/toggle-product', toggleActive);
+app_product.put('/toggle-product', authentication, toggleActive);
 
 app_product.get('/search-product', search);
 
-app_product.put('/update-product', upload.single('attachments'), updateProduct);
+app_product.put(
+  '/update-product',
+  authentication,
+  upload.array('attachments'),
+  updateProduct,
+);
 
 export default app_product;

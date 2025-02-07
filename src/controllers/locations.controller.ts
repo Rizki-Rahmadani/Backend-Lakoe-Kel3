@@ -115,6 +115,15 @@ export const createLocation = async (req: Request, res: Response) => {
       });
     }
 
+    const data = await biteShip.json(); // Parse response JSON dari Biteship API
+
+    // Perbarui lokasi dengan biteshipId
+    // const updatedLocation = await prisma.location.update({
+    //   where: { id: newLocation.id },
+    //   data: { biteshipId: biteshipData.id },
+    // });
+
+
     // Kirim response ke client
     return res.status(201).json({
       message: 'Location created successfully',
@@ -444,7 +453,6 @@ export const updateLocation = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'An error occurred while updating the location' });
   }
 };
-
 
 export const deleteLocation = async (req: Request, res: Response) => {
   /*  
