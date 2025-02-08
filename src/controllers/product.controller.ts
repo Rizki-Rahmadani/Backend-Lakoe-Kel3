@@ -14,6 +14,9 @@ export async function createProduct(
     name,
     description,
     minimum_order,
+    price,
+    stock,
+    sku,
     length,
     height,
     width,
@@ -116,20 +119,32 @@ export async function createProduct(
       }
     }
 
+    // Convert string inputs to numbers
+    const parsedMinimumOrder = minimum_order ? parseInt(minimum_order) : null;
+    const parsedPrice = price ? parseFloat(price) : null;
+    const parsedStock = stock ? parseInt(stock) : null;
+    const parsedLength = length ? parseFloat(length) : null;
+    const parsedHeight = height ? parseFloat(height) : null;
+    const parsedWidth = width ? parseFloat(width) : null;
+    const parsedWeight = weight ? parseFloat(weight) : null;
+
     // Prepare data for database insertion
     const data = {
       name,
       store_id: {
         connect: {
-          id: checkStore.id, // Connect the product to the store using the store's ID
+          id: checkStore.id,
         },
       },
       description,
-      minimum_order,
-      weight,
-      height,
-      length,
-      width,
+      minimum_order: parsedMinimumOrder,
+      price: parsedPrice,
+      stock: parsedStock,
+      sku,
+      weight: parsedWeight,
+      height: parsedHeight,
+      length: parsedLength,
+      width: parsedWidth,
       attachments: imagePaths,
       Categories: {
         connect: [...categoryIdsArray, ...subcategoryIdsArray].map(
@@ -176,6 +191,20 @@ export async function getProductbyStore(req: Request, res: Response) {
     }
     const product = await prisma.product.findMany({
       where: { storesId: getStore.id },
+      include: {
+        variants: {
+          include: {
+            Variant_options: {
+              include: {
+                Variant_option_values: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     res.status(200).json({
       message: 'successfully fetched products',
@@ -185,6 +214,7 @@ export async function getProductbyStore(req: Request, res: Response) {
     res.status(500).json({ message: 'failed to get all products', error });
   }
 }
+
 export async function getProductforName(req: Request, res: Response) {
   const { username } = req.params;
   try {
@@ -229,6 +259,9 @@ export async function getAllProduct(
             },
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc', // Mengurutkan berdasarkan createdAt dalam urutan menurun
       },
     });
 
