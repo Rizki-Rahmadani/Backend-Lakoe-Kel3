@@ -51,10 +51,13 @@ model Product {
   attachments   String[]
   is_active     Boolean?     @default(false)
   variants      Variants[]
-  width         Int
-  length        Int
-  height        Int
-  weight        Int
+  price         Int?
+  sku           String?
+  stock         Int?
+  width         Int?
+  length        Int?
+  height        Int?
+  weight        Int?
   minimum_order Int?
   store_id      Stores?      @relation(fields: [storesId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   storesId      String?
