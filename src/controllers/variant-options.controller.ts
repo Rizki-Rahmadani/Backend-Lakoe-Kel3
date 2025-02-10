@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { error } from 'console';
 
 const prisma = new PrismaClient();
 
@@ -19,23 +18,12 @@ export const createVariantOptions = async (req: Request, res: Response) => {
         } 
     */
   try {
-    const { name, variantId, productId } = req.body;
+    const { name, variantId, parentVariantOptionId } = req.body;
 
-    if (!name || !variantId || !productId) {
+    if (!name || !variantId) {
       return res.status(400).json({ error: 'All fields required' });
     }
 
-    // Check if the product exists
-    const checkProduct = await prisma.product.findUnique({
-      where: { id: productId },
-      select: { variants: true },
-    });
-
-    if (!checkProduct) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    // Check if the variant exists
     const checkVariant = await prisma.variants.findUnique({
       where: { id: variantId },
     });
@@ -44,43 +32,22 @@ export const createVariantOptions = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Variant doesn't exist" });
     }
 
-    // Fetch all variant options for the variant
-    const variantOptions = await prisma.variant_options.findMany({
-      where: { variantsId: variantId },
+    const newVariantOption = await prisma.variant_options.create({
+      data: {
+        name, // e.g., Red
+        variantsId: variantId,
+        parentVariantOptionId, // If it's a sub-variant, pass the parent ID (e.g., Red -> 7kg)
+      },
     });
-
-    if (variantOptions.length === 0) {
-      return res
-        .status(404)
-        .json({ error: 'No variant options found for this variant' });
-    }
-
-    // Create the new sub-variant and link it to all available variant options without variant_option_values
-    const subVariantPromises = variantOptions.map(async (option) => {
-      return prisma.variant_options.create({
-        data: {
-          name, // The sub-variant name (e.g., 7kg)
-          variantsId: variantId,
-          parentVariantOptionId: option.id, // Link the sub-variant to the parent variant option
-          // No variant_option_values are created here
-        },
-      });
-    });
-
-    // Wait for all sub-variants to be created
-    const newSubVariants = await Promise.all(subVariantPromises);
 
     res.status(201).json({
-      message:
-        'Sub-variant created successfully for all variant options without option values',
-      variant_options: newSubVariants,
+      message: 'Variant Option created successfully',
+      variant_option: newVariantOption,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error:
-        'An error occurred while creating sub-variants for variant options',
-    });
+    res
+      .status(500)
+      .json({ error: 'An error occurred while creating the variant option' });
   }
 };
 
