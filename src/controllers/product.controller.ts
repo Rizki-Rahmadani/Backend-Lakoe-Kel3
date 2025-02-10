@@ -195,8 +195,18 @@ export async function getProductbyStore(req: Request, res: Response) {
         variants: {
           include: {
             Variant_options: {
+              where: { parentVariantOptionId: null },
               include: {
-                Variant_option_values: true,
+                variant_option_values: true, // Include variant option values (e.g., price, stock, etc.)
+                subVariantOptions: {
+                  // Include sub-variants (where `parentVariantOptionId` exists)
+                  where: {
+                    parentVariantOptionId: { not: null }, // Only fetch sub-variants (not top-level options)
+                  },
+                  include: {
+                    variant_option_values: true, // Include variant option values for sub-variants as well
+                  },
+                },
               },
             },
           },
