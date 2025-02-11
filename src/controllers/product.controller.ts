@@ -13,6 +13,7 @@ export async function createProduct(
   const {
     name,
     description,
+    url,
     minimum_order,
     price,
     stock,
@@ -26,15 +27,24 @@ export async function createProduct(
   } = req.body;
   const userId = (req as any).user.id;
   let imagePaths: string[] = []; // Default to an empty string
-
+  let customUrl: string = '';
   try {
     const checkStore = await prisma.stores.findUnique({
       where: { userId: userId },
-      select: { id: true },
+      select: { id: true, username: true },
     });
     if (!checkStore) {
       res.status(404).json({ message: 'Store not found' });
       return;
+    }
+    const checkUrl = await prisma.product.findUnique({
+      where: { url: url },
+    });
+    if (checkUrl) {
+      const randInt = Math.floor(1000 + Math.random() * 9000);
+      customUrl = `${url}-${randInt}`;
+    } else {
+      customUrl = url;
     }
     // Upload the file to Cloudinary if it exists
     if (req.files && Array.isArray(req.files)) {
@@ -137,6 +147,7 @@ export async function createProduct(
         },
       },
       description,
+      url: customUrl,
       minimum_order: parsedMinimumOrder,
       price: parsedPrice,
       stock: parsedStock,
@@ -196,7 +207,7 @@ export async function getProductbyStore(req: Request, res: Response) {
           include: {
             Variant_options: {
               include: {
-                Variant_option_values: true,
+                Variant_option_values: true, // Include variant option values (e.g., price, stock, etc.)
               },
             },
           },
@@ -233,6 +244,28 @@ export async function getProductforName(req: Request, res: Response) {
     });
   } catch (error) {
     res.status(500).json({ message: 'failed to get all products', error });
+  }
+}
+export async function getProductByUrl(req: Request, res: Response) {
+  const { url, username } = req.params;
+  try {
+    const findStore = await prisma.stores.findUnique({
+      where: { username: username },
+    });
+    if (!findStore) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+    const findProduct = await prisma.product.findUnique({
+      where: { url: url, storesId: findStore.id },
+    });
+    if (!findProduct) {
+      return res.status(404).json({ message: 'Product Not Available' });
+    }
+    return res
+      .status(200)
+      .json({ message: 'Product fetched succesfully', product: findProduct });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal Server error' });
   }
 }
 export async function getAllProduct(

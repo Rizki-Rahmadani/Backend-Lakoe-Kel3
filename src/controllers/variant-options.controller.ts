@@ -18,19 +18,19 @@ export const createVariantOptions = async (req: Request, res: Response) => {
         } 
     */
   try {
-    const { name, variantId } = req.body;
+    const { name, variantId, parentVariantOptionId } = req.body;
 
     if (!name || !variantId) {
       return res.status(400).json({ error: 'All fields required' });
     }
 
-    // Periksa apakah variantId ada di database
-    const checkProduct = await prisma.variants.findUnique({
+
+    const checkVariant = await prisma.variants.findUnique({
       where: { id: variantId },
     });
 
-    if (!checkProduct) {
-      return res.status(404).json({ error: "Variants doesn't exist" });
+    if (!checkVariant) {
+      return res.status(404).json({ error: "Variant doesn't exist" });
     }
 
     let newVariants;
@@ -62,10 +62,11 @@ export const createVariantOptions = async (req: Request, res: Response) => {
         variant_options: newVariants,
       });
     }
+
   } catch (error) {
     res
       .status(500)
-      .json({ error: 'An error occurred while creating the variant' });
+      .json({ error: 'An error occurred while creating the variant option' });
   }
 };
 

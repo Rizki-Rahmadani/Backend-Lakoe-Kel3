@@ -47,6 +47,7 @@ model Roles {
 model Product {
   id            String       @id @unique @default(cuid())
   name          String
+  url           String       @unique
   description   String?
   attachments   String[]
   is_active     Boolean?     @default(false)
@@ -157,6 +158,7 @@ model Variants {
 model Categories {
   id        String       @id @unique @default(cuid())
   name      String
+  icon      String?
   products  Product[]
   parentId  String?
   parent    Categories?  @relation("CategoryParent", fields: [parentId], references: [id])

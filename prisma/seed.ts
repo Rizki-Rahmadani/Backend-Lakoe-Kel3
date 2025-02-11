@@ -47,22 +47,22 @@ async function seedRoles() {
 async function seedCategories() {
   // Seed Common Categories
   const categories = [
-    { name: 'Electronics', parentId: null },
-    { name: 'Laptops', parentId: null },
-    { name: 'Mobile Phones', parentId: null },
-    { name: 'Fashion', parentId: null },
-    { name: 'Clothing', parentId: null },
-    { name: 'Men\'s Clothing', parentId: null },
-    { name: 'Women\'s Clothing', parentId: null },
-    { name: 'Home & Living', parentId: null },
-    { name: 'Furniture', parentId: null },
-    { name: 'Kitchen Appliances', parentId: null },
-    { name: 'Toys & Games', parentId: null },
-    { name: 'Sports & Outdoors', parentId: null },
-    { name: 'Beauty & Health', parentId: null },
-    { name: 'Books', parentId: null },
-    { name: 'Pet Supplies', parentId: null },
-    { name: 'Food & Beverages', parentId: null },
+    { name: 'Electronics', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/memory/default/48px.svg' },
+    { name: 'Laptops', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/laptop/default/48px.svg' },
+    { name: 'Mobile Phones', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/smartphone/default/48px.svg' },
+    { name: 'Fashion', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/checkroom/default/48px.svg' },
+    { name: 'Clothing', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/checkroom/default/48px.svg' },
+    { name: 'Men\'s Clothing', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/face/default/48px.svg' },
+    { name: 'Women\'s Clothing', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/face/default/48px.svg' },
+    { name: 'Home & Living', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/home/default/48px.svg' },
+    { name: 'Furniture', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/weekend/default/48px.svg' },
+    { name: 'Kitchen Appliances', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/kitchen/default/48px.svg' },
+    { name: 'Toys & Games', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/toys/default/48px.svg' },
+    { name: 'Sports & Outdoors', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/sports_soccer/default/48px.svg' },
+    { name: 'Beauty & Health', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/spa/default/48px.svg' },
+    { name: 'Books', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/menu_book/default/48px.svg' },
+    { name: 'Pet Supplies', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/pets/default/48px.svg' },
+    { name: 'Food & Beverages', parentId: null, icon: 'https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/local_dining/default/48px.svg' },
   ];
 
   // Loop through the categories and create them if they do not already exist

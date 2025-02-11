@@ -1,6 +1,7 @@
 export type OrderItem = {
   name: string;
   description: string;
+  variant_options: string;
   category: string;
   value: number;
   quantity: number;
@@ -17,15 +18,26 @@ export type OrderRequest = {
   shipper_organization: string;
   origin_contact_name: string;
   origin_contact_phone: string;
+  origin_contact_email: string;
   origin_address: string;
   origin_note: string;
   origin_postal_code: number;
+  origin_area_id: string;
+  origin_coordinate: {
+    latitude: number;
+    longitude: number;
+  };
+  destination_area_id: string;
   destination_contact_name: string;
   destination_contact_phone: string;
   destination_contact_email: string;
   destination_address: string;
   destination_postal_code: number;
   destination_note: string;
+  destination_coordinate: {
+    latitude: number;
+    longitude: number;
+  };
   courier_company: string;
   courier_type: string;
   courier_insurance?: number;
