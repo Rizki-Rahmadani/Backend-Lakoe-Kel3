@@ -18,6 +18,7 @@ import cartsitemsRoute from './carts-items.route';
 import categoryRoute from './category.route';
 import variantRoutes from './variants.route';
 import orderRoute from './order.route';
+import trackingRoute from './tracking.route';
 const router = express.Router();
 
 router.use('/role', roleRoute);
@@ -38,5 +39,6 @@ router.use('/variant-option-values', variantOptionValueRoutes);
 router.use('/carts', cartsRoute);
 router.use('/cart-items', cartsitemsRoute);
 router.use('/locations', locationRoute);
+router.use('/tracking', trackingRoute);
 
 export default router;
