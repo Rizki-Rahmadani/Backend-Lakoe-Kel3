@@ -9,35 +9,159 @@ export async function createProduct(
   req: Request,
   res: Response,
   next: NextFunction,
-): Promise<void> {
-  const { name, storesId, description } = req.body;
-  let imagePath = ''; // Default to an empty string
+) {
+  const {
+    name,
+    description,
+    minimum_order,
+    price,
+    stock,
+    sku,
+    length,
+    height,
+    width,
+    weight,
+    categoryIds,
+    subcategoryIds,
+  } = req.body;
+  const userId = (req as any).user.id;
+  let imagePaths: string[] = []; // Default to an empty string
 
   try {
-    // Upload the file to Cloudinary if it exists
-    if (req.file) {
-      const uploadResult = await uploadToCloudinary(req.file, 'product');
-      imagePath = uploadResult.url; // Use the secure URL from Cloudinary
+    const checkStore = await prisma.stores.findUnique({
+      where: { userId: userId },
+      select: { id: true },
+    });
+    if (!checkStore) {
+      res.status(404).json({ message: 'Store not found' });
+      return;
     }
-    console.log('The image path:', imagePath);
+    // Upload the file to Cloudinary if it exists
+    if (req.files && Array.isArray(req.files)) {
+      // Loop through all the files in req.files and upload them to Cloudinary
+      for (const file of req.files) {
+        const uploadResult = await uploadToCloudinary(file, 'product');
+        imagePaths.push(uploadResult.url); // Store the Cloudinary URL for each uploaded file
+      }
+    }
+    console.log('The image path:', imagePaths);
 
     // Validate input fields
-    if (!name || !imagePath) {
+    if (!name || !imagePaths) {
       res.status(400).json({ message: 'All fields are required' });
       return; // Explicitly terminate the function after sending a response
     }
+    // Parse categoryIds if passed as a stringified array
+    let categoryIdsArray: string[] = [];
+    if (categoryIds) {
+      if (typeof categoryIds === 'string') {
+        try {
+          categoryIdsArray = JSON.parse(categoryIds);
+        } catch (error) {
+          return res.status(400).json({
+            message:
+              'Invalid categoryIds format. Ensure it is a valid JSON array string.',
+          });
+        }
+      } else {
+        categoryIdsArray = categoryIds;
+      }
+    }
+
+    // Ensure subcategoryIds is a valid array
+    let subcategoryIdsArray: string[] = [];
+    if (subcategoryIds) {
+      if (typeof subcategoryIds === 'string') {
+        try {
+          subcategoryIdsArray = JSON.parse(subcategoryIds);
+        } catch (error) {
+          return res.status(400).json({
+            message:
+              'Invalid subcategoryIds format. Ensure it is a valid JSON array string.',
+          });
+        }
+      } else {
+        subcategoryIdsArray = subcategoryIds;
+      }
+    }
+
+    // Validate that the categoryIds are valid
+    if (categoryIdsArray.length > 0) {
+      const categories = await prisma.categories.findMany({
+        where: {
+          id: { in: categoryIdsArray },
+          parentId: null, // Ensure these are top-level categories (no parent)
+        },
+      });
+
+      if (categories.length !== categoryIdsArray.length) {
+        res
+          .status(400)
+          .json({ message: 'One or more category IDs are invalid' });
+        return;
+      }
+    }
+
+    // Validate that the subcategoryIds are valid and belong to the correct parent category
+    if (subcategoryIdsArray.length > 0) {
+      const subcategories = await prisma.categories.findMany({
+        where: {
+          id: { in: subcategoryIdsArray },
+          parentId: { not: null }, // Ensure these are subcategories (have a parentId)
+        },
+      });
+
+      if (subcategories.length !== subcategoryIdsArray.length) {
+        res.status(400).json({
+          message: 'One or more subcategory IDs are invalid or do not exist',
+        });
+        return;
+      }
+    }
+
+    // Convert string inputs to numbers
+    const parsedMinimumOrder = minimum_order ? parseInt(minimum_order) : null;
+    const parsedPrice = price ? parseFloat(price) : null;
+    const parsedStock = stock ? parseInt(stock) : null;
+    const parsedLength = length ? parseFloat(length) : null;
+    const parsedHeight = height ? parseFloat(height) : null;
+    const parsedWidth = width ? parseFloat(width) : null;
+    const parsedWeight = weight ? parseFloat(weight) : null;
 
     // Prepare data for database insertion
     const data = {
       name,
-      storesId: storesId, // Ensure storesId is a number if required by your schema
+      store_id: {
+        connect: {
+          id: checkStore.id,
+        },
+      },
       description,
-      attachments: imagePath, // Save the uploaded image URL
+      minimum_order: parsedMinimumOrder,
+      price: parsedPrice,
+      stock: parsedStock,
+      sku,
+      weight: parsedWeight,
+      height: parsedHeight,
+      length: parsedLength,
+      width: parsedWidth,
+      attachments: imagePaths,
+      Categories: {
+        connect: [...categoryIdsArray, ...subcategoryIdsArray].map(
+          (id: string) => ({ id }),
+        ),
+      },
     };
 
     // Create the product in the database
     const newProduct = await prisma.product.create({
       data: data,
+      select: {
+        id: true,
+        name: true,
+        attachments: true,
+        Categories: true,
+      },
     });
 
     // Send success response
@@ -53,6 +177,74 @@ export async function createProduct(
   }
 }
 
+export async function getProductbyStore(req: Request, res: Response) {
+  const userId = (req as any).user.id;
+  try {
+    const checkUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    const getStore = await prisma.stores.findUnique({
+      where: { userId: checkUser?.id },
+    });
+    if (!getStore) {
+      return res.status(404).json({ message: 'Store Not Found' });
+    }
+    const product = await prisma.product.findMany({
+      where: { storesId: getStore.id },
+      include: {
+        variants: {
+          include: {
+            Variant_options: {
+              where: { parentVariantOptionId: null },
+              include: {
+                variant_option_values: true, // Include variant option values (e.g., price, stock, etc.)
+                subVariantOptions: {
+                  // Include sub-variants (where `parentVariantOptionId` exists)
+                  where: {
+                    parentVariantOptionId: { not: null }, // Only fetch sub-variants (not top-level options)
+                  },
+                  include: {
+                    variant_option_values: true, // Include variant option values for sub-variants as well
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    res.status(200).json({
+      message: 'successfully fetched products',
+      product: product,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'failed to get all products', error });
+  }
+}
+
+export async function getProductforName(req: Request, res: Response) {
+  const { username } = req.params;
+  try {
+    const getStore = await prisma.stores.findUnique({
+      where: { username: username },
+    });
+    if (!getStore) {
+      return res.status(404).json({ message: 'Store Not Found' });
+    }
+    const product = await prisma.product.findMany({
+      where: { storesId: getStore.id },
+    });
+    res.status(200).json({
+      message: 'successfully fetched products',
+      product: product,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'failed to get all products', error });
+  }
+}
 export async function getAllProduct(
   req: Request,
   res: Response,
@@ -77,6 +269,9 @@ export async function getAllProduct(
             },
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc', // Mengurutkan berdasarkan createdAt dalam urutan menurun
       },
     });
 
@@ -163,7 +358,8 @@ export async function updateProduct(
   next: NextFunction,
 ): Promise<void> {
   const { id } = req.body;
-  const { name, description, size, minimum_order } = req.body;
+  const { name, description, minimum_order, length, height, width, weight } =
+    req.body;
   try {
     let productExist = await prisma.product.findUnique({
       where: { id: id },
@@ -173,11 +369,11 @@ export async function updateProduct(
       res.status(404).json({ message: 'product not found' });
     }
 
-    let imagePath = productExist?.attachments;
+    let imagePath: string[] = productExist?.attachments || [];
 
     if (req.file) {
       const uploadResult = await uploadToCloudinary(req.file, 'product');
-      imagePath = uploadResult.url;
+      imagePath = [...imagePath, uploadResult.url];
       // res.status(200).json({message: "success on update"})
     }
 
@@ -188,7 +384,9 @@ export async function updateProduct(
         name: name, // Keep existing content if not updated
         attachments: imagePath, // Update the image if changed
         description: description || productExist?.description,
-        size: size || productExist?.size,
+        length: length || productExist?.length,
+        width: width || productExist?.width,
+        weight: weight || productExist?.weight,
         minimum_order: parseInt(minimum_order) || productExist?.minimum_order,
       },
     });
@@ -221,7 +419,10 @@ export async function search(req: Request, res: Response) {
         description: true,
         attachments: true,
         variants: true,
-        size: true,
+        weight: true,
+        length: true,
+        width: true,
+        height: true,
         minimum_order: true,
       },
     });
