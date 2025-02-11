@@ -9,6 +9,7 @@ import {
   updateProduct,
   getProductbyStore,
   getProductforName,
+  getProductByUrl,
 } from '../../controllers/product.controller';
 import { upload } from '../../middlewares/upload-file';
 import { authentication } from '../../middlewares/authmiddleware';
@@ -20,6 +21,7 @@ app_product.post(
 );
 
 app_product.get('/get-product', getAllProduct);
+app_product.get('/:username/:url', getProductByUrl);
 app_product.get('/check-product', authentication, getProductbyStore);
 app_product.get('/get-product/:username', getProductforName);
 app_product.delete('/delete-product', authentication, deleteProduct);
