@@ -17,6 +17,10 @@ import cartsRoute from './carts.route';
 import cartsitemsRoute from './carts-items.route';
 import categoryRoute from './category.route';
 import variantRoutes from './variants.route';
+import app_transaction from './transaction.route';
+import app_payment from './payment.route';
+import app_invoice from './invoice.route';
+import app_invoice_history from './invoice_history.route';
 
 const router = express.Router();
 
@@ -26,7 +30,10 @@ router.use('/profile', profileRoute);
 
 router.use('/product', authentication, app_product);
 router.use('/message', authentication, app_message);
-
+router.use('/transaction', app_transaction);
+router.use('/invoice', app_invoice);
+router.use('/invoice-history', app_invoice_history);
+router.use('/payment', app_payment);
 router.use('/stores', app_store);
 router.use('/bank', app_bank);
 router.use('/operation-hour', app_hour);
