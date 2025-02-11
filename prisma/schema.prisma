@@ -47,6 +47,7 @@ model Roles {
 model Product {
   id            String       @id @unique @default(cuid())
   name          String
+  url           String       @unique
   description   String?
   attachments   String[]
   is_active     Boolean?     @default(false)
@@ -130,22 +131,18 @@ model Variant_option_values {
   Cart_items        Cart_items[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
+
+  @@unique([sku, variant_optionsId])
 }
 
 model Variant_options {
   id                    String                  @id @unique @default(cuid())
   name                  String
   variant_id            Variants                @relation(fields: [variantsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  variant_option_values Variant_option_values[]
+  Variant_option_values Variant_option_values[]
   variantsId            String
-  parentVariantOptionId String?
-
-  parent_variant_option Variant_options? @relation("VariantOptionParent", fields: [parentVariantOptionId], references: [id])
-
-  subVariantOptions Variant_options[] @relation("VariantOptionParent")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
 }
 
 model Variants {
@@ -162,6 +159,7 @@ model Variants {
 model Categories {
   id        String       @id @unique @default(cuid())
   name      String
+  icon      String?
   products  Product[]
   parentId  String?
   parent    Categories?  @relation("CategoryParent", fields: [parentId], references: [id])
