@@ -91,71 +91,76 @@ export const createVariantOptionsValue = async (
   res: Response,
 ) => {
   try {
-    const { sku, weight, stock, price, is_active, variant_options } = req.body;
-    console.log('Request body:', req.body);
+    const variantValues = req.body; // Frontend harus mengirim array data kombinasi
 
-    if (!sku || !weight || !stock || !price || !variant_options) {
-      return res.status(400).json({ error: 'All fields required' });
+    if (!Array.isArray(variantValues) || variantValues.length === 0) {
+      return res.status(400).json({ error: 'Data must be a non-empty array' });
     }
 
-    // Validasi dan ambil semua variant options
-    const variantOptions = await prisma.variant_options.findMany({
-      where: {
-        id: {
-          in: variant_options, // variant_options adalah array dari ID
-        },
-      },
+    console.log('Received variant values:', variantValues);
+
+    // Validasi: Pastikan semua variant_optionsId ada di database
+    const allVariantOptionsIds = variantValues.flatMap(
+      (v) => v.variant_optionsId,
+    );
+    const existingVariantOptions = await prisma.variant_options.findMany({
+      where: { id: { in: allVariantOptionsIds } },
     });
 
-    if (variantOptions.length !== variant_options.length) {
+    const existingVariantOptionsIds = new Set(
+      existingVariantOptions.map((v) => v.id),
+    );
+
+    // Cek apakah ada variant_optionsId yang tidak valid
+    const invalidIds = allVariantOptionsIds.filter(
+      (id) => !existingVariantOptionsIds.has(id),
+    );
+
+    if (invalidIds.length > 0) {
       return res
-        .status(404)
-        .json({ error: "Some variant options don't exist" });
+        .status(400)
+        .json({ error: 'Invalid variant_optionsId found', invalidIds });
     }
 
-    // Kombinasikan semua opsi varian
-    const combinations = variantOptions.map((option) => ({
-      sku,
-      weight,
-      stock,
-      price,
-      is_active,
-      variant_optionsId: option.id,
-    }));
-
-    // Simpan atau perbarui semua kombinasi ke dalam database
+    // Simpan atau update data kombinasi
     const createdVariants = await Promise.all(
-      combinations.map(async (combination) => {
+      variantValues.map(async (variant) => {
+        const { sku, weight, stock, price, is_active, variant_optionsId } =
+          variant;
+
         const existingVariant = await prisma.variant_option_values.findFirst({
           where: {
-            sku: combination.sku,
-            variant_optionsId: combination.variant_optionsId,
+            sku,
+            variant_options: {
+              some: {
+                variant_option: { id: { in: variant_optionsId } }, // ✅ Perbaikan query
+              },
+            },
           },
         });
 
         if (existingVariant) {
-          // Update jika sudah ada
+          // Update jika SKU sudah ada
           return await prisma.variant_option_values.update({
             where: { id: existingVariant.id },
-            data: {
-              weight: combination.weight,
-              stock: combination.stock,
-              price: combination.price,
-              is_active: combination.is_active,
-            },
+            data: { weight, stock, price, is_active },
           });
         } else {
-          // Create jika belum ada
-          return await prisma.variant_option_values.create({
-            data: {
-              sku: combination.sku,
-              weight: combination.weight,
-              stock: combination.stock,
-              price: combination.price,
-              is_active: combination.is_active,
-              variant_optionsId: combination.variant_optionsId,
-            },
+          // Buat variant_option_values baru
+          const newVariantOptionValue =
+            await prisma.variant_option_values.create({
+              data: { sku, weight, stock, price, is_active },
+            });
+
+          // Buat relasi many-to-many di VariantOptionValueToOptions
+          await prisma.variantOptionValueToOptions.createMany({
+            data: variant_optionsId.map((optionId: any) => ({
+              variant_option_value_id: newVariantOptionValue.id,
+              variant_option_id: optionId,
+            })),
           });
+
+          return newVariantOptionValue;
         }
       }),
     );
@@ -165,11 +170,8 @@ export const createVariantOptionsValue = async (
       variant_option_values: createdVariants,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        error: 'An error occurred while creating the variant options values',
-      });
+    console.error('Error creating variant option values:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
