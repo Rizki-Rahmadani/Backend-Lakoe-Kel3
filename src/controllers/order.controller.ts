@@ -58,6 +58,14 @@ export const createOrder = async (req: Request, res: Response) => {
     const apiBiteship = `https://api.biteship.com/v1/orders`;
     // Send the request to create an order on Biteship
 
+    // Buat request ke Biteship API
+    const biteship = await axios.post(apiBiteship, orderPayload, {
+      headers: {
+        Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
+        'Content-Type': 'application/json',
+      },
+    });
+
     const response = await biteshipClient.post('/draft_orders', orderPayload);
 
     const data = biteship.data;
