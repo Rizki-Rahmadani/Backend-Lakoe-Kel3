@@ -1,18 +1,11 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
+import { authentication } from '../middlewares/authmiddleware';
+import axios from 'axios';
 dotenv.config();
 
 const prisma = new PrismaClient();
-
-// export const getLocations = async (req: Request, res: Response) => {
-//   try {
-//     const locations = await prisma.location.findMany();
-//     res.status(200).json(locations);
-//   } catch (error) {
-//     res.status(500).json({ error: 'An error occurred while fetching locations' });
-//   }
-// }
 
 export const createLocation = async (req: Request, res: Response) => {
   try {
@@ -77,12 +70,25 @@ export const createLocation = async (req: Request, res: Response) => {
 
     // URL API Biteship
     const apiBiteship = `https://api.biteship.com/v1/locations`;
+    console.log('api biteship', process.env.API_BITESHIP_TEST);
+
+    //mencari Biteship_area_id dari kode pos
+    const search_area_id = await axios.get(
+      `https://api.biteship.com/v1/maps/areas?countries=ID&input=${newLocation.postal_code}&type=single`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    const biteship_area_id = search_area_id.data.areas[0].id;
 
     // Buat request ke Biteship API
     const biteShip = await fetch(apiBiteship, {
       method: `POST`,
       headers: {
-        Authorization: `Bearer ${process.env.VITE_API_BITESHIP_TEST}`, // Pastikan API key valid
+        Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -97,6 +103,8 @@ export const createLocation = async (req: Request, res: Response) => {
       }),
     });
 
+    console.log('post Biteship', biteShip);
+
     const data = await biteShip.json(); // Parse response JSON dari Biteship API
 
     // Perbarui lokasi dengan biteshipId
@@ -105,6 +113,7 @@ export const createLocation = async (req: Request, res: Response) => {
       data: { biteshipId: data.id },
     });
 
+    console.log('update BiteshipId', updatedLocation);
     // Handle response dari Biteship API
     if (!biteShip.ok) {
       const errorDetails = await biteShip.text(); // Ambil detail error
@@ -115,15 +124,6 @@ export const createLocation = async (req: Request, res: Response) => {
       });
     }
 
-    // const data = await biteShip.json(); // Parse response JSON dari Biteship API
-
-    // Perbarui lokasi dengan biteshipId
-    // const updatedLocation = await prisma.location.update({
-    //   where: { id: newLocation.id },
-    //   data: { biteshipId: biteshipData.id },
-    // });
-
-    // Kirim response ke client
     return res.status(201).json({
       message: 'Location created successfully',
       location: updatedLocation,

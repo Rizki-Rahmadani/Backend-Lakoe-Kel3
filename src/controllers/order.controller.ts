@@ -60,7 +60,7 @@ export const createOrder = async (req: Request, res: Response) => {
     // Buat request ke Biteship API
     const biteship = await axios.post(apiBiteship, orderPayload, {
       headers: {
-        Authorization: `Bearer ${process.env.VITE_API_BITESHIP_TEST}`, // Pastikan API key valid
+        Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
         'Content-Type': 'application/json',
       },
     });
