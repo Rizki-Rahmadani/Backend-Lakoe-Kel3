@@ -17,13 +17,24 @@ import cartsRoute from './carts.route';
 import cartsitemsRoute from './carts-items.route';
 import categoryRoute from './category.route';
 import variantRoutes from './variants.route';
+import app_transaction from './transaction.route';
+import app_payment from './payment.route';
+import app_invoice from './invoice.route';
+import app_invoice_history from './invoice_history.route';
 import orderRoute from './order.route';
+import trackingRoute from './tracking.route';
+import { courierRoute } from './courier.route';
+
 const router = express.Router();
 
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
 router.use('/profile', profileRoute);
 
+router.use('/transaction', app_transaction);
+router.use('/invoice', app_invoice);
+router.use('/invoice-history', app_invoice_history);
+router.use('/payment', app_payment);
 router.use('/product', app_product);
 router.use('/message', app_message);
 
@@ -38,5 +49,7 @@ router.use('/variant-option-values', variantOptionValueRoutes);
 router.use('/carts', cartsRoute);
 router.use('/cart-items', cartsitemsRoute);
 router.use('/locations', locationRoute);
+router.use('/tracking', trackingRoute);
+router.use('/courier', courierRoute);
 
 export default router;

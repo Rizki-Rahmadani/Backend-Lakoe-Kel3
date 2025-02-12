@@ -136,11 +136,10 @@ model Variant_option_values {
 }
 
 model Variant_options {
-  id                    String                  @id @unique @default(cuid())
+  id                    String                 @id @unique @default(cuid())
   name                  String
   variant_id            Variants                @relation(fields: [variantsId], references: [id], onDelete: Cascade)
   variant_values        VariantOptionValueToOptions[]
-
   variantsId            String
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
@@ -215,22 +214,25 @@ model Cart_items {
 model Invoices {
   id                   String                 @id @unique @default(cuid())
   prices               Int
-  status               Boolean                @default(false)
-  receiver_longitude   String
-  receiver_latitude    String
+  status               String                @default("pending")
+  service_charge       Int
+  receiver_city        String
+  receiver_province    String
+  receiver_subDistrict String
   receiver_district    String
   receiver_phone       String
-  receiver_address     String
   receiver_name        String
-  invoice_number       String
-  cart_id              Carts                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  receiver_postalCode  String
+  receiver_detailAddress String
+  receiver_email       String
+  cart_id              Carts?                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id              User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   payment_id           Payments?              @relation(fields: [paymentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courier_id           Couriers?
-  cartsId              String
+  cartsId              String?
   userId               String
-  paymentsId           String                 @unique
-  courierId            String
+  paymentsId           String?                 @unique
+  courierId            String?
   Confirmation_payment Confirmation_payment[]
   Invoice_histories    Invoice_histories[]
   createdAt            DateTime               @default(now())
@@ -249,7 +251,7 @@ model Confirmation_payment {
 
 model Invoice_histories {
   id         String    @id @unique @default(cuid())
-  status     Boolean   @default(false)
+  status     String   @default("pending")
   invoice_id Invoices  @relation(fields: [invoicesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   created_at DateTime? @default(now())
   invoicesId String
@@ -261,10 +263,10 @@ model Payments {
   id                   String    @id @unique @default(cuid())
   bank                 String
   amount               Int
-  status               Boolean   @default(false)
+  status               String   @default("pending")
   invoice_id           Invoices? @relation
   user_id              User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  moota_transaction_id String?
+  midtrans_transaction_id String?
   userId               String
   invoicesId           String    @unique
   createdAt            DateTime  @default(now())

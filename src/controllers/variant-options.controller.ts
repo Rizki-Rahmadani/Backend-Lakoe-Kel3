@@ -24,6 +24,7 @@ export const createVariantOptions = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'All fields required' });
     }
 
+
     if (!variantId) {
       console.error('Variant ID is missing!');
       return;
@@ -80,6 +81,51 @@ export const createVariantOptions = async (req: Request, res: Response) => {
       .json({ error: 'An error occurred while creating the variant option' });
   }
 };
+
+// export const createVariantOptions = async (req: Request, res: Response) => {
+//   /*
+//         #swagger.tags = ['Variant-Options']
+//         #swagger.requestBody = {
+//             required: true,
+//             content: {
+//                 "application/json": {
+//                     schema: {
+//                         $ref: "#/components/schemas/CreateVariantOptionsDTO"
+//                     }
+//                 }
+//             }
+//         }
+//     */
+//   try {
+//     const { name, variantId } = req.body;
+
+//     if (!name || !variantId) {
+//       return res.status(400).json({ error: 'All fields required' });
+//     }
+//     const checkProduct = await prisma.variants.findUnique({
+//       where: { id: variantId },
+//     });
+
+//     if (!checkProduct) {
+//       return res.status(404).json({ error: "Variants doesn't exist" });
+//     }
+
+//     const newVariant = await prisma.variant_options.create({
+//       data: {
+//         name,
+//         variantsId: variantId,
+//       },
+//     });
+//     res.status(201).json({
+//       message: 'Variant created successfully',
+//       variant_options: newVariant,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ error: 'An error occurred while creating the variant' });
+//   }
+// };
 
 export async function getVariantOptionsById(req: Request, res: Response) {
   /*  
