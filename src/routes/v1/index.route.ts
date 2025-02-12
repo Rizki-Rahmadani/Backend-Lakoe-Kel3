@@ -22,6 +22,7 @@ import app_payment from './payment.route';
 import app_invoice from './invoice.route';
 import app_invoice_history from './invoice_history.route';
 import orderRoute from './order.route';
+import trackingRoute from './tracking.route';
 
 const router = express.Router();
 
@@ -48,5 +49,6 @@ router.use('/variant-option-values', variantOptionValueRoutes);
 router.use('/carts', cartsRoute);
 router.use('/cart-items', cartsitemsRoute);
 router.use('/locations', locationRoute);
+router.use('/tracking', trackingRoute);
 
 export default router;

@@ -47,6 +47,7 @@ model Roles {
 model Product {
   id            String       @id @unique @default(cuid())
   name          String
+  url           String       @unique
   description   String?
   attachments   String[]
   is_active     Boolean?     @default(false)
@@ -130,7 +131,6 @@ model Variant_option_values {
   Cart_items        Cart_items[]
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
-
   @@unique([sku, variant_optionsId])
 }
 
