@@ -24,14 +24,11 @@ export async function createProduct(
     weight,
     categoryIds,
     subcategoryIds,
-    variants, // This is the new field for variants
   } = req.body;
   const userId = (req as any).user.id;
   let imagePaths: string[] = []; // Default to an empty string
   let customUrl: string = '';
-  
   try {
-    // Check store existence
     const checkStore = await prisma.stores.findUnique({
       where: { userId: userId },
       select: { id: true, username: true },
@@ -40,7 +37,6 @@ export async function createProduct(
       res.status(404).json({ message: 'Store not found' });
       return;
     }
-
     const checkUrl = await prisma.product.findUnique({
       where: { url: url },
     });
@@ -50,23 +46,22 @@ export async function createProduct(
     } else {
       customUrl = url;
     }
-    
     // Upload the file to Cloudinary if it exists
-
     if (req.files && Array.isArray(req.files)) {
+      // Loop through all the files in req.files and upload them to Cloudinary
       for (const file of req.files) {
         const uploadResult = await uploadToCloudinary(file, 'product');
-        imagePaths.push(uploadResult.url);
+        imagePaths.push(uploadResult.url); // Store the Cloudinary URL for each uploaded file
       }
     }
+    console.log('The image path:', imagePaths);
 
-    // Validate required fields
+    // Validate input fields
     if (!name || !imagePaths) {
       res.status(400).json({ message: 'All fields are required' });
-      return;
+      return; // Explicitly terminate the function after sending a response
     }
-
-    // Parse categoryIds and subcategoryIds as JSON if needed
+    // Parse categoryIds if passed as a stringified array
     let categoryIdsArray: string[] = [];
     if (categoryIds) {
       if (typeof categoryIds === 'string') {
@@ -74,7 +69,8 @@ export async function createProduct(
           categoryIdsArray = JSON.parse(categoryIds);
         } catch (error) {
           return res.status(400).json({
-            message: 'Invalid categoryIds format.',
+            message:
+              'Invalid categoryIds format. Ensure it is a valid JSON array string.',
           });
         }
       } else {
@@ -82,6 +78,7 @@ export async function createProduct(
       }
     }
 
+    // Ensure subcategoryIds is a valid array
     let subcategoryIdsArray: string[] = [];
     if (subcategoryIds) {
       if (typeof subcategoryIds === 'string') {
@@ -89,7 +86,8 @@ export async function createProduct(
           subcategoryIdsArray = JSON.parse(subcategoryIds);
         } catch (error) {
           return res.status(400).json({
-            message: 'Invalid subcategoryIds format.',
+            message:
+              'Invalid subcategoryIds format. Ensure it is a valid JSON array string.',
           });
         }
       } else {
@@ -97,49 +95,41 @@ export async function createProduct(
       }
     }
 
-    // Validate categories and subcategories
+    // Validate that the categoryIds are valid
     if (categoryIdsArray.length > 0) {
       const categories = await prisma.categories.findMany({
         where: {
           id: { in: categoryIdsArray },
-          parentId: null,
+          parentId: null, // Ensure these are top-level categories (no parent)
         },
       });
+
       if (categories.length !== categoryIdsArray.length) {
-        res.status(400).json({ message: 'Invalid category IDs' });
+        res
+          .status(400)
+          .json({ message: 'One or more category IDs are invalid' });
         return;
       }
     }
 
+    // Validate that the subcategoryIds are valid and belong to the correct parent category
     if (subcategoryIdsArray.length > 0) {
       const subcategories = await prisma.categories.findMany({
         where: {
           id: { in: subcategoryIdsArray },
-          parentId: { not: null },
+          parentId: { not: null }, // Ensure these are subcategories (have a parentId)
         },
       });
+
       if (subcategories.length !== subcategoryIdsArray.length) {
         res.status(400).json({
-          message:
-            'Invalid subcategory IDs or mismatched parent-child relation',
+          message: 'One or more subcategory IDs are invalid or do not exist',
         });
         return;
       }
     }
 
-    // Validate and parse the variants if provided
-    let parsedVariants = [];
-    if (variants) {
-      try {
-        parsedVariants = JSON.parse(variants);
-      } catch (error) {
-        return res.status(400).json({
-          message: 'Invalid variants format.',
-        });
-      }
-    }
-
-    // Convert to numbers for numerical fields
+    // Convert string inputs to numbers
     const parsedMinimumOrder = minimum_order ? parseInt(minimum_order) : null;
     const parsedPrice = price ? parseFloat(price) : null;
     const parsedStock = stock ? parseInt(stock) : null;
@@ -148,7 +138,7 @@ export async function createProduct(
     const parsedWidth = width ? parseFloat(width) : null;
     const parsedWeight = weight ? parseFloat(weight) : null;
 
-    // Prepare data for product insertion
+    // Prepare data for database insertion
     const data = {
       name,
       store_id: {
@@ -174,7 +164,7 @@ export async function createProduct(
       },
     };
 
-    // Create product
+    // Create the product in the database
     const newProduct = await prisma.product.create({
       data: data,
       select: {
@@ -185,47 +175,15 @@ export async function createProduct(
       },
     });
 
-    // Handle variants if provided
-    if (parsedVariants.length > 0) {
-      for (const variant of parsedVariants) {
-        const createdVariant = await prisma.variants.create({
-          data: {
-            name: variant.name,
-            productId: newProduct.id,
-          },
-        });
-
-        for (const option of variant.options) {
-          const createdOption = await prisma.variant_options.create({
-            data: {
-              name: option.name,
-              variantsId: createdVariant.id,
-            },
-          });
-
-          await prisma.variant_option_values.create({
-            data: {
-              sku: option.sku || sku,
-              price: option.price || price,
-              stock: option.stock || stock,
-              weight: option.weight || weight,
-              length: option.length || length,
-              height: option.height || height,
-              width: option.width || width,
-              variant_optionsId: createdOption.id,
-            },
-          });
-        }
-      }
-    }
-
-    // Send response
+    // Send success response
     res.status(201).json({
       message: 'Product created successfully',
       product: newProduct,
     });
   } catch (error) {
     console.error('Error creating product:', error);
+
+    // Pass errors to the Express error-handling middleware
     next(error);
   }
 }
