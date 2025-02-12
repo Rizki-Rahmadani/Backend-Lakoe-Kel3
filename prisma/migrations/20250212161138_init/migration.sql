@@ -38,6 +38,7 @@ CREATE TABLE "Roles" (
 CREATE TABLE "Product" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
     "description" TEXT,
     "attachments" TEXT[],
     "is_active" BOOLEAN DEFAULT false,
@@ -113,7 +114,6 @@ CREATE TABLE "Variant_option_values" (
     "stock" INTEGER NOT NULL,
     "price" INTEGER NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT false,
-    "variant_optionsId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -132,6 +132,14 @@ CREATE TABLE "Variant_options" (
 );
 
 -- CreateTable
+CREATE TABLE "VariantOptionValueToOptions" (
+    "variant_option_value_id" TEXT NOT NULL,
+    "variant_option_id" TEXT NOT NULL,
+
+    CONSTRAINT "VariantOptionValueToOptions_pkey" PRIMARY KEY ("variant_option_value_id","variant_option_id")
+);
+
+-- CreateTable
 CREATE TABLE "Variants" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -147,6 +155,7 @@ CREATE TABLE "Variants" (
 CREATE TABLE "Categories" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "icon" TEXT,
     "parentId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -337,6 +346,9 @@ CREATE UNIQUE INDEX "Roles_id_key" ON "Roles"("id");
 CREATE UNIQUE INDEX "Product_id_key" ON "Product"("id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Product_url_key" ON "Product"("url");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Stores_id_key" ON "Stores"("id");
 
 -- CreateIndex
@@ -353,6 +365,9 @@ CREATE UNIQUE INDEX "Location_id_key" ON "Location"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Variant_option_values_id_key" ON "Variant_option_values"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Variant_option_values_sku_key" ON "Variant_option_values"("sku");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Variant_options_id_key" ON "Variant_options"("id");
@@ -430,10 +445,13 @@ ALTER TABLE "Location" ADD CONSTRAINT "Location_storesId_fkey" FOREIGN KEY ("sto
 ALTER TABLE "Location" ADD CONSTRAINT "Location_profilesId_fkey" FOREIGN KEY ("profilesId") REFERENCES "Profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Variant_option_values" ADD CONSTRAINT "Variant_option_values_variant_optionsId_fkey" FOREIGN KEY ("variant_optionsId") REFERENCES "Variant_options"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Variant_options" ADD CONSTRAINT "Variant_options_variantsId_fkey" FOREIGN KEY ("variantsId") REFERENCES "Variants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Variant_options" ADD CONSTRAINT "Variant_options_variantsId_fkey" FOREIGN KEY ("variantsId") REFERENCES "Variants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "VariantOptionValueToOptions" ADD CONSTRAINT "VariantOptionValueToOptions_variant_option_value_id_fkey" FOREIGN KEY ("variant_option_value_id") REFERENCES "Variant_option_values"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "VariantOptionValueToOptions" ADD CONSTRAINT "VariantOptionValueToOptions_variant_option_id_fkey" FOREIGN KEY ("variant_option_id") REFERENCES "Variant_options"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Variants" ADD CONSTRAINT "Variants_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
