@@ -57,6 +57,7 @@ export const createOrder = async (req: Request, res: Response) => {
     // URL API Biteship
     const apiBiteship = `https://api.biteship.com/v1/orders`;
     // Send the request to create an order on Biteship
+
     // Buat request ke Biteship API
     const biteship = await axios.post(apiBiteship, orderPayload, {
       headers: {
@@ -65,12 +66,16 @@ export const createOrder = async (req: Request, res: Response) => {
       },
     });
 
+    const response = await biteshipClient.post('/draft_orders', orderPayload);
+
     const data = biteship.data;
     console.log(data);
     // You can now store this order information in your database if needed
     res.status(201).json({
-      message: 'Order created successfully!',
-      biteShip: data,
+
+      message: 'draft order created successfully!',
+      orderId: order.id,
+      order,
     });
   } catch (error: unknown) {
     // Type narrowing for the Axios error
@@ -85,6 +90,36 @@ export const createOrder = async (req: Request, res: Response) => {
       });
     } else {
       // For non-Axios errors
+      console.error('Unexpected error:', error);
+      return res.status(500).json({
+        message: 'An unexpected error occurred',
+        error: (error as Error).message || error,
+      });
+    }
+  }
+};
+
+export const confirmOrder = async (req: Request, res: Response) => {
+  try {
+    // Fetch draft orders from Biteship
+    const response = await biteshipClient.get('/draft_orders');
+    console.log('This is response: ', response.data);
+
+    // Send only the necessary data (response.data) in the JSON response
+    res.status(200).json({
+      message: 'Draft order fetched successfully!',
+      data: response.data, // Only send the data property
+    });
+  } catch (error: unknown) {
+    // Handle errors
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data || error.message;
+      console.error('Error fetching draft orders:', errorMessage);
+      return res.status(500).json({
+        message: 'Failed to fetch draft orders',
+        error: errorMessage,
+      });
+    } else {
       console.error('Unexpected error:', error);
       return res.status(500).json({
         message: 'An unexpected error occurred',

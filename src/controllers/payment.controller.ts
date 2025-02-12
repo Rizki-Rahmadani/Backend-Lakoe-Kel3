@@ -4,7 +4,13 @@ import { Request, Response, NextFunction } from 'express';
 const prisma = new PrismaClient();
 
 export async function createPayment(req: Request, res: Response) {
-  const { bank, gross_amount, status_code, midtrans_transaction_id } = req.body;
+  const {
+    bank,
+    gross_amount,
+    status_code,
+    midtrans_transaction_id,
+    invoicesId,
+  } = req.body;
   // const userId = (req as any).user.id;
   const userId = 'cm6iuhgwl0001tat8bgmz4wkc';
   if (!bank && !gross_amount && !status_code && userId) {
@@ -14,9 +20,9 @@ export async function createPayment(req: Request, res: Response) {
   }
   let status;
   if (status_code == '200') {
-    status = true;
+    status = 'success';
   } else {
-    status = false;
+    status = 'failed';
   }
   try {
     const findUser = await prisma.user.findUnique({
@@ -29,9 +35,10 @@ export async function createPayment(req: Request, res: Response) {
     const data = {
       bank: bank,
       amount: gross_amount,
-      isPaid: status,
+      status: status,
       userId: userId,
       midtrans_transaction_id: midtrans_transaction_id,
+      invoicesId: invoicesId,
     };
     console.log(data);
 
@@ -66,7 +73,7 @@ export async function getPayment(req: Request, res: Response) {
       select: {
         bank: true,
         amount: true,
-        isPaid: true,
+        status: true,
         userId: true,
       },
     });

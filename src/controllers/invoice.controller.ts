@@ -103,7 +103,7 @@ export async function getInvoice(req: Request, res: Response) {
                             product_id: {
                               select: {
                                 name: true,
-                                size: true,
+                                weight: true,
                               },
                             },
                           },
@@ -128,7 +128,7 @@ export async function getInvoice(req: Request, res: Response) {
         payment_id: {
           select: {
             bank: true,
-            isPaid: true,
+            status: true,
           },
         },
         courierId: true,
