@@ -47,10 +47,11 @@ model Roles {
 model Product {
   id            String       @id @unique @default(cuid())
   name          String
+  url           String       @unique
   description   String?
   attachments   String[]
   is_active     Boolean?     @default(false)
-  variants      Variants[]
+  variants      Variants[]   @relation(onDelete: Cascade)
   price         Int?
   sku           String?
   stock         Int?
@@ -119,49 +120,60 @@ model Location {
 }
 
 model Variant_option_values {
-  id                String          @id @unique @default(cuid())
-  sku               String
-  weight            Int
-  stock             Int
-  price             Int
-  is_active         Boolean         @default(false)
-  variant_option_id Variant_options @relation(fields: [variant_optionsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  variant_optionsId String
-  Cart_items        Cart_items[]
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id          String          @id @unique @default(cuid())
+  sku         String
+  weight      Int
+  stock       Int
+  price       Int
+  is_active   Boolean         @default(false)
+  variant_options VariantOptionValueToOptions[] @relation(onDelete: Cascade)
+
+  Cart_items  Cart_items[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([sku])
 }
 
 model Variant_options {
   id                    String                  @id @unique @default(cuid())
   name                  String
-  variant_id            Variants                @relation(fields: [variantsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  variant_option_values Variant_option_values[]
+  variant_id            Variants                @relation(fields: [variantsId], references: [id], onDelete: Cascade)
+  variant_values        VariantOptionValueToOptions[]
+
   variantsId            String
-  parentVariantOptionId String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+}
 
-  parent_variant_option Variant_options? @relation("VariantOptionParent", fields: [parentVariantOptionId], references: [id])
+model VariantOptionValueToOptions {
+  variant_option_value_id String
+  variant_option_id       String
 
-  subVariantOptions Variant_options[] @relation("VariantOptionParent")
+  variant_option_value Variant_option_values @relation(fields: [variant_option_value_id], references: [id], onDelete: Cascade)
+  variant_option       Variant_options       @relation(fields: [variant_option_id], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@id([variant_option_value_id, variant_option_id])
 }
 
 model Variants {
   id              String            @id @unique @default(cuid())
   name            String
   is_active       Boolean           @default(false)
-  product_id      Product           @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Variant_options Variant_options[]
+  product_id      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Variant_options Variant_options[]  @relation(onDelete: Cascade)
+
   productId       String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
 
+
+
 model Categories {
   id        String       @id @unique @default(cuid())
   name      String
+  icon      String?
   products  Product[]
   parentId  String?
   parent    Categories?  @relation("CategoryParent", fields: [parentId], references: [id])

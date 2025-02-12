@@ -18,10 +18,15 @@ export const createVariantOptions = async (req: Request, res: Response) => {
         } 
     */
   try {
-    const { name, variantId, parentVariantOptionId } = req.body;
+    const { name, variantId } = req.body;
 
     if (!name || !variantId) {
       return res.status(400).json({ error: 'All fields required' });
+    }
+
+    if (!variantId) {
+      console.error('Variant ID is missing!');
+      return;
     }
 
     const checkVariant = await prisma.variants.findUnique({
@@ -32,18 +37,43 @@ export const createVariantOptions = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Variant doesn't exist" });
     }
 
-    const newVariantOption = await prisma.variant_options.create({
-      data: {
-        name, // e.g., Red
-        variantsId: variantId,
-        parentVariantOptionId, // If it's a sub-variant, pass the parent ID (e.g., Red -> 7kg)
-      },
-    });
+    let newVariants;
 
-    res.status(201).json({
-      message: 'Variant Option created successfully',
-      variant_option: newVariantOption,
-    });
+    if (Array.isArray(name)) {
+      // Jika name adalah array, gunakan Promise.all untuk memastikan ID dikembalikan
+      newVariants = await Promise.all(
+        name.map(async (variantName) => {
+          return await prisma.variant_options.create({
+            data: {
+              name: variantName,
+              variantsId: variantId,
+            },
+            select: { id: true, name: true, variantsId: true }, // ✅ Pastikan ID dikembalikan
+          });
+        }),
+      );
+
+      res.status(201).json({
+        message: 'Variants created successfully',
+        variant_options: Array.isArray(newVariants)
+          ? newVariants
+          : [newVariants],
+      });
+    } else {
+      // Jika hanya satu varian, buat satu entry
+      newVariants = await prisma.variant_options.create({
+        data: {
+          name,
+          variantsId: variantId,
+        },
+        select: { id: true, name: true, variantsId: true },
+      });
+
+      res.status(201).json({
+        message: 'Variant created successfully',
+        variant_options: newVariants,
+      });
+    }
   } catch (error) {
     res
       .status(500)
