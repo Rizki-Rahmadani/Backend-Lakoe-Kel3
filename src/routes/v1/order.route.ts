@@ -5,4 +5,5 @@ const orderRoute = express.Router();
 
 orderRoute.post('/add-order', orders.createOrder);
 orderRoute.get('/:id', orders.retrieveOrder);
+orderRoute.get('/', orders.confirmOrder);
 export default orderRoute;
