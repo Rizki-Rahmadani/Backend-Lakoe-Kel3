@@ -34,22 +34,22 @@ export const createOrder = async (req: Request, res: Response) => {
       },
       destination_area_id: orderData.destination_area_id,
       courier_company: orderData.courier_company,
-      courier_type: orderData.courier_company, // Ensure this is included
+      courier_type: orderData.courier_type, // Ensure this is included
       courier_insurance: orderData.courier_insurance,
       delivery_type: orderData.delivery_type,
       order_note: 'please be Careful',
       items: [
         {
           name: orderItem.name,
-          description: orderItem.description,
-          variant_options: orderItem.variant_options,
-          category: orderItem.category,
+          // description: orderItem.description,
+          // variant_options: orderItem.variant_options,
+          // category: orderItem.category,
           value: orderItem.value,
           quantity: orderItem.quantity,
-          height: orderItem.height,
-          length: orderItem.length,
+          // height: orderItem.height,
+          // length: orderItem.length,
           weight: orderItem.weight,
-          width: orderItem.width,
+          // width: orderItem.width,
         },
       ],
     };
