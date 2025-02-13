@@ -72,10 +72,9 @@ export const createOrder = async (req: Request, res: Response) => {
     console.log(data);
     // You can now store this order information in your database if needed
     res.status(201).json({
-
       message: 'draft order created successfully!',
-      orderId: order.id,
-      order,
+      orderId: data.id,
+      data,
     });
   } catch (error: unknown) {
     // Type narrowing for the Axios error
