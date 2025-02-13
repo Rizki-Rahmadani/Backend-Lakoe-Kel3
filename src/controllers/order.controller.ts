@@ -8,24 +8,46 @@ const prisma = new PrismaClient();
 export const createOrder = async (req: Request, res: Response) => {
   const orderData: OrderRequest = req.body;
   const orderItem: OrderItem = req.body;
-
+  const { productId, locationId, storeId, invoiceId } = req.body;
   try {
+    const findStore = await prisma.stores.findUnique({
+      where: { id: storeId },
+      select: {
+        name: true,
+        user: true,
+      },
+    });
+    if (!findStore) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+    const findLocation = await prisma.location.findUnique({
+      where: { id: locationId, storesId: storeId, is_main_location: true },
+    });
+    if (!findLocation) {
+      return res.status(404).json({ message: 'Location not available' });
+    }
+    const findInvoice = await prisma.invoices.findUnique({
+      where: { id: invoiceId },
+    });
+    if (!findInvoice) {
+      return res.status(404).json({ message: 'Not found' });
+    }
     // Prepare the order payload
     const orderPayload = {
-      origin_contact_name: orderData.origin_contact_name,
-      origin_contact_phone: orderData.origin_contact_phone,
-      origin_contact_email: orderData.origin_contact_email,
-      origin_address: orderData.origin_address,
-      origin_postal_code: orderData.origin_postal_code,
+      origin_contact_name: findStore.name,
+      origin_contact_phone: findStore.user.phone_number,
+      origin_contact_email: findStore.user.email,
+      origin_address: findLocation.address,
+      origin_postal_code: findLocation.postal_code,
       origin_coordinate: {
-        latitude: orderData.origin_coordinate.latitude,
-        longitude: orderData.origin_coordinate.longitude,
+        latitude: findLocation.latitude,
+        longitude: findLocation.longitude,
       },
-      origin_area_id: orderData.origin_area_id,
-      destination_contact_name: orderData.destination_contact_name,
-      destination_contact_phone: orderData.destination_contact_phone,
-      destination_contact_email: orderData.destination_contact_email,
-      destination_address: orderData.destination_address,
+      origin_area_id: findLocation.biteship_area_id,
+      destination_contact_name: findInvoice.receiver_name,
+      destination_contact_phone: findInvoice.receiver_phone,
+      destination_contact_email: findInvoice.receiver_email,
+      destination_address: findInvoice.receiver_address,
       destination_postal_code: orderData.destination_postal_code,
       destination_note: orderData.destination_note,
       destination_coordinate: {
@@ -55,7 +77,7 @@ export const createOrder = async (req: Request, res: Response) => {
     };
 
     // URL API Biteship
-    const apiBiteship = `https://api.biteship.com/v1/orders`;
+    const apiBiteship = `https://api.biteship.com/v1/draft-orders`;
     // Send the request to create an order on Biteship
 
     // Buat request ke Biteship API
@@ -66,16 +88,14 @@ export const createOrder = async (req: Request, res: Response) => {
       },
     });
 
-    const response = await biteshipClient.post('/draft_orders', orderPayload);
+    // const response = await biteshipClient.post('/draft_orders', orderPayload);
 
     const data = biteship.data;
     console.log(data);
     // You can now store this order information in your database if needed
     res.status(201).json({
-
       message: 'draft order created successfully!',
-      orderId: order.id,
-      order,
+      orderId: data,
     });
   } catch (error: unknown) {
     // Type narrowing for the Axios error
