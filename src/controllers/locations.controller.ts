@@ -82,7 +82,7 @@ export const createLocation = async (req: Request, res: Response) => {
         },
       },
     );
-    const biteship_area_id = search_area_id.data.areas[0].id;
+    const biteshipAreaId = search_area_id.data.areas[0].id;
 
     // Buat request ke Biteship API
     const biteShip = await fetch(apiBiteship, {
@@ -110,7 +110,10 @@ export const createLocation = async (req: Request, res: Response) => {
     // Perbarui lokasi dengan biteshipId
     const updatedLocation = await prisma.location.update({
       where: { id: newLocation.id },
-      data: { biteshipId: data.id },
+      data: {
+        biteship_location_id: data.id,
+        biteship_area_id: biteshipAreaId,
+      },
     });
 
     console.log('update BiteshipId', updatedLocation);
@@ -378,7 +381,7 @@ export const updateLocation = async (req: Request, res: Response) => {
     });
 
     // Cek apakah ada biteshipId, jika ada, update di Biteship
-    const biteshipId = findLocation.biteshipId;
+    const biteshipId = findLocation.biteship_location_id;
     console.log('Biteship ID:', biteshipId);
     if (biteshipId) {
       const apiBiteship = `https://api.biteship.com/v1/locations/${biteshipId}`;
@@ -431,7 +434,7 @@ export const updateLocation = async (req: Request, res: Response) => {
       // Perbarui biteshipId di database setelah berhasil update dari Biteship
       await prisma.location.update({
         where: { id },
-        data: { biteshipId: biteshipData.id },
+        data: { biteship_location_id: biteshipData.id },
       });
 
       // Kirim response ke client dengan data dari Biteship
@@ -473,7 +476,7 @@ export const deleteLocation = async (req: Request, res: Response) => {
       where: { id },
     });
 
-    const biteshipId = findLocation.biteshipId;
+    const biteshipId = findLocation.biteship_location_id;
     const apiBiteship = `https://api.biteship.com/v1/locations/${biteshipId}`;
 
     // Buat request ke Biteship API

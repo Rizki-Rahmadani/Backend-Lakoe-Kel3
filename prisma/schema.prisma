@@ -84,11 +84,28 @@ model Stores {
   Stores_on_decorations Stores_on_decorations[]
   Operation_hours       Operation_hours[]
   Message_templates     Message_templates[]
+  Orders                Orders[]
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId                String                  @unique
 }
+
+
+model Orders {
+  id            String   @id @unique @default(cuid())
+  order_id      String   @unique
+  receiver_name String
+  status        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  biteship_order_id String?
+  storeId       String
+  locationId    String
+  store    Stores   @relation(fields: [storeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
 
 model bank_accounts {
   id         String   @id @unique @default(cuid())
@@ -109,14 +126,16 @@ model Location {
   city_district    String
   store_id         Stores?   @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   profile_id       Profiles? @relation(fields: [profilesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orders           Orders[]
   is_main_location Boolean?  @default(false)
   longitude        String
   latitude         String
   storesId         String?
   profilesId       String?
-  biteshipId       String?
+  biteship_location_id       String?
+  biteship_area_id String?
   createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  updatedAt        DateTime  @updatedAt
 }
 
 model Variant_option_values {
@@ -160,13 +179,10 @@ model Variants {
   is_active       Boolean           @default(false)
   product_id      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
   Variant_options Variant_options[]
-
   productId       String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 }
-
-
 
 model Categories {
   id        String       @id @unique @default(cuid())
@@ -221,12 +237,14 @@ model Invoices {
   receiver_district    String
   receiver_phone       String
   receiver_name        String
+
   receiver_postalCode  String
   receiver_detailAddress String
   receiver_email       String
   order_id             String?
   receiver_biteship_area_id String?
   cart_id              Carts?                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  invoice_number       String
   user_id              User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   payment_id           Payments?              @relation(fields: [paymentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courier_id           Couriers?
@@ -269,7 +287,7 @@ model Payments {
   user_id              User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   midtrans_transaction_id String?
   userId               String
-  invoicesId           String    @unique
+  invoicesId           String?    @unique
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }

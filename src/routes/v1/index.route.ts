@@ -24,9 +24,15 @@ import app_invoice_history from './invoice_history.route';
 import orderRoute from './order.route';
 import trackingRoute from './tracking.route';
 import { courierRoute } from './courier.route';
+import webhook_midtrans from './webhook.route';
 import webhookRoute from './webhook.route';
 
 const router = express.Router();
+
+// router.post("/webhook-midtrans", (req, res)=>{
+//     console.log(req.body);
+//     res.status(200).json({message: "hello"})
+// })
 
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
@@ -38,7 +44,7 @@ router.use('/invoice-history', app_invoice_history);
 router.use('/payment', app_payment);
 router.use('/product', app_product);
 router.use('/message', app_message);
-
+router.use('/web', webhook_midtrans);
 router.use('/stores', app_store);
 router.use('/bank', app_bank);
 router.use('/operation-hour', app_hour);
