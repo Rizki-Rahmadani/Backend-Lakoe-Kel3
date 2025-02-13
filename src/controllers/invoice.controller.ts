@@ -23,6 +23,7 @@ export async function createInvoice(req: Request, res: Response) {
     userId,
     paymentsId,
     courierId,
+    order_id,
   } = req.body;
 
   try {
@@ -41,9 +42,11 @@ export async function createInvoice(req: Request, res: Response) {
       receiver_email: receiver_email,
       // cartsId: cartsId,
       userId: userId,
+      order_id: order_id,
       // paymentsId: paymentsId,
       // courierId: courierId
     };
+
     console.log(data);
 
     const invoice_created = await prisma.invoices.create({
@@ -58,6 +61,8 @@ export async function createInvoice(req: Request, res: Response) {
       .status(500)
       .json({ message: 'error on creating invoice', error });
   }
+
+  //biteship code
 
   // const paymentExist = prisma.payments.findUnique({
   //     where: {id: paymentId}
@@ -156,4 +161,36 @@ export async function getInvoice(req: Request, res: Response) {
   // const paymentExist = prisma.payments.findUnique({
   //     where: {id: paymentId}
   // })
+}
+
+export async function updateInvoice(req: Request, res: Response) {
+  const { order_id, status } = req.body;
+
+  try {
+    const data = { status: status };
+    console.log(data);
+
+    const existingInvoice = await prisma.invoices.findFirst({
+      where: { order_id: order_id },
+    });
+
+    let invoice_updated = null; // Declare outside to avoid "not defined" error
+
+    if (existingInvoice) {
+      invoice_updated = await prisma.invoices.update({
+        where: { id: existingInvoice.id }, // Use the unique `id`
+        data: {
+          status: 'success',
+        },
+      });
+    } else {
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    return res
+      .status(200)
+      .json({ message: 'Invoice data updated', invoice_updated });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error updating invoice', error });
+  }
 }

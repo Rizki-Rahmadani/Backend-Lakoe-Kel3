@@ -238,8 +238,14 @@ model Invoices {
   receiver_phone       String
   receiver_address     String
   receiver_name        String
+
+  receiver_postalCode  String
+  receiver_detailAddress String
+  receiver_email       String
+  order_id             String?
+  receiver_biteship_area_id String?
+  cart_id              Carts?                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   invoice_number       String
-  cart_id              Carts                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id              User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   payment_id           Payments?              @relation(fields: [paymentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courier_id           Couriers?
@@ -282,7 +288,7 @@ model Payments {
   user_id              User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   moota_transaction_id String?
   userId               String
-  invoicesId           String    @unique
+  invoicesId           String?    @unique
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 }

@@ -12,7 +12,7 @@ export async function createPayment(req: Request, res: Response) {
     invoicesId,
   } = req.body;
   // const userId = (req as any).user.id;
-  const userId = 'cm6iuhgwl0001tat8bgmz4wkc';
+  const userId = 'cm71m960c0007tarc0pnj62eb';
   if (!bank && !gross_amount && !status_code && userId) {
     return res
       .status(400)
