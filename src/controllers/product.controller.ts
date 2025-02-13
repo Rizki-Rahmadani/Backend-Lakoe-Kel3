@@ -207,7 +207,11 @@ export async function getProductbyStore(req: Request, res: Response) {
           include: {
             Variant_options: {
               include: {
-                Variant_option_values: true, // Include variant option values (e.g., price, stock, etc.)
+                variant_values: {
+                  include: {
+                    variant_option_value: true,
+                  },
+                }, // Include variant option values (e.g., price, stock, etc.)
               },
             },
           },
@@ -345,32 +349,81 @@ export async function deleteProduct(
   next: NextFunction,
 ) {
   const { id } = req.body;
+  console.log('Deleting product with ID:', id); // Log ID produk yang akan dihapus
+
   try {
-    const productExist = await prisma.product.findUnique({
-      where: { id: id },
-    });
+    // **1. Cari semua Variants yang terkait dengan Product**
+    const variantIds = await prisma.variants
+      .findMany({
+        where: { productId: id },
+        select: { id: true },
+      })
+      .then((variants) => variants.map((v) => v.id));
 
-    //   console.log(id)
+    console.log('Variant IDs to delete:', variantIds); // Log ID varian yang ditemukan
 
-    if (!productExist) {
-      return res.status(404).json({ message: 'product not found' });
+    if (variantIds.length > 0) {
+      // **2. Cari semua Variant_option_values yang terkait**
+      const variantOptionValueIds = await prisma.variant_option_values
+        .findMany({
+          where: {
+            variant_options: {
+              some: {
+                variant_option: {
+                  variantsId: { in: variantIds },
+                },
+              },
+            },
+          },
+          select: { id: true },
+        })
+        .then((values) => values.map((v) => v.id));
+
+      console.log('Variant Option Value IDs to delete:', variantOptionValueIds);
+
+      // **3. Hapus semua VariantOptionValueToOptions terkait**
+      if (variantOptionValueIds.length > 0) {
+        await prisma.variantOptionValueToOptions.deleteMany({
+          where: {
+            OR: [
+              { variant_option_value_id: { in: variantOptionValueIds } },
+              { variant_option_id: { in: variantIds } },
+            ],
+          },
+        });
+        console.log('Deleted related VariantOptionValueToOptions');
+      }
+
+      // **4. Hapus semua Variant_option_values**
+      await prisma.variant_option_values.deleteMany({
+        where: { id: { in: variantOptionValueIds } },
+      });
+      console.log('Deleted related Variant_option_values');
+
+      // **5. Hapus semua Variant_options**
+      await prisma.variant_options.deleteMany({
+        where: { variantsId: { in: variantIds } },
+      });
+      console.log('Deleted related Variant_options');
+
+      // **6. Hapus semua Variants**
+      await prisma.variants.deleteMany({
+        where: { productId: id },
+      });
+      console.log('Deleted related Variants');
     }
 
+    // **7. Hapus produk utama**
     await prisma.product.delete({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
+    console.log('Deleted Product successfully');
 
-    //authorized user function
-    //   if (productExist?.storesId !== (req as any).user.id) {
-    //     return res
-    //       .status(401)
-    //       .json({ message: 'User not granted to delete this thread' });
-    //   }
-
-    return res.status(200).json({ message: 'product deleted' });
+    return res
+      .status(200)
+      .json({ message: 'Product and related data deleted successfully' });
   } catch (error) {
+    console.error('Error deleting product:', error);
     return res.status(500).json({ message: 'Error deleting product', error });
   }
 }

@@ -25,6 +25,7 @@ import orderRoute from './order.route';
 import trackingRoute from './tracking.route';
 import { courierRoute } from './courier.route';
 import webhook_midtrans from './webhook.route';
+import webhookRoute from './webhook.route';
 
 const router = express.Router();
 
@@ -57,5 +58,6 @@ router.use('/cart-items', cartsitemsRoute);
 router.use('/locations', locationRoute);
 router.use('/tracking', trackingRoute);
 router.use('/courier', courierRoute);
+router.use('/webhook', webhookRoute);
 
 export default router;
