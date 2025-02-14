@@ -180,7 +180,7 @@ export async function updateInvoice(req: Request, res: Response) {
       invoice_updated = await prisma.invoices.update({
         where: { id: existingInvoice.id }, // Use the unique `id`
         data: {
-          status: 'success',
+          status: status,
         },
       });
     } else {

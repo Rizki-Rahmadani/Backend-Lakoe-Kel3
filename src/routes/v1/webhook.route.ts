@@ -31,13 +31,123 @@ webhook_midtrans.post('/midtrans-webhook', async (req, res) => {
     const transactionStatus = result.transaction_status;
     const fraudStatus = result.fraud_status;
 
+    if (transactionStatus === 'capture' && fraudStatus === 'accept') {
+      console.log(`Payment for order ${data.order_id} is captured.`);
+      const service_charge = (800000 * 2 * 1) / 100;
+      const invoice_response = await axios.post(
+        apiURL + '/invoice/create-invoice',
+        {
+          status: 'success',
+          prices: 800000 * 2,
+          service_charge: service_charge,
+          receiver_city: 'jkt',
+          receiver_province: 'jkt',
+          receiver_subDistrict: 'jkt',
+          receiver_district: 'jkt',
+          receiver_phone: '092131322',
+          receiver_name: 'sam',
+          receiver_postalCode: '12440',
+          receiver_detailAddress: 'ehiuewuhwuiehrweur',
+          receiver_email: 'sam@mail.com',
+          // cartsId: 'cdqdwir39232',
+          userId: 'cm71m960c0007tarc0pnj62eb',
+          order_id: data.orderId,
+          // paymentsId: 'joewjfiewjfiwf',
+          // courierId: 'wqeijeiqejei',
+        },
+        {
+          headers: {
+            // Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: invoice_response.data.invoice_created.id,
+        },
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
+      await axios.post(
+        `${apiURL}/payment/create-payment`,
+        {
+          bank: result.va_numbers?.[0]?.bank || 'unknown',
+          gross_amount: Number(result.gross_amount),
+          status_code: result.status_code,
+          midtrans_transaction_id: result.transaction_id,
+          invoicesId: invoice_response.data.invoice_created.id,
+        },
+        {
+          headers: {
+            // Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
+
+    if (transactionStatus === 'deny') {
+      console.log(`Payment for order ${data.order_id} is deny.`);
+      const service_charge = (800000 * 2 * 1) / 100;
+      const invoice_response = await axios.post(
+        apiURL + '/invoice/create-invoice',
+        {
+          status: 'success',
+          prices: 800000 * 2,
+          service_charge: service_charge,
+          receiver_city: 'jkt',
+          receiver_province: 'jkt',
+          receiver_subDistrict: 'jkt',
+          receiver_district: 'jkt',
+          receiver_phone: '092131322',
+          receiver_name: 'sam',
+          receiver_postalCode: '12440',
+          receiver_detailAddress: 'ehiuewuhwuiehrweur',
+          receiver_email: 'sam@mail.com',
+          // cartsId: 'cdqdwir39232',
+          userId: 'cm71m960c0007tarc0pnj62eb',
+          order_id: data.orderId,
+          // paymentsId: 'joewjfiewjfiwf',
+          // courierId: 'wqeijeiqejei',
+        },
+        {
+          headers: {
+            // Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: invoice_response.data.invoice_created.id,
+        },
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
+
+      await axios.post(
+        `${apiURL}/payment/create-payment`,
+        {
+          bank: result.va_numbers?.[0]?.bank || 'unknown',
+          gross_amount: Number(result.gross_amount),
+          status_code: result.status_code,
+          midtrans_transaction_id: result.transaction_id,
+          invoicesId: invoice_response.data.invoice_updated.id,
+        },
+        {
+          headers: {
+            // Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
+
     if (transactionStatus === 'settlement' && fraudStatus === 'accept') {
       console.log(`Payment for order ${data.order_id} successful.`);
-
-      // Update invoice status
-      // const price = 500000;
-      // const quantity = 2
-      // const service_charge = (price * quantity * 1) / 100;
 
       const updateInvoice = await axios.put(
         apiURL + '/invoice/update-invoice',
@@ -86,17 +196,59 @@ webhook_midtrans.post('/midtrans-webhook', async (req, res) => {
       console.log('invoice_history created: ', invoice_history_response.data);
     } else if (transactionStatus === 'pending') {
       console.log(`Payment for order ${data.order_id} is pending.`);
-    } else {
+      const service_charge = (800000 * 2 * 1) / 100;
+
+      const invoice_response = await axios.post(
+        apiURL + '/invoice/create-invoice',
+        {
+          status: 'pending',
+          prices: 800000 * 2,
+          service_charge: service_charge,
+          receiver_city: 'jkt',
+          receiver_province: 'jkt',
+          receiver_subDistrict: 'jkt',
+          receiver_district: 'jkt',
+          receiver_phone: '092131322',
+          receiver_name: 'sam',
+          receiver_postalCode: '12440',
+          receiver_detailAddress: 'ehiuewuhwuiehrweur',
+          receiver_email: 'sam@mail.com',
+          // cartsId: 'cdqdwir39232',
+          userId: 'cm71m960c0007tarc0pnj62eb',
+          order_id: data.orderId,
+          // paymentsId: 'joewjfiewjfiwf',
+          // courierId: 'wqeijeiqejei',
+        },
+        {
+          headers: {
+            // Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: invoice_response.data.invoice_created.id,
+        },
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
+    } else if (
+      transactionStatus === 'failure' ||
+      transactionStatus === 'cancel' ||
+      transactionStatus === 'expire'
+    ) {
       console.log(`Payment for order ${data.order_id} failed.`);
       await axios.put(
-        `${apiURL}/invoice/update-invoice`,
+        apiURL + '/invoice/update-invoice',
         {
-          id: data.order_id,
+          order_id: data.order_id,
           status: 'failed',
         },
         {
           headers: {
-            // Authorization: `Bearer ${token}`,
+            //   Authorization: `bearer ${token}`,
             'Content-Type': 'application/json',
           },
         },
