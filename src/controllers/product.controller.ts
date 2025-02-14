@@ -330,7 +330,7 @@ export async function toggleActive(req: Request, res: Response) {
     // Toggle the `is_active` field
     const updatedProduct = await prisma.product.update({
       where: { id },
-      data: { is_active: !product.is_active }, // Flip the value
+      data: { is_active: !product.is_active },
     });
 
     return res.status(200).json({
@@ -517,3 +517,167 @@ export async function search(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 }
+
+/**
+ * Fungsi untuk mendapatkan semua kombinasi dari opsi varian
+ */
+const getCombinations = (arrays: any[][]): any[][] => {
+  if (arrays.length === 0) return [[]];
+
+  const firstArray = arrays[0];
+  const remainingCombinations = getCombinations(arrays.slice(1));
+
+  return firstArray.flatMap((value) =>
+    remainingCombinations.map((combination) => [value, ...combination]),
+  );
+};
+
+/**
+ * Endpoint untuk mengambil produk, variant options, dan variant option values
+ */
+// export const getProductWithVariants = async (req: Request, res: Response) => {
+//   try {
+//     const { productId } = req.params;
+
+//     const userId = (req as any).user.id;
+
+//     if (!userId) {
+//       return res.status(401).json({ message: 'Unauthorized: No token provided' });
+//     }
+
+//     // Query data produk beserta variant options dan variant option values
+//     const product = await prisma.product.findUnique({
+//       where: { id: productId },
+//       select: {
+//         name: true,
+//         description: true,
+//         attachments: true,
+//         variants: {
+//           select: {
+//             id: true, // Ambil ID dari variant
+//             name: true,
+//             Variant_options: {
+//               select: {
+//                 id: true, // Ambil ID dari Variant_options
+//                 name: true,
+//                 variant_values: {
+//                   select: {
+//                     variant_option_value: {
+//                       select: {
+//                         id: true, // Ambil ID dari variant_option_value
+//                         sku: true,
+//                         price: true,
+//                         stock: true,
+//                         weight: true,
+//                       }
+//                     }
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       }
+//     });
+
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+
+//     // Menggabungkan atribut variant_option_value berdasarkan kombinasi yang valid
+//     const combinedVariants = product.variants.map(variant => {
+//       return {
+//         ...variant,
+//         Variant_options: variant.Variant_options.map(option => {
+//           // Ambil variant_values yang sesuai dengan option
+//           const filteredValues = option.variant_values.map(value => value.variant_option_value);
+
+//           return {
+//             ...option,
+//             variant_values: filteredValues
+//           };
+//         })
+//       };
+//     });
+
+//     return res.json({ ...product, variants: combinedVariants });
+//   } catch (error) {
+//     console.error("Error fetching product data:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+export const getProductWithVariants = async (req: Request, res: Response) => {
+  try {
+    const { productId } = req.params;
+
+    // Cek apakah produk tersedia
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: {
+        variants: {
+          include: {
+            Variant_options: {
+              include: {
+                variant_values: {
+                  include: {
+                    variant_option_value: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Ambil semua kombinasi varian berdasarkan variant_option_values
+    const variantCombinations = await prisma.variant_option_values.findMany({
+      where: {
+        variant_options: {
+          some: {
+            variant_option: {
+              variantsId: {
+                in: product.variants.map((v) => v.id),
+              },
+            },
+          },
+        },
+      },
+      include: {
+        variant_options: {
+          include: {
+            variant_option: true,
+          },
+        },
+      },
+    });
+
+    // Format response agar mudah digunakan di frontend
+    const formattedCombinations = variantCombinations.map((variant) => ({
+      id: variant.id,
+      sku: variant.sku,
+      price: variant.price,
+      stock: variant.stock,
+      weight: variant.weight,
+      is_active: variant.is_active,
+      options: variant.variant_options.map((option) => ({
+        id: option.variant_option.id,
+        name: option.variant_option.name,
+      })),
+    }));
+
+    res.status(200).json({
+      message: 'Variant combinations retrieved successfully',
+      attachments: product.attachments,
+      variant_combinations: formattedCombinations,
+    });
+  } catch (error) {
+    console.error('Error fetching variant combinations:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
