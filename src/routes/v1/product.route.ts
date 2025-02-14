@@ -10,6 +10,7 @@ import {
   getProductbyStore,
   getProductforName,
   getProductByUrl,
+  getProductWithVariants,
 } from '../../controllers/product.controller';
 import { upload } from '../../middlewares/upload-file';
 import { authentication } from '../../middlewares/authmiddleware';
@@ -20,6 +21,7 @@ app_product.post(
   createProduct,
 );
 
+app_product.get('/variants/:productId', getProductWithVariants);
 app_product.get('/get-product', getAllProduct);
 app_product.get('/:username/:url', getProductByUrl);
 app_product.get('/check-product', authentication, getProductbyStore);
