@@ -7,7 +7,7 @@ const apiURL = 'http://localhost:3000/api'; // Replace with your actual API URL
 
 webhook_midtrans.post('/midtrans-webhook', async (req, res) => {
   try {
-    const data = req.body;
+    const data = req?.body;
     console.log('Midtrans Webhook Data:', data);
 
     // Verify the notification with Midtrans
@@ -50,8 +50,8 @@ webhook_midtrans.post('/midtrans-webhook', async (req, res) => {
           receiver_detailAddress: 'ehiuewuhwuiehrweur',
           receiver_email: 'sam@mail.com',
           // cartsId: 'cdqdwir39232',
-          userId: 'cm71m960c0007tarc0pnj62eb',
-          order_id: data.orderId,
+          userId: 'cm74hxlxy0009tsd4lzhwhwmv',
+          order_id: data.order_id,
           // paymentsId: 'joewjfiewjfiwf',
           // courierId: 'wqeijeiqejei',
         },
@@ -107,8 +107,8 @@ webhook_midtrans.post('/midtrans-webhook', async (req, res) => {
           receiver_detailAddress: 'ehiuewuhwuiehrweur',
           receiver_email: 'sam@mail.com',
           // cartsId: 'cdqdwir39232',
-          userId: 'cm71m960c0007tarc0pnj62eb',
-          order_id: data.orderId,
+          userId: 'cm74hxlxy0009tsd4lzhwhwmv',
+          order_id: data.order_id,
           // paymentsId: 'joewjfiewjfiwf',
           // courierId: 'wqeijeiqejei',
         },
@@ -214,8 +214,8 @@ webhook_midtrans.post('/midtrans-webhook', async (req, res) => {
           receiver_detailAddress: 'ehiuewuhwuiehrweur',
           receiver_email: 'sam@mail.com',
           // cartsId: 'cdqdwir39232',
-          userId: 'cm71m960c0007tarc0pnj62eb',
-          order_id: data.orderId,
+          userId: 'cm74hxlxy0009tsd4lzhwhwmv',
+          order_id: data.order_id,
           // paymentsId: 'joewjfiewjfiwf',
           // courierId: 'wqeijeiqejei',
         },
