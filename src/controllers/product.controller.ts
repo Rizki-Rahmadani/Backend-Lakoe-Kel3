@@ -681,3 +681,166 @@ export const getProductWithVariants = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// export const checkoutProduct = async (req: Request, res: Response) => {
+//   try {
+//     const { productId } = req.params;
+//     const { selectedOptions } = req.body;
+
+//     // Fetch product details
+//     const product = await prisma.product.findUnique({
+//       where: { id: productId },
+//       select: {
+//         name: true,
+//         attachments: true,
+//         variants: {
+//           select: {
+//             id: true,
+//             name: true,
+//             Variant_options: {
+//               select: {
+//                 id: true,
+//                 name: true,
+//               },
+//             },
+//           },
+//         },
+//       },
+//     });
+
+//     if (!product) {
+//       return res.status(404).json({ message: 'Product not found' });
+//     }
+
+//     // Fetch variant price if selected options are provided
+//     let price = null;
+//     if (selectedOptions && selectedOptions.length > 0) {
+//       const variantCombination = await prisma.variant_option_values.findFirst({
+//         where: {
+//           variant_options: {
+//             every: {
+//               variant_option_id: { in: selectedOptions },
+//             },
+//           },
+//         },
+//         select: {
+//           price: true,
+//         },
+//       });
+
+//       if (variantCombination) {
+//         price = variantCombination.price;
+//       }
+//     }
+
+//     res.status(200).json({ ...product, price });
+//   } catch (error) {
+//     console.error('Failed to fetch product for checkout:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+export const getProductForCheckout = async (req: Request, res: Response) => {
+  try {
+    const { url, username } = req.params;
+    const { selectedOptions } = req.body;
+
+    // Fetch store details
+    const store = await prisma.stores.findUnique({
+      where: { username: username },
+    });
+
+    if (!store) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Fetch product details by URL and store ID
+    const product = await prisma.product.findUnique({
+      where: { url: url, storesId: store.id },
+      select: {
+        id: true, // Include product ID
+        name: true,
+        attachments: true,
+        price: true,
+        description: true,
+        minimum_order: true, // Include minimum order
+        stock: true, // Include stock
+        weight: true, // Include weight
+        length: true, // Include length
+        width: true, // Include width
+        height: true, // Include height
+        sku: true, // Include SKU
+        is_active: true, // Include active status
+        variants: {
+          select: {
+            id: true,
+            name: true,
+            Variant_options: {
+              select: {
+                id: true,
+                name: true,
+                variant_values: {
+                  select: {
+                    variant_option_value: {
+                      select: {
+                        price: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const prices = product.variants.flatMap((variant) =>
+      variant.Variant_options.flatMap((option) =>
+        option.variant_values.map((val) => val.variant_option_value.price),
+      ),
+    );
+    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+
+    let price = product.price; // Default to product price
+
+    // Check if the product has variants
+    if (product.variants && product.variants.length > 0) {
+      // If there are selected options, find the price based on the selected variant
+      if (selectedOptions && selectedOptions.length > 0) {
+        const variantCombination = await prisma.variant_option_values.findFirst(
+          {
+            where: {
+              variant_options: {
+                every: {
+                  variant_option_id: { in: selectedOptions },
+                },
+              },
+            },
+            select: {
+              price: true,
+            },
+          },
+        );
+
+        if (variantCombination) {
+          price = variantCombination.price; // Update price if variant combination is found
+        }
+      }
+    }
+
+    res.status(200).json({
+      ...product,
+      price,
+      priceRange: { min: minPrice, max: maxPrice },
+    });
+  } catch (error) {
+    console.error('Failed to fetch product for checkout:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
