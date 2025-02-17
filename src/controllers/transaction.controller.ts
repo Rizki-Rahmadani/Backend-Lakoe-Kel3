@@ -36,7 +36,7 @@ export default async function createTransaction(req: Request, res: Response) {
     console.log(price);
 
     // Create transaction token using Midtrans
-    const token = await snap.createTransactionToken(parameter);
+    const token = await snap.createTransaction(parameter);
 
     console.log('Transaction Token:', token); // Log the token for debugging
 
