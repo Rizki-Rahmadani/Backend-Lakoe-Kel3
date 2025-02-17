@@ -14,7 +14,7 @@ app_message.post('/create-message', authentication, createMessage);
 
 app_message.get('/get-message', authentication, getMessage);
 
-app_message.get('/detail-message', authentication, getMessageDetailed);
+app_message.post('/detail-message', authentication, getMessageDetailed);
 
 app_message.put('/update-message', authentication, editMessage);
 
