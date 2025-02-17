@@ -26,7 +26,7 @@ import trackingRoute from './tracking.route';
 import { courierRoute } from './courier.route';
 import webhook_midtrans from './webhook.route';
 import webhookRoute from './webhook.route';
-
+import adminRoute from './admin.route';
 const router = express.Router();
 
 // router.post("/webhook-midtrans", (req, res)=>{
@@ -37,7 +37,7 @@ const router = express.Router();
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
 router.use('/profile', profileRoute);
-
+router.use('/admin', adminRoute);
 router.use('/transaction', app_transaction);
 router.use('/invoice', app_invoice);
 router.use('/invoice-history', app_invoice_history);
