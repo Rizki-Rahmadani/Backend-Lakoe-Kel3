@@ -25,7 +25,9 @@ import orderRoute from './order.route';
 import trackingRoute from './tracking.route';
 import { courierRoute } from './courier.route';
 import webhookRoute from './webhook.route';
+import adminRoute from './admin.route';
 import { checkout } from './checkout.route';
+
 
 const router = express.Router();
 
@@ -37,7 +39,7 @@ const router = express.Router();
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
 router.use('/profile', profileRoute);
-
+router.use('/admin', adminRoute);
 router.use('/transaction', app_transaction);
 router.use('/invoice', app_invoice);
 router.use('/invoice-history', app_invoice_history);
