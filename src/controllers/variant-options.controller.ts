@@ -18,12 +18,17 @@ export const createVariantOptions = async (req: Request, res: Response) => {
         } 
     */
   try {
-    const { name, variantId, parentVariantOptionId } = req.body;
+    const { name, variantId } = req.body;
 
     if (!name || !variantId) {
       return res.status(400).json({ error: 'All fields required' });
     }
 
+
+    if (!variantId) {
+      console.error('Variant ID is missing!');
+      return;
+    }
 
     const checkVariant = await prisma.variants.findUnique({
       where: { id: variantId },
@@ -36,17 +41,24 @@ export const createVariantOptions = async (req: Request, res: Response) => {
     let newVariants;
 
     if (Array.isArray(name)) {
-      // Jika name adalah array, buat semua varian sekaligus
-      newVariants = await prisma.variant_options.createMany({
-        data: name.map((variantName) => ({
-          name: variantName,
-          variantsId: variantId,
-        })),
-      });
+      // Jika name adalah array, gunakan Promise.all untuk memastikan ID dikembalikan
+      newVariants = await Promise.all(
+        name.map(async (variantName) => {
+          return await prisma.variant_options.create({
+            data: {
+              name: variantName,
+              variantsId: variantId,
+            },
+            select: { id: true, name: true, variantsId: true }, // ✅ Pastikan ID dikembalikan
+          });
+        }),
+      );
 
       res.status(201).json({
         message: 'Variants created successfully',
-        variant_options: newVariants,
+        variant_options: Array.isArray(newVariants)
+          ? newVariants
+          : [newVariants],
       });
     } else {
       // Jika hanya satu varian, buat satu entry
@@ -55,6 +67,7 @@ export const createVariantOptions = async (req: Request, res: Response) => {
           name,
           variantsId: variantId,
         },
+        select: { id: true, name: true, variantsId: true },
       });
 
       res.status(201).json({
@@ -62,7 +75,6 @@ export const createVariantOptions = async (req: Request, res: Response) => {
         variant_options: newVariants,
       });
     }
-
   } catch (error) {
     res
       .status(500)

@@ -40,7 +40,7 @@ export async function createInvoice(req: Request, res: Response) {
       receiver_postalCode: receiver_postalCode,
       receiver_detailAddress: receiver_detailAddress,
       receiver_email: receiver_email,
-      // cartsId: cartsId,
+      cartsId: cartsId,
       userId: userId,
       order_id: order_id,
       // paymentsId: paymentsId,
@@ -89,38 +89,7 @@ export async function getInvoice(req: Request, res: Response) {
         receiver_postalCode: true,
         receiver_detailAddress: true,
         receiver_email: true,
-        cartsId: true,
-        cart_id: {
-          select: {
-            discount: true,
-            Cart_items: {
-              select: {
-                qty: true,
-                variant_option_value_id: {
-                  select: {
-                    weight: true,
-                    variant_option_id: {
-                      select: {
-                        name: true,
-                        variant_id: {
-                          select: {
-                            name: true,
-                            product_id: {
-                              select: {
-                                name: true,
-                                weight: true,
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
+
         userId: true,
         user_id: {
           select: {

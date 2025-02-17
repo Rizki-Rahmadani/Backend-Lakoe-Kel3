@@ -84,11 +84,28 @@ model Stores {
   Stores_on_decorations Stores_on_decorations[]
   Operation_hours       Operation_hours[]
   Message_templates     Message_templates[]
+  Orders                Orders[]
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
   user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId                String                  @unique
 }
+
+
+model Orders {
+  id            String   @id @unique @default(cuid())
+  order_id      String   @unique
+  receiver_name String
+  status        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  biteship_order_id String?
+  storeId       String
+  locationId    String
+  store    Stores   @relation(fields: [storeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
 
 model bank_accounts {
   id         String   @id @unique @default(cuid())
@@ -109,46 +126,58 @@ model Location {
   city_district    String
   store_id         Stores?   @relation(fields: [storesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   profile_id       Profiles? @relation(fields: [profilesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orders           Orders[]
   is_main_location Boolean?  @default(false)
   longitude        String
   latitude         String
   storesId         String?
   profilesId       String?
-  biteshipId       String?
+  biteship_location_id       String?
+  biteship_area_id String?
   createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  updatedAt        DateTime  @updatedAt
 }
 
 model Variant_option_values {
-  id                String          @id @unique @default(cuid())
-  sku               String
-  weight            Int
-  stock             Int
-  price             Int
-  is_active         Boolean         @default(false)
-  variant_option_id Variant_options @relation(fields: [variant_optionsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  variant_optionsId String
-  Cart_items        Cart_items[]
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  @@unique([sku, variant_optionsId])
+  id          String          @id @unique @default(cuid())
+  sku         String
+  weight      Int
+  stock       Int
+  price       Int
+  is_active   Boolean         @default(false)
+  variant_options VariantOptionValueToOptions[]
+
+  Cart_items  Cart_items[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([sku])
 }
 
 model Variant_options {
   id                    String                  @id @unique @default(cuid())
   name                  String
-  variant_id            Variants                @relation(fields: [variantsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Variant_option_values Variant_option_values[]
+  variant_id            Variants                @relation(fields: [variantsId], references: [id], onDelete: Cascade)
+  variant_values        VariantOptionValueToOptions[]
+
   variantsId            String
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
+}
+
+model VariantOptionValueToOptions {
+  variant_option_value_id String
+  variant_option_id       String
+  variant_option_value Variant_option_values @relation(fields: [variant_option_value_id], references: [id], onDelete: Cascade)
+  variant_option       Variant_options       @relation(fields: [variant_option_id], references: [id], onDelete: Cascade)
+  @@id([variant_option_value_id, variant_option_id])
 }
 
 model Variants {
   id              String            @id @unique @default(cuid())
   name            String
   is_active       Boolean           @default(false)
-  product_id      Product           @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  product_id      Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
   Variant_options Variant_options[]
   productId       String
   createdAt       DateTime          @default(now())
@@ -214,11 +243,12 @@ model Invoices {
   order_id             String?
   receiver_biteship_area_id String?
   cart_id              Carts?                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  invoice_number       String?
   user_id              User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   payment_id           Payments?              @relation(fields: [paymentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   courier_id           Couriers?
   cartsId              String?
-  userId               String
+  userId               String 
   paymentsId           String?                 @unique
   courierId            String?
   Confirmation_payment Confirmation_payment[]
@@ -251,7 +281,7 @@ model Payments {
   id                   String    @id @unique @default(cuid())
   bank                 String
   amount               Int
-  status               String   @default("pending")
+  status               String @default("pending")
   invoice_id           Invoices? @relation
   user_id              User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   midtrans_transaction_id String?

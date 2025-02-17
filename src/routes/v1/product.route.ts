@@ -10,6 +10,8 @@ import {
   getProductbyStore,
   getProductforName,
   getProductByUrl,
+  getProductWithVariants,
+  getProductForCheckout,
 } from '../../controllers/product.controller';
 import { upload } from '../../middlewares/upload-file';
 import { authentication } from '../../middlewares/authmiddleware';
@@ -20,8 +22,10 @@ app_product.post(
   createProduct,
 );
 
+app_product.get('/variants/:productId', getProductWithVariants);
 app_product.get('/get-product', getAllProduct);
-app_product.get('/:username/:url', getProductByUrl);
+// app_product.get('/:username/:url', getProductByUrl);
+app_product.post('/:username/:url', getProductForCheckout);
 app_product.get('/check-product', authentication, getProductbyStore);
 app_product.get('/get-product/:username', getProductforName);
 app_product.delete('/delete-product', authentication, deleteProduct);

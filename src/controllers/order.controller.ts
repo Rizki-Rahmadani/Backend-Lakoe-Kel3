@@ -37,6 +37,7 @@ export const createOrder = async (req: Request, res: Response) => {
 
       courier_company: orderData.courier_company,
       courier_type: orderData.courier_type,
+
       courier_insurance: orderData.courier_insurance,
       delivery_type: orderData.delivery_type,
       order_note: 'please be Careful',
@@ -44,15 +45,15 @@ export const createOrder = async (req: Request, res: Response) => {
       items: [
         {
           name: orderItem.name,
-          description: orderItem.description,
-          variant_options: orderItem.variant_options,
-          category: orderItem.category,
+          // description: orderItem.description,
+          // variant_options: orderItem.variant_options,
+          // category: orderItem.category,
           value: orderItem.value,
           quantity: orderItem.quantity,
-          height: orderItem.height,
-          length: orderItem.length,
+          // height: orderItem.height,
+          // length: orderItem.length,
           weight: orderItem.weight,
-          width: orderItem.width,
+          // width: orderItem.width,
         },
       ],
     };
@@ -69,10 +70,10 @@ export const createOrder = async (req: Request, res: Response) => {
     });
 
     const data = biteship.data;
-    // console.log(data);
-
+    console.log(data);
+    // You can now store this order information in your database if needed
     res.status(201).json({
-      message: 'Draft order created successfully!',
+      message: 'draft order created successfully!',
       orderId: data.id,
       data,
     });

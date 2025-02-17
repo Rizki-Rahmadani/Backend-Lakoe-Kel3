@@ -207,7 +207,11 @@ export async function getProductbyStore(req: Request, res: Response) {
           include: {
             Variant_options: {
               include: {
-                Variant_option_values: true, // Include variant option values (e.g., price, stock, etc.)
+                variant_values: {
+                  include: {
+                    variant_option_value: true,
+                  },
+                }, // Include variant option values (e.g., price, stock, etc.)
               },
             },
           },
@@ -326,7 +330,7 @@ export async function toggleActive(req: Request, res: Response) {
     // Toggle the `is_active` field
     const updatedProduct = await prisma.product.update({
       where: { id },
-      data: { is_active: !product.is_active }, // Flip the value
+      data: { is_active: !product.is_active },
     });
 
     return res.status(200).json({
@@ -345,32 +349,81 @@ export async function deleteProduct(
   next: NextFunction,
 ) {
   const { id } = req.body;
+  console.log('Deleting product with ID:', id); // Log ID produk yang akan dihapus
+
   try {
-    const productExist = await prisma.product.findUnique({
-      where: { id: id },
-    });
+    // **1. Cari semua Variants yang terkait dengan Product**
+    const variantIds = await prisma.variants
+      .findMany({
+        where: { productId: id },
+        select: { id: true },
+      })
+      .then((variants) => variants.map((v) => v.id));
 
-    //   console.log(id)
+    console.log('Variant IDs to delete:', variantIds); // Log ID varian yang ditemukan
 
-    if (!productExist) {
-      return res.status(404).json({ message: 'product not found' });
+    if (variantIds.length > 0) {
+      // **2. Cari semua Variant_option_values yang terkait**
+      const variantOptionValueIds = await prisma.variant_option_values
+        .findMany({
+          where: {
+            variant_options: {
+              some: {
+                variant_option: {
+                  variantsId: { in: variantIds },
+                },
+              },
+            },
+          },
+          select: { id: true },
+        })
+        .then((values) => values.map((v) => v.id));
+
+      console.log('Variant Option Value IDs to delete:', variantOptionValueIds);
+
+      // **3. Hapus semua VariantOptionValueToOptions terkait**
+      if (variantOptionValueIds.length > 0) {
+        await prisma.variantOptionValueToOptions.deleteMany({
+          where: {
+            OR: [
+              { variant_option_value_id: { in: variantOptionValueIds } },
+              { variant_option_id: { in: variantIds } },
+            ],
+          },
+        });
+        console.log('Deleted related VariantOptionValueToOptions');
+      }
+
+      // **4. Hapus semua Variant_option_values**
+      await prisma.variant_option_values.deleteMany({
+        where: { id: { in: variantOptionValueIds } },
+      });
+      console.log('Deleted related Variant_option_values');
+
+      // **5. Hapus semua Variant_options**
+      await prisma.variant_options.deleteMany({
+        where: { variantsId: { in: variantIds } },
+      });
+      console.log('Deleted related Variant_options');
+
+      // **6. Hapus semua Variants**
+      await prisma.variants.deleteMany({
+        where: { productId: id },
+      });
+      console.log('Deleted related Variants');
     }
 
+    // **7. Hapus produk utama**
     await prisma.product.delete({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
+    console.log('Deleted Product successfully');
 
-    //authorized user function
-    //   if (productExist?.storesId !== (req as any).user.id) {
-    //     return res
-    //       .status(401)
-    //       .json({ message: 'User not granted to delete this thread' });
-    //   }
-
-    return res.status(200).json({ message: 'product deleted' });
+    return res
+      .status(200)
+      .json({ message: 'Product and related data deleted successfully' });
   } catch (error) {
+    console.error('Error deleting product:', error);
     return res.status(500).json({ message: 'Error deleting product', error });
   }
 }
@@ -464,3 +517,330 @@ export async function search(req: Request, res: Response) {
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 }
+
+/**
+ * Fungsi untuk mendapatkan semua kombinasi dari opsi varian
+ */
+const getCombinations = (arrays: any[][]): any[][] => {
+  if (arrays.length === 0) return [[]];
+
+  const firstArray = arrays[0];
+  const remainingCombinations = getCombinations(arrays.slice(1));
+
+  return firstArray.flatMap((value) =>
+    remainingCombinations.map((combination) => [value, ...combination]),
+  );
+};
+
+/**
+ * Endpoint untuk mengambil produk, variant options, dan variant option values
+ */
+// export const getProductWithVariants = async (req: Request, res: Response) => {
+//   try {
+//     const { productId } = req.params;
+
+//     const userId = (req as any).user.id;
+
+//     if (!userId) {
+//       return res.status(401).json({ message: 'Unauthorized: No token provided' });
+//     }
+
+//     // Query data produk beserta variant options dan variant option values
+//     const product = await prisma.product.findUnique({
+//       where: { id: productId },
+//       select: {
+//         name: true,
+//         description: true,
+//         attachments: true,
+//         variants: {
+//           select: {
+//             id: true, // Ambil ID dari variant
+//             name: true,
+//             Variant_options: {
+//               select: {
+//                 id: true, // Ambil ID dari Variant_options
+//                 name: true,
+//                 variant_values: {
+//                   select: {
+//                     variant_option_value: {
+//                       select: {
+//                         id: true, // Ambil ID dari variant_option_value
+//                         sku: true,
+//                         price: true,
+//                         stock: true,
+//                         weight: true,
+//                       }
+//                     }
+//                   }
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       }
+//     });
+
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+
+//     // Menggabungkan atribut variant_option_value berdasarkan kombinasi yang valid
+//     const combinedVariants = product.variants.map(variant => {
+//       return {
+//         ...variant,
+//         Variant_options: variant.Variant_options.map(option => {
+//           // Ambil variant_values yang sesuai dengan option
+//           const filteredValues = option.variant_values.map(value => value.variant_option_value);
+
+//           return {
+//             ...option,
+//             variant_values: filteredValues
+//           };
+//         })
+//       };
+//     });
+
+//     return res.json({ ...product, variants: combinedVariants });
+//   } catch (error) {
+//     console.error("Error fetching product data:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+export const getProductWithVariants = async (req: Request, res: Response) => {
+  try {
+    const { productId } = req.params;
+
+    // Cek apakah produk tersedia
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: {
+        variants: {
+          include: {
+            Variant_options: {
+              include: {
+                variant_values: {
+                  include: {
+                    variant_option_value: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Ambil semua kombinasi varian berdasarkan variant_option_values
+    const variantCombinations = await prisma.variant_option_values.findMany({
+      where: {
+        variant_options: {
+          some: {
+            variant_option: {
+              variantsId: {
+                in: product.variants.map((v) => v.id),
+              },
+            },
+          },
+        },
+      },
+      include: {
+        variant_options: {
+          include: {
+            variant_option: true,
+          },
+        },
+      },
+    });
+
+    // Format response agar mudah digunakan di frontend
+    const formattedCombinations = variantCombinations.map((variant) => ({
+      id: variant.id,
+      sku: variant.sku,
+      price: variant.price,
+      stock: variant.stock,
+      weight: variant.weight,
+      is_active: variant.is_active,
+      options: variant.variant_options.map((option) => ({
+        id: option.variant_option.id,
+        name: option.variant_option.name,
+      })),
+    }));
+
+    res.status(200).json({
+      message: 'Variant combinations retrieved successfully',
+      attachments: product.attachments,
+      variant_combinations: formattedCombinations,
+    });
+  } catch (error) {
+    console.error('Error fetching variant combinations:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// export const checkoutProduct = async (req: Request, res: Response) => {
+//   try {
+//     const { productId } = req.params;
+//     const { selectedOptions } = req.body;
+
+//     // Fetch product details
+//     const product = await prisma.product.findUnique({
+//       where: { id: productId },
+//       select: {
+//         name: true,
+//         attachments: true,
+//         variants: {
+//           select: {
+//             id: true,
+//             name: true,
+//             Variant_options: {
+//               select: {
+//                 id: true,
+//                 name: true,
+//               },
+//             },
+//           },
+//         },
+//       },
+//     });
+
+//     if (!product) {
+//       return res.status(404).json({ message: 'Product not found' });
+//     }
+
+//     // Fetch variant price if selected options are provided
+//     let price = null;
+//     if (selectedOptions && selectedOptions.length > 0) {
+//       const variantCombination = await prisma.variant_option_values.findFirst({
+//         where: {
+//           variant_options: {
+//             every: {
+//               variant_option_id: { in: selectedOptions },
+//             },
+//           },
+//         },
+//         select: {
+//           price: true,
+//         },
+//       });
+
+//       if (variantCombination) {
+//         price = variantCombination.price;
+//       }
+//     }
+
+//     res.status(200).json({ ...product, price });
+//   } catch (error) {
+//     console.error('Failed to fetch product for checkout:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+export const getProductForCheckout = async (req: Request, res: Response) => {
+  try {
+    const { url, username } = req.params;
+    const { selectedOptions } = req.body;
+
+    // Fetch store details
+    const store = await prisma.stores.findUnique({
+      where: { username: username },
+    });
+
+    if (!store) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Fetch product details by URL and store ID
+    const product = await prisma.product.findUnique({
+      where: { url: url, storesId: store.id },
+      select: {
+        id: true, // Include product ID
+        name: true,
+        attachments: true,
+        price: true,
+        description: true,
+        minimum_order: true, // Include minimum order
+        stock: true, // Include stock
+        weight: true, // Include weight
+        length: true, // Include length
+        width: true, // Include width
+        height: true, // Include height
+        sku: true, // Include SKU
+        is_active: true, // Include active status
+        variants: {
+          select: {
+            id: true,
+            name: true,
+            Variant_options: {
+              select: {
+                id: true,
+                name: true,
+                variant_values: {
+                  select: {
+                    variant_option_value: {
+                      select: {
+                        price: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const prices = product.variants.flatMap((variant) =>
+      variant.Variant_options.flatMap((option) =>
+        option.variant_values.map((val) => val.variant_option_value.price),
+      ),
+    );
+    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+
+    let price = product.price; // Default to product price
+
+    // Check if the product has variants
+    if (product.variants && product.variants.length > 0) {
+      // If there are selected options, find the price based on the selected variant
+      if (selectedOptions && selectedOptions.length > 0) {
+        const variantCombination = await prisma.variant_option_values.findFirst(
+          {
+            where: {
+              variant_options: {
+                every: {
+                  variant_option_id: { in: selectedOptions },
+                },
+              },
+            },
+            select: {
+              price: true,
+            },
+          },
+        );
+
+        if (variantCombination) {
+          price = variantCombination.price; // Update price if variant combination is found
+        }
+      }
+    }
+
+    res.status(200).json({
+      ...product,
+      price,
+      priceRange: { min: minPrice, max: maxPrice },
+    });
+  } catch (error) {
+    console.error('Failed to fetch product for checkout:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
