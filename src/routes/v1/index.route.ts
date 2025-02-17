@@ -24,8 +24,8 @@ import app_invoice_history from './invoice_history.route';
 import orderRoute from './order.route';
 import trackingRoute from './tracking.route';
 import { courierRoute } from './courier.route';
-import webhook_midtrans from './webhook.route';
 import webhookRoute from './webhook.route';
+import { checkout } from './checkout.route';
 
 const router = express.Router();
 
@@ -44,7 +44,6 @@ router.use('/invoice-history', app_invoice_history);
 router.use('/payment', app_payment);
 router.use('/product', app_product);
 router.use('/message', app_message);
-router.use('/web', webhook_midtrans);
 router.use('/stores', app_store);
 router.use('/bank', app_bank);
 router.use('/operation-hour', app_hour);
@@ -59,5 +58,6 @@ router.use('/locations', locationRoute);
 router.use('/tracking', trackingRoute);
 router.use('/courier', courierRoute);
 router.use('/webhook', webhookRoute);
+router.use('/checkout', checkout);
 
 export default router;
