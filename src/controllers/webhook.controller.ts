@@ -1,7 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
-import { Request, Response } from 'express';
+
+import express, { Request, Response, NextFunction } from 'express';
+v
 const prisma = new PrismaClient();
+
+const user_data = express.Router();
 
 export async function BiteshipTracking(req: Request, res: Response) {
   const event = req.body;
@@ -76,7 +80,13 @@ export async function BiteshipTracking(req: Request, res: Response) {
 const apiURL = 'http://localhost:3000/api'; // Replace with your actual API URL
 // const token = 'YOUR_AUTH_TOKEN'; // Replace with actual token if required
 
-export const Midtrans = async (req: Request, res: Response) => {
+
+export async function Midtrans(req: Request, res: Response) {
+  // user_data.post("/save-data", (req, res) => {
+  //   const req_user = req.body;
+  //   console.log("data recieved: ", req_user);
+  //   res.status(200).json({ message: "Data received successfully!", data: req_user });
+  // });
   try {
     const data = req.body;
     console.log('Midtrans Webhook Data:', data);
