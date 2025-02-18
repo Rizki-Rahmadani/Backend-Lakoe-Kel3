@@ -784,6 +784,7 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
                     variant_option_value: {
                       select: {
                         price: true,
+                        weight: true,
                       },
                     },
                   },
@@ -808,6 +809,7 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
     const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
 
     let price = product.price; // Default to product price
+    let weight = product.weight;
 
     // Check if the product has variants
     if (product.variants && product.variants.length > 0) {
@@ -824,12 +826,14 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
             },
             select: {
               price: true,
+              weight: true,
             },
           },
         );
 
         if (variantCombination) {
           price = variantCombination.price; // Update price if variant combination is found
+          weight = variantCombination.weight;
         }
       }
     }
@@ -837,6 +841,7 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
     res.status(200).json({
       ...product,
       price,
+      weight,
       priceRange: { min: minPrice, max: maxPrice },
     });
   } catch (error) {

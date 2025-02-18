@@ -117,6 +117,7 @@ export async function getAllStore(
     const allStore = prisma.stores.findMany({
       select: {
         name: true,
+        username: true,
         slogan: true,
         description: true,
         domain: true,
@@ -131,7 +132,9 @@ export async function getAllStore(
       };
     });
 
-    res.status(200).json({ message: 'store fetched: ', formattedStore });
+    res
+      .status(200)
+      .json({ message: 'store fetched: ', stores: formattedStore });
   } catch (error) {
     res.send(500).json({ message: 'error getting stores.', error });
   }
