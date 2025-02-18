@@ -15,25 +15,40 @@ const snap = new MidtransClient.Snap({
 export default async function createTransaction(req: Request, res: Response) {
   try {
     // Destructure incoming request body
-    const { id, productName, price, quantity } = req.body;
-
+    const { id, productName, price, quantity, service_charge, shipment } =
+      req.body;
+    const amount = price * quantity + service_charge + shipment;
+    console.log(amount);
     // Construct parameter object for Midtrans
     const parameter = {
-      item_details: {
-        name: productName,
-        price: price,
-        quantity: quantity,
-      },
+      item_details: [
+        {
+          name: productName,
+          price: price,
+          quantity: quantity,
+        },
+        {
+          name: 'service charge',
+          price: service_charge,
+          quantity: 1,
+        },
+        {
+          name: 'shipment',
+          price: shipment,
+          quantity: 1,
+        },
+      ],
+
       transaction_details: {
         order_id: id,
-        gross_amount: price * quantity,
+        gross_amount: amount,
       },
       credit_card: {
         secure: true,
       },
     };
-    console.log(id);
-    console.log(price);
+    // console.log(id);
+    // console.log(price);
 
     // Create transaction token using Midtrans
     const token = await snap.createTransaction(parameter);
