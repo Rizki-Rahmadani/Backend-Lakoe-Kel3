@@ -269,4 +269,3 @@ webhookRoute.post('/biteship/tracking', webhook.BiteshipTracking);
 webhookRoute.post('/midtrans', webhook.Midtrans);
 
 export default webhookRoute;
-
