@@ -27,7 +27,7 @@ import { courierRoute } from './courier.route';
 import webhookRoute from './webhook.route';
 import adminRoute from './admin.route';
 import { checkout } from './checkout.route';
-
+import bankUpdateRoute from './bank-update.route';
 
 const router = express.Router();
 
@@ -48,6 +48,7 @@ router.use('/product', app_product);
 router.use('/message', app_message);
 router.use('/stores', app_store);
 router.use('/bank', app_bank);
+router.use('/update-bank', bankUpdateRoute);
 router.use('/operation-hour', app_hour);
 router.use('/order', orderRoute);
 router.use('/category', categoryRoute);
