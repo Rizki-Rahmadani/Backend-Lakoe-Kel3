@@ -76,9 +76,9 @@ export async function BiteshipTracking(req: Request, res: Response) {
 const apiURL = 'http://localhost:3000/api'; // Replace with your actual API URL
 // const token = 'YOUR_AUTH_TOKEN'; // Replace with actual token if required
 
-export async function Midtrans(req: Request, res: Response) {
+export const Midtrans = async (req: Request, res: Response) => {
   try {
-    const data = req?.body;
+    const data = req.body;
     console.log('Midtrans Webhook Data:', data);
 
     // Verify the notification with Midtrans
@@ -121,7 +121,7 @@ export async function Midtrans(req: Request, res: Response) {
           receiver_detailAddress: 'ehiuewuhwuiehrweur',
           receiver_email: 'sam@mail.com',
           // cartsId: 'cdqdwir39232',
-          userId: 'cm74hxlxy0009tsd4lzhwhwmv',
+          userId: 'cm71m960c0007tarc0pnj62eb',
           order_id: data.order_id,
           // paymentsId: 'joewjfiewjfiwf',
           // courierId: 'wqeijeiqejei',
@@ -133,6 +133,32 @@ export async function Midtrans(req: Request, res: Response) {
           },
         },
       );
+
+      // confirm order to biteship if is paid
+      const draftOrdersId = '2131241';
+      const orderBiteship = await axios.post(
+        `${apiURL}/order/confirm/${draftOrdersId}`,
+      );
+
+      //menambahkan order ke database
+      const dbOrders = await prisma.orders.create({
+        data: {
+          order_id: midtransResponse.data.id,
+          receiver_name: '',
+          status: 'Pesanan Baru',
+          biteship_order_id: orderBiteship.data.id,
+          // midtrans_order_id:midtransResponse.data.id,
+          storeId: '',
+          locationId: '',
+        },
+      });
+
+      // order_id      String   @unique
+      // receiver_name String
+      // status        String
+      // biteship_order_id String?
+      // storeId       String
+      // locationId    String
 
       const invoice_history_response = await axios.post(
         apiURL + '/invoice-history/create-invoice-history',
@@ -165,7 +191,7 @@ export async function Midtrans(req: Request, res: Response) {
       const invoice_response = await axios.post(
         apiURL + '/invoice/create-invoice',
         {
-          status: 'success',
+          status: 'failed',
           prices: 800000 * 2,
           service_charge: service_charge,
           receiver_city: 'jkt',
@@ -178,7 +204,7 @@ export async function Midtrans(req: Request, res: Response) {
           receiver_detailAddress: 'ehiuewuhwuiehrweur',
           receiver_email: 'sam@mail.com',
           // cartsId: 'cdqdwir39232',
-          userId: 'cm74hxlxy0009tsd4lzhwhwmv',
+          userId: 'cm71m960c0007tarc0pnj62eb',
           order_id: data.order_id,
           // paymentsId: 'joewjfiewjfiwf',
           // courierId: 'wqeijeiqejei',
@@ -190,6 +216,21 @@ export async function Midtrans(req: Request, res: Response) {
           },
         },
       );
+
+      //create order status failed
+      //  const dbOrders = await prisma.orders.update({
+      //   data:{
+      //     order_id:midtransResponse.data.id,
+      //     receiver_name:"",
+      //     status:"Pesanan Baru",
+      //     biteship_order_id:orderBiteship.data.id,
+      //     // midtrans_order_id:midtransResponse.data.id,
+      //     storeId:"",
+      //     locationId:"",
+
+      //   }
+      // }
+      // )
 
       const invoice_history_response = await axios.post(
         apiURL + '/invoice-history/create-invoice-history',
@@ -234,11 +275,24 @@ export async function Midtrans(req: Request, res: Response) {
         },
       );
 
-      // make order to biteship if is paid
+      // confirm order to biteship if is paid
       const draftOrdersId = '2131241';
       const orderBiteship = await axios.post(
         `${apiURL}/order/confirm/${draftOrdersId}`,
       );
+
+      //menambahkan order ke database
+      const dbOrders = await prisma.orders.create({
+        data: {
+          order_id: midtransResponse.data.id,
+          receiver_name: '',
+          status: 'Pesanan Baru',
+          biteship_order_id: orderBiteship.data.id,
+          // midtrans_order_id:midtransResponse.data.id,
+          storeId: '',
+          locationId: '',
+        },
+      });
 
       // Create payment record
       await axios.post(
@@ -291,7 +345,7 @@ export async function Midtrans(req: Request, res: Response) {
           receiver_detailAddress: 'ehiuewuhwuiehrweur',
           receiver_email: 'sam@mail.com',
           // cartsId: 'cdqdwir39232',
-          userId: 'cm74hxlxy0009tsd4lzhwhwmv',
+          userId: 'cm71m960c0007tarc0pnj62eb',
           order_id: data.order_id,
           // paymentsId: 'joewjfiewjfiwf',
           // courierId: 'wqeijeiqejei',
@@ -337,7 +391,7 @@ export async function Midtrans(req: Request, res: Response) {
     console.error('Error processing Midtrans webhook:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-}
+};
 
 // import { PrismaClient } from '@prisma/client';
 // import axios from 'axios';
