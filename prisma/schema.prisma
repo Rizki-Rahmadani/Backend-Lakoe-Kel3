@@ -94,16 +94,20 @@ model Stores {
 
 model Orders {
   id            String   @id @unique @default(cuid())
-  order_id      String   @unique
-  receiver_name String
+  order_id      String?   @unique
+  receiver_name String?
   status        String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  biteship_order_id String?
-  storeId       String
-  locationId    String
+  biteship_order_id String?   @unique
+  midtrans_order_id String?   @unique
+  invoiceId     String?   
+  biteship_tracking_link  String?
+  storeId       String    
+  locationId    String?   
+  invoice   Invoices?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   store    Stores   @relation(fields: [storeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 
@@ -251,6 +255,7 @@ model Invoices {
   userId               String 
   paymentsId           String?                 @unique
   courierId            String?
+  orders               Orders[]
   Confirmation_payment Confirmation_payment[]
   Invoice_histories    Invoice_histories[]
   createdAt            DateTime               @default(now())
