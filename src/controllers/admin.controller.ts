@@ -162,3 +162,243 @@ export async function loginAdmin(req: Request, res: Response) {
     res.status(500).json({ message: 'Error logging in', error });
   }
 }
+
+export async function showAllRequest(req: Request, res: Response) {
+  const userId = (req as any).user.id;
+  try {
+    const checkRoles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'admin', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkRoles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId, rolesId: checkRoles.id },
+    });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const fetchRequest = await prisma.transaction.findMany({
+      where: {
+        type: {
+          equals: 'withdraw',
+          mode: 'insensitive',
+        },
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: 'Withdraw List fetched', request: fetchRequest });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error accepting withdraw', error });
+  }
+}
+export async function showPendingRequest(req: Request, res: Response) {
+  const userId = (req as any).user.id;
+  try {
+    const checkRoles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'admin', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkRoles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId, rolesId: checkRoles.id },
+    });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const fetchRequest = await prisma.transaction.findMany({
+      where: {
+        type: {
+          equals: 'withdraw',
+          mode: 'insensitive',
+        },
+        status: {
+          equals: 'pending',
+          mode: 'insensitive',
+        },
+      },
+      include: { store: true },
+    });
+    return res
+      .status(200)
+      .json({ message: 'Withdraw List fetched', request: fetchRequest });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error accepting withdraw', error });
+  }
+}
+export async function showAcceptedRequest(req: Request, res: Response) {
+  const userId = (req as any).user.id;
+  try {
+    const checkRoles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'admin', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkRoles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId, rolesId: checkRoles.id },
+    });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const fetchRequest = await prisma.transaction.findMany({
+      where: {
+        type: {
+          equals: 'withdraw',
+          mode: 'insensitive',
+        },
+        status: {
+          equals: 'accepted',
+          mode: 'insensitive',
+        },
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: 'Withdraw List fetched', request: fetchRequest });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error accepting withdraw', error });
+  }
+}
+export async function showRejectedRequest(req: Request, res: Response) {
+  const userId = (req as any).user.id;
+  try {
+    const checkRoles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'admin', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkRoles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId, rolesId: checkRoles.id },
+    });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const fetchRequest = await prisma.transaction.findMany({
+      where: {
+        type: {
+          equals: 'withdraw',
+          mode: 'insensitive',
+        },
+        status: {
+          equals: 'rejected',
+          mode: 'insensitive',
+        },
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: 'Withdraw List fetched', request: fetchRequest });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error accepting withdraw', error });
+  }
+}
+export async function acceptWithdraw(req: Request, res: Response) {
+  const { id } = req.params;
+  const userId = (req as any).user.id;
+  try {
+    const checkRoles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'admin', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkRoles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId, rolesId: checkRoles.id },
+    });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const updateWithdraw = await prisma.transaction.update({
+      where: { id: id },
+      data: {
+        status: 'accepted',
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: 'Withdraw Accepted', status: updateWithdraw });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error accepting withdraw', error });
+  }
+}
+export async function rejectWithdraw(req: Request, res: Response) {
+  const { id } = req.params;
+  const userId = (req as any).user.id;
+  try {
+    const checkRoles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'admin', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkRoles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId, rolesId: checkRoles.id },
+    });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const updateWithdraw = await prisma.transaction.update({
+      where: { id: id },
+      data: {
+        status: 'rejected',
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: 'Withdraw Rejected', status: updateWithdraw });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error Rejecting Withdraw', error });
+  }
+}
