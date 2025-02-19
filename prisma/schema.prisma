@@ -93,6 +93,7 @@ model Stores {
 }
 
 model Orders {
+
   id                     String    @id @unique @default(cuid())
   order_id               String?   @unique
   receiver_name          String?
@@ -108,6 +109,7 @@ model Orders {
   invoice                Invoices? @relation(fields: [invoiceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   store                  Stores    @relation(fields: [storeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   location               Location? @relation(fields: [locationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
 }
 
 model bank_accounts {
@@ -247,21 +249,21 @@ model Invoices {
   receiver_email            String
   order_id                  String?
   receiver_biteship_area_id String?
-  cart_id                   Carts?                 @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  invoice_number            String?
-  user_id                   User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  payment_id                Payments?              @relation(fields: [paymentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  courier_id                Couriers?
-  cartsId                   String?
-  userId                    String
-  paymentsId                String?                @unique
-  courierId                 String?
-  Confirmation_payment      Confirmation_payment[]
-  Invoice_histories         Invoice_histories[]
-  orders                    Orders[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  cart_id              Carts?                  @relation(fields: [cartsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  invoice_number       String?
+  user_id              User                   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  payment_id           Payments?              @relation(fields: [paymentsId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  courier_id           Couriers?
+  cartsId              String?
+  userId               String 
+  paymentsId           String?                 @unique
+  courierId            String?
+  orders               Orders[]
+  Confirmation_payment Confirmation_payment[]
+  Invoice_histories    Invoice_histories[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
 }
 
 model Confirmation_payment {

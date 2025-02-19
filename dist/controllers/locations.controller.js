@@ -166,33 +166,79 @@ const updateLocation = async (req, res) => {
     }
 };
 exports.updateLocation = updateLocation;
-const deleteLocation = async (req, res) => {
-    /*
-          #swagger.tags = ['Location']
-          #swagger.requestBody = {
-              required: true,
-              content: {
-                  "application/json": {
-                      schema: {
-                          $ref: "#/components/schemas/DeleteLocationDTO"
-                      }
-                  }
-              }
-          }
-      */
+
+export const deleteLocation = async (req, res) => {
     try {
-        const { id } = req.params;
-        await prisma.location.delete({
-            where: { id },
+      const { id } = req.params;
+  
+      // Temukan lokasi yang akan dihapus
+      const findLocation = await prisma.location.findUnique({
+        where: { id },
+      });
+  
+      if (!findLocation) {
+        return res.status(404).json({ message: 'Location not found' });
+      }
+  
+      // Simpan storesId sebelum menghapus lokasi
+      const storeId = findLocation.storesId;
+  
+      // Hapus lokasi dari database
+      await prisma.location.delete({
+        where: { id },
+      });
+  
+      // Jika lokasi yang dihapus adalah lokasi utama, cari lokasi lain untuk dijadikan utama
+      if (findLocation.is_main_location) {
+        const nextLocation = await prisma.location.findFirst({
+          where: { storesId: storeId },
+          orderBy: { createdAt: 'asc' }, // Pilih lokasi tertua
         });
-        res.status(200).json({
-            message: 'Locations deleted successfully',
-        });
-    }
-    catch (error) {
-        res
-            .status(500)
-            .json({ error: 'An error occurred while deleting the location' });
-    }
-};
-exports.deleteLocation = deleteLocation;
+  
+        if (nextLocation) {
+          await prisma.location.update({
+            where: { id: nextLocation.id },
+            data: { is_main_location: true },
+          });
+        }
+      }
+  
+      return res.status(200).json({
+        message: 'Location deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error in deleteLocation:', error);
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  };
+
+// const deleteLocation = async (req, res) => {
+//     /*
+//           #swagger.tags = ['Location']
+//           #swagger.requestBody = {
+//               required: true,
+//               content: {
+//                   "application/json": {
+//                       schema: {
+//                           $ref: "#/components/schemas/DeleteLocationDTO"
+//                       }
+//                   }
+//               }
+//           }
+//       */
+//     try {
+//         const { id } = req.params;
+//         await prisma.location.delete({
+//             where: { id },
+//         });
+//         res.status(200).json({
+//             message: 'Locations deleted successfully',
+//         });
+//     }
+//     catch (error) {
+//         res
+//             .status(500)
+//             .json({ error: 'An error occurred while deleting the location' });
+//     }
+// };
+// exports.deleteLocation = deleteLocation;
