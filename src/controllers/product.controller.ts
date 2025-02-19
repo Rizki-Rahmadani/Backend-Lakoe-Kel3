@@ -259,9 +259,16 @@ export async function getProductByUrl(req: Request, res: Response) {
     if (!findStore) {
       return res.status(404).json({ message: 'Store not found' });
     }
-    const findProduct = await prisma.product.findUnique({
-      where: { url: url, storesId: findStore.id },
+    //tampilkan semua produk yang aktif di setiap store
+    const findProduct = await prisma.product.findMany({
+      where: {
+        storesId: findStore.id,
+        is_active: true,
+      },
     });
+    // const findProduct = await prisma.product.findUnique({
+    //   where: { url: url, storesId: findStore.id },
+    // });
     if (!findProduct) {
       return res.status(404).json({ message: 'Product Not Available' });
     }
