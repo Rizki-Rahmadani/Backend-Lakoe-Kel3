@@ -323,77 +323,41 @@ export const confirmDraftOrder = async (req: Request, res: Response) => {
     }
   }
 };
-// export const confirmDraftOrder = async (req: Request, res: Response) => {
-//   try {
-//     // Fetch draft orders from Biteship
-//     const { id } = req.body;
-//     const apiBiteship = `https://api.biteship.com/v1/draft_orders/${id}/confirm`;
-//     console.log(process.env.API_BITESHIP_TEST)
-//     const biteship = await axios.post(apiBiteship, {
-//       headers: {
-//         Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`,
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     // const response = await biteshipClient.get('/draft_orders');
-//     // console.log('This is response: ', biteship);
-
-//     // Send only the necessary data (response.data) in the JSON response
-//     res.status(200).json({
-//       message: 'Draft order fetched successfully!',
-//       data: biteship.data, // Only send the data property
-//     });
-//   } catch (error: unknown) {
-//     // Handle errors
-//     if (axios.isAxiosError(error)) {
-//       const errorMessage = error.response?.data || error.message;
-//       console.error('Error fetching draft orders:', errorMessage);
-//       return res.status(500).json({
-//         message: 'Failed to fetch draft orders',
-//         error: errorMessage,
-//       });
-//     } else {
-//       console.error('Unexpected error:', error);
-//       return res.status(500).json({
-//         message: 'An unexpected error occurred',
-//         error: (error as Error).message || error,
-//       });
-//     }
-//   }
-// };
 
 export const retrieveOrder = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
+  const { userId } = (req as any).user;
   try {
-    // Send the request to Biteship API to retrieve the order
-    const response = await biteshipClient.get('/draft_orders/' + id);
 
-    // Handle the successful response
-    const order = response.data;
-    // You can store this order information in your database if needed
-    res.status(200).json({
-      message: 'Order Retrieved successfully!',
-      order,
+    // Cari Store berdasarkan userId
+    const findStore = await prisma.stores.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!findStore) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Cari Orders berdasarkan storeId
+    const findOrder = await prisma.orders.findMany({
+      where: { storeId: findStore.id },
+    });
+
+    // Cari Invoices berdasarkan userId
+    // const findInvoice = await prisma.invoices.findMany({
+    //   where: { order_id: findOrder.id },
+    // });
+
+    // Kirim response dengan findOrder dan findInvoice
+    res.json({
+      store: findStore,
+      orders: findOrder,
+      // invoices: findInvoice,
     });
   } catch (error: unknown) {
-    // Type narrowing for AxiosError
-    if (axios.isAxiosError(error)) {
-      // If the error is an AxiosError, safely access properties like response
-      const errorMessage = error.response?.data?.error || error.message;
-      console.error('Error retrieving order:', errorMessage);
-
-      return res.status(400).json({
-        message: 'Failed to retrieve order',
-        error: errorMessage,
-      });
-    } else {
-      // For non-Axios errors
-      console.error('Unexpected error:', error);
-      return res.status(500).json({
-        message: 'An unexpected error occurred',
-        error: (error as Error).message || error,
-      });
-    }
+    console.error('Error retrieving orders and invoices:', error);
+    return res.status(500).json({
+      message: 'An unexpected error occurred',
+      error: (error as Error).message || error,
+    });
   }
 };
