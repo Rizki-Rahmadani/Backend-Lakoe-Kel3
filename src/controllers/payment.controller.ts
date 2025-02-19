@@ -10,9 +10,10 @@ export async function createPayment(req: Request, res: Response) {
     status_code,
     midtrans_transaction_id,
     invoicesId,
+    userId,
   } = req.body;
   // const userId = (req as any).user.id;
-  const userId = 'cm74hxlxy0009tsd4lzhwhwmv';
+  // const userId = 'cm78p5jli0001tankm1gcyj9x';
   if (!bank && !gross_amount && !status_code && userId) {
     return res
       .status(400)
