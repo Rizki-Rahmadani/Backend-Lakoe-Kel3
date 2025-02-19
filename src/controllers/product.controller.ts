@@ -240,7 +240,47 @@ export async function getProductforName(req: Request, res: Response) {
       return res.status(404).json({ message: 'Store Not Found' });
     }
     const product = await prisma.product.findMany({
-      where: { storesId: getStore.id },
+      where: { storesId: getStore.id, is_active: true },
+      select: {
+        id: true, // Include product ID
+        name: true,
+        attachments: true,
+        price: true,
+        description: true,
+        minimum_order: true, // Include minimum order
+        stock: true, // Include stock
+        weight: true, // Include weight
+        length: true, // Include length
+        width: true, // Include width
+        height: true, // Include height
+        sku: true, // Include SKU
+        is_active: true, // Include active status
+        variants: {
+          select: {
+            id: true,
+            name: true,
+            Variant_options: {
+              select: {
+                id: true,
+                name: true,
+                variant_values: {
+                  select: {
+                    variant_option_value: {
+                      select: {
+                        price: true,
+                        weight: true,
+                        sku: true,
+                        stock: true,
+                        is_active: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
     res.status(200).json({
       message: 'successfully fetched products',
@@ -792,6 +832,9 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
                       select: {
                         price: true,
                         weight: true,
+                        sku: true,
+                        stock: true,
+                        is_active: true,
                       },
                     },
                   },
