@@ -8,6 +8,7 @@ async function main() {
 
   // Seed Categories
   await seedCategories();
+
 }
 
 async function seedRoles() {
