@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
-import { authentication } from '../middlewares/authmiddleware';
 import axios from 'axios';
 dotenv.config();
 
