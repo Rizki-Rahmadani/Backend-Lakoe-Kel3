@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createStore } from './store.controller';
 
 const SECRET_KEY =
   process.env.SECRET_KEY || 'aksjdkl2aj3djaklfji32dj2dj9ld92jd92j';
@@ -11,7 +10,7 @@ const prisma = new PrismaClient();
 
 const SALT_ROUNDS = 10;
 
-export async function register(req: Request, res: Response) {
+export async function registerAdmin(req: Request, res: Response) {
   /*  
       #swagger.tags = ['Auth']
       #swagger.requestBody = {
@@ -35,7 +34,7 @@ export async function register(req: Request, res: Response) {
     const addroles = await prisma.roles.findFirst({
       where: {
         name: {
-          equals: 'seller', // make sure you're comparing it to a lowercase string
+          equals: 'admin', // make sure you're comparing it to a lowercase string
           mode: 'insensitive', // this makes the comparison case-insensitive
         },
       },
@@ -84,38 +83,16 @@ export async function register(req: Request, res: Response) {
       },
     });
 
-    const findRegister = await prisma.user.findUnique({
-      where: { email: email },
-      select: { id: true },
-    });
-    function formatString(input: string): string {
-      return input.toLowerCase().replace(/\s+/g, '');
-    }
-    const findStore = await prisma.stores.findUnique({
-      where: { username: formatString(fullname) },
-    });
-    if (findStore) {
-      return res.status(403).json({ message: 'Store Name already taken' });
-    }
-    const addstore = await prisma.stores.create({
-      data: {
-        name: fullname,
-        username: formatString(fullname),
-        userId: findRegister!.id,
-      },
-    });
-
     res.status(201).json({
-      message: 'User & store registered',
+      message: 'Admin registered',
       user: newUser,
-      store: addstore,
     });
   } catch (error) {
     res.status(500).json({ message: 'Error registering user', error });
   }
 }
 
-export async function login(req: Request, res: Response) {
+export async function loginAdmin(req: Request, res: Response) {
   /*  
       #swagger.tags = ['Auth']
       #swagger.requestBody = {
@@ -135,8 +112,22 @@ export async function login(req: Request, res: Response) {
     return res.status(400).json({ message: 'All fields are required' });
   }
   try {
+    const checkRoles = await prisma.roles.findFirst({
+      where: {
+        name: {
+          equals: 'admin', // make sure you're comparing it to a lowercase string
+          mode: 'insensitive', // this makes the comparison case-insensitive
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkRoles) {
+      return res.status(404).json({ message: 'Role not found' });
+    }
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email, rolesId: checkRoles.id },
     });
 
     if (!user) {
@@ -169,26 +160,5 @@ export async function login(req: Request, res: Response) {
     }
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
-  }
-}
-
-export async function currentUser(req: Request, res: Response) {
-  const id = (req as any).user.id;
-  try {
-    const getUser = await prisma.user.findUnique({
-      where: { id: id },
-      select: {
-        id: true,
-        fullname: true,
-        email: true,
-        role_id: true,
-      },
-    });
-    if (!getUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    return res.status(200).json({ message: 'User found', user: getUser });
-  } catch {
-    return res.status(400).json({ message: 'Error fetching User' });
   }
 }

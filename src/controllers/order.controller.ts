@@ -16,7 +16,7 @@ export const createOrder = async (req: Request, res: Response) => {
       .json({ message: 'Items array is required and cannot be empty.' });
   }
 
-  const orderItem: OrderItem = orderData.items[0]; // ✅ Correct way to extract first item
+  const orderItem: OrderItem = orderData.items[0]; // Correct way to extract first item
 
   try {
     const orderPayload = {
@@ -26,7 +26,6 @@ export const createOrder = async (req: Request, res: Response) => {
       origin_address: orderData.origin_address,
       origin_postal_code: orderData.origin_postal_code,
       origin_area_id: orderData.origin_area_id,
-
       destination_contact_name: orderData.destination_contact_name,
       destination_contact_phone: orderData.destination_contact_phone,
       destination_contact_email: orderData.destination_contact_email,
@@ -34,40 +33,42 @@ export const createOrder = async (req: Request, res: Response) => {
       destination_postal_code: orderData.destination_postal_code,
       destination_note: orderData.destination_note,
       destination_area_id: orderData.destination_area_id,
-
       courier_company: orderData.courier_company,
       courier_type: orderData.courier_type,
-
       courier_insurance: orderData.courier_insurance,
       delivery_type: orderData.delivery_type,
-      order_note: 'please be Careful',
-
+      order_note: orderData.order_note,
       items: [
         {
           name: orderItem.name,
-          // description: orderItem.description,
-          // variant_options: orderItem.variant_options,
-          // category: orderItem.category,
+          description: orderItem.description,
+          variant_options: orderItem.variant_options,
+          category: orderItem.category,
           value: orderItem.value,
           quantity: orderItem.quantity,
-          // height: orderItem.height,
-          // length: orderItem.length,
+          height: orderItem.height,
+          length: orderItem.length,
           weight: orderItem.weight,
-          // width: orderItem.width,
+          width: orderItem.width,
         },
       ],
     };
 
-    console.log('Order item:', orderItem); // ✅ Log the item to debug
+    console.log('Order item:', orderItem); // Log the item to debug
 
     // Make API request to Biteship
-    const apiBiteship = `https://api.biteship.com/v1/draft_orders`;
+    const apiBiteship = `https://api.biteship.com/v1/orders`;
     const biteship = await axios.post(apiBiteship, orderPayload, {
       headers: {
         Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`,
         'Content-Type': 'application/json',
       },
     });
+
+    // const confirmOrder = await prisma.orders.update({
+    //   where: { order_id: order_id },
+    //   data: { status: statusOrder },
+    // });
 
     const data = biteship.data;
     console.log(data);
@@ -94,6 +95,7 @@ export const createOrder = async (req: Request, res: Response) => {
     }
   }
 };
+
 
 export const updateOrder = async (req: Request, res: Response) => {
   const orderData: OrderRequest = req.body;
@@ -181,31 +183,135 @@ export const updateOrder = async (req: Request, res: Response) => {
 };
 
 export const confirmOrder = async (req: Request, res: Response) => {
+
+// export const createDraftOrder = async (req: Request, res: Response) => {
+//   const orderData: OrderRequest = req.body;
+
+//   if (!orderData.items || orderData.items.length === 0) {
+//     return res
+//       .status(400)
+//       .json({ message: 'Items array is required and cannot be empty.' });
+//   }
+
+//   const orderItem: OrderItem = orderData.items[0]; // Correct way to extract first item
+
+
   try {
-    // Fetch draft orders from Biteship
-    const { id } = req.body;
-    const apiBiteship = `https://api.biteship.com/v1/draft_orders/${id}/confirm`;
-    const biteship = await axios.post(apiBiteship, {
+    const orderPayload = {
+      origin_contact_name: orderData.origin_contact_name,
+      origin_contact_phone: orderData.origin_contact_phone,
+      origin_contact_email: orderData.origin_contact_email,
+      origin_address: orderData.origin_address,
+      origin_postal_code: orderData.origin_postal_code,
+      origin_area_id: orderData.origin_area_id,
+      destination_contact_name: orderData.destination_contact_name,
+      destination_contact_phone: orderData.destination_contact_phone,
+      destination_contact_email: orderData.destination_contact_email,
+      destination_address: orderData.destination_address,
+      destination_postal_code: orderData.destination_postal_code,
+      destination_note: orderData.destination_note,
+      destination_area_id: orderData.destination_area_id,
+      courier_company: orderData.courier_company,
+      courier_type: orderData.courier_type,
+      courier_insurance: orderData.courier_insurance,
+      delivery_type: orderData.delivery_type,
+      order_note: orderData.order_note,
+      items: [
+        {
+          name: orderItem.name,
+          description: orderItem.description,
+          variant_options: orderItem.variant_options,
+          category: orderItem.category,
+          value: orderItem.value,
+          quantity: orderItem.quantity,
+          height: orderItem.height,
+          length: orderItem.length,
+          weight: orderItem.weight,
+          width: orderItem.width,
+        },
+      ],
+    };
+
+    console.log('Order item:', orderItem); // Log the item to debug
+
+    // Make API request to Biteship
+    const apiBiteship = `https://api.biteship.com/v1/draft_orders`;
+    const biteship = await axios.post(apiBiteship, orderPayload, {
       headers: {
         Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`,
         'Content-Type': 'application/json',
       },
     });
-    // const response = await biteshipClient.get('/draft_orders');
-    // console.log('This is response: ', biteship);
 
-    // Send only the necessary data (response.data) in the JSON response
+    const data = biteship.data;
+    // Simpan orderId ke database
+    await prisma.orders.create({
+      data: {
+        receiver_name: orderData.destination_contact_name,
+        storeId: '',
+        locationId: '',
+        order_id: data.id,
+        status: data.status,
+      },
+    });
+
+    console.log(data);
+    // You can now store this order information in your database if needed
+    res.status(201).json({
+      message: 'Draft order created and saved successfully!',
+      orderId: data.id,
+      data,
+    });
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data || error.message;
+      console.error('Error creating order:', errorMessage);
+      return res.status(500).json({
+        message: 'Failed to create order',
+        error: errorMessage,
+      });
+    } else {
+      // console.error("Unexpected error:", error);
+      return res.status(500).json({
+        message: 'An unexpected error occurred',
+        error: (error as Error).message || error,
+      });
+    }
+  }
+};
+
+export const confirmDraftOrder = async (req: Request, res: Response) => {
+  try {
+    // Ambil ID dari body request
+    const { id } = req.params;
+    const apiBiteship = `https://api.biteship.com/v1/draft_orders/${id}/confirm`;
+
+    // Pastikan token ada di environment
+    console.log('Token:', process.env.API_BITESHIP_TEST);
+
+    // Perbaiki letak headers
+    const biteship = await axios.post(
+      apiBiteship,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    // Kirim respons sukses
     res.status(200).json({
       message: 'order confirmed successfully!',
       data: biteship.data, // Only send the data property
     });
   } catch (error: unknown) {
-    // Handle errors
     if (axios.isAxiosError(error)) {
       const errorMessage = error.response?.data || error.message;
-      console.error('Error fetching draft orders:', errorMessage);
+      console.error('Error confirming draft order:', errorMessage);
       return res.status(500).json({
-        message: 'Failed to fetch draft orders',
+        message: 'Failed to confirm draft order',
         error: errorMessage,
       });
     } else {
@@ -217,6 +323,44 @@ export const confirmOrder = async (req: Request, res: Response) => {
     }
   }
 };
+// export const confirmDraftOrder = async (req: Request, res: Response) => {
+//   try {
+//     // Fetch draft orders from Biteship
+//     const { id } = req.body;
+//     const apiBiteship = `https://api.biteship.com/v1/draft_orders/${id}/confirm`;
+//     console.log(process.env.API_BITESHIP_TEST)
+//     const biteship = await axios.post(apiBiteship, {
+//       headers: {
+//         Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`,
+//         'Content-Type': 'application/json',
+//       },
+//     });
+//     // const response = await biteshipClient.get('/draft_orders');
+//     // console.log('This is response: ', biteship);
+
+//     // Send only the necessary data (response.data) in the JSON response
+//     res.status(200).json({
+//       message: 'Draft order fetched successfully!',
+//       data: biteship.data, // Only send the data property
+//     });
+//   } catch (error: unknown) {
+//     // Handle errors
+//     if (axios.isAxiosError(error)) {
+//       const errorMessage = error.response?.data || error.message;
+//       console.error('Error fetching draft orders:', errorMessage);
+//       return res.status(500).json({
+//         message: 'Failed to fetch draft orders',
+//         error: errorMessage,
+//       });
+//     } else {
+//       console.error('Unexpected error:', error);
+//       return res.status(500).json({
+//         message: 'An unexpected error occurred',
+//         error: (error as Error).message || error,
+//       });
+//     }
+//   }
+// };
 
 export const retrieveOrder = async (req: Request, res: Response) => {
   const { id } = req.params;

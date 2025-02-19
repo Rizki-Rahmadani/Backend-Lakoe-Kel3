@@ -27,6 +27,10 @@ import { courierRoute } from './courier.route';
 // import webhook_midtrans from './webhook.route';
 import webhookRoute from './webhook.route';
 import app_user from './user.route';
+import adminRoute from './admin.route';
+import { checkout } from './checkout.route';
+import bankUpdateRoute from './bank-update.route';
+
 
 const router = express.Router();
 
@@ -38,7 +42,7 @@ const router = express.Router();
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
 router.use('/profile', profileRoute);
-
+router.use('/admin', adminRoute);
 router.use('/transaction', app_transaction);
 router.use('/invoice', app_invoice);
 router.use('/invoice-history', app_invoice_history);
@@ -49,6 +53,7 @@ router.use('/message', app_message);
 router.use('/stores', app_store);
 router.use('/user', app_user);
 router.use('/bank', app_bank);
+router.use('/update-bank', bankUpdateRoute);
 router.use('/operation-hour', app_hour);
 router.use('/order', orderRoute);
 router.use('/category', categoryRoute);
@@ -61,5 +66,6 @@ router.use('/locations', locationRoute);
 router.use('/tracking', trackingRoute);
 router.use('/courier', courierRoute);
 router.use('/webhook', webhookRoute);
+router.use('/checkout', checkout);
 
 export default router;
