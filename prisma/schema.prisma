@@ -304,7 +304,7 @@ model Couriers {
   price                Int
   invoice_id           Invoices @relation(fields: [invoicesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   order_id             String
-  invoicesId           String   @unique
+  invoicesId           String  @unique
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }

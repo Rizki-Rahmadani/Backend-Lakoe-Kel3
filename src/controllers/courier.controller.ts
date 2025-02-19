@@ -2,8 +2,19 @@ import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
 import dotenv from 'dotenv';
+import { log } from 'console';
 dotenv.config();
 const prisma = new PrismaClient();
+
+export const getCouriersSeeder = async (req: Request, res: Response) => {
+  try {
+    const couriers = await prisma.couriers.findMany();
+    res.status(200).json({ success: true, data: couriers });
+  } catch (error) {
+    console.error('Error fetching couriers:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
 
 export const getCourier = async (req: Request, res: Response) => {
   console.log('api Biteship', process.env.API_BITESHIP_TEST);
@@ -57,7 +68,7 @@ export const getCourierRates = async (req: Request, res: Response) => {
       {
         origin_area_id: origin_area_id,
         destination_area_id: destination_area_id,
-        couriers: 'paxel,jne,sicepat,anteraja,jnt,tiki,ninja,pos',
+        couriers: 'gojek,grab,jne,jnt,tiki',
         items: [
           {
             name: name,
