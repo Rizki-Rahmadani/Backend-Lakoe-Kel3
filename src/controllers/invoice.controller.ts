@@ -9,39 +9,43 @@ export async function createInvoice(req: Request, res: Response) {
   const {
     prices,
     status,
-    service_charge,
+
     receiver_province,
     receiver_city,
     receiver_district,
-    receiver_subDistrict,
+
     receiver_postalCode,
     receiver_detailAddress,
     receiver_phone,
     receiver_email,
     receiver_name,
     cartsId,
-    userId,
+    storesId,
     paymentsId,
     courierId,
     order_id,
   } = req.body;
 
   try {
+    const findStore = prisma.stores.findUnique({
+      where: { id: storesId },
+    });
+    if (!findStore) {
+      return res.status(400).json({ message: 'not found' });
+    }
     const data = {
       status: status,
       prices: prices,
-      service_charge: service_charge,
       receiver_city: receiver_city,
       receiver_province: receiver_province,
-      receiver_subDistrict: receiver_subDistrict,
       receiver_district: receiver_district,
       receiver_phone: receiver_phone,
       receiver_name: receiver_name,
       receiver_postalCode: receiver_postalCode,
       receiver_detailAddress: receiver_detailAddress,
       receiver_email: receiver_email,
-      cartsId: cartsId,
-      userId: userId,
+      // cartsId: cartsId,
+      storesId: storesId,
       order_id: order_id,
       // paymentsId: paymentsId,
       // courierId: courierId
@@ -71,18 +75,18 @@ export async function createInvoice(req: Request, res: Response) {
 
 export async function getInvoice(req: Request, res: Response) {
   try {
-    // const {id} = req.body;
+    const { id } = req.body;
 
     const findInvoice = await prisma.invoices.findMany({
-      // where: {id: id},
+      where: { id: id },
       select: {
         id: true,
         status: true,
         prices: true,
-        service_charge: true,
+
         receiver_city: true,
         receiver_province: true,
-        receiver_subDistrict: true,
+
         receiver_district: true,
         receiver_phone: true,
         receiver_name: true,
@@ -90,14 +94,7 @@ export async function getInvoice(req: Request, res: Response) {
         receiver_detailAddress: true,
         receiver_email: true,
 
-        userId: true,
-        user_id: {
-          select: {
-            fullname: true,
-            phone_number: true,
-            email: true,
-          },
-        },
+        storesId: true,
         paymentsId: true,
         payment_id: {
           select: {
@@ -150,6 +147,9 @@ export async function updateInvoice(req: Request, res: Response) {
         where: { id: existingInvoice.id }, // Use the unique `id`
         data: {
           status: status,
+        },
+        include: {
+          store_id: true,
         },
       });
     } else {

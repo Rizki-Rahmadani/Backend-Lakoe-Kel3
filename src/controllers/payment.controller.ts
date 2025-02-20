@@ -10,11 +10,11 @@ export async function createPayment(req: Request, res: Response) {
     status_code,
     midtrans_transaction_id,
     invoicesId,
-    userId,
+    storeId,
   } = req.body;
   // const userId = (req as any).user.id;
   // const userId = 'cm78p5jli0001tankm1gcyj9x';
-  if (!bank && !gross_amount && !status_code && userId) {
+  if (!bank && !gross_amount && !status_code) {
     return res
       .status(400)
       .json({ message: 'failed to get data from midtrans.' });
@@ -22,12 +22,14 @@ export async function createPayment(req: Request, res: Response) {
   let status;
   if (status_code == '200') {
     status = 'success';
+  } else if (status_code == '201') {
+    status = 'pending';
   } else {
     status = 'failed';
   }
   try {
-    const findUser = await prisma.user.findUnique({
-      where: { id: userId },
+    const findUser = await prisma.stores.findUnique({
+      where: { id: storeId },
     });
     if (!findUser) {
       return res.status(404).json({ message: 'User not found' });
@@ -37,7 +39,7 @@ export async function createPayment(req: Request, res: Response) {
       bank: bank,
       amount: gross_amount,
       status: status,
-      userId: userId,
+      storeId: storeId,
       midtrans_transaction_id: midtrans_transaction_id,
       invoicesId: invoicesId,
     };
@@ -59,23 +61,23 @@ export async function createPayment(req: Request, res: Response) {
 }
 
 export async function getPayment(req: Request, res: Response) {
-  const userId = (req as any).user.id;
+  const { storeId } = req.body;
 
   try {
-    const userExist = prisma.user.findUnique({
-      where: { id: userId },
+    const userExist = prisma.stores.findUnique({
+      where: { id: storeId },
     });
     if (!userExist) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     const paymentExist = prisma.payments.findMany({
-      where: { userId: userId },
+      where: { storeId: storeId },
       select: {
         bank: true,
         amount: true,
         status: true,
-        userId: true,
+        storeId: true,
       },
     });
 

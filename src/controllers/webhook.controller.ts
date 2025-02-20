@@ -2,20 +2,19 @@ import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import express, { Request, Response, NextFunction, response } from 'express';
-
+export const app_temporary = express();
 const prisma = new PrismaClient();
 
-const user_data = express.Router();
-const token = Cookies.get('token');
-console.log(token);
+// const user_data = express.Router();
+
 export async function BiteshipTracking(req: Request, res: Response) {
   const event = req.body;
-  console.log('Webhook Biteship diterima:', event);
+  // console.log('Webhook Biteship diterima:', event);
 
   // Cek apakah ada perubahan status pada order tertentu
   if (event.order_id && event.status) {
-    console.log(`Order ID: ${event.order_id}`);
-    console.log(`Status Order: ${event.status}`);
+    // console.log(`Order ID: ${event.order_id}`);
+    // console.log(`Status Order: ${event.status}`);
 
     // Map status dari Biteship ke status yang diinginkan
     let statusOrder = event.status;
@@ -82,6 +81,9 @@ const apiURL = 'http://localhost:3000/api'; // Replace with your actual API URL
 // const token = 'YOUR_AUTH_TOKEN'; // Replace with actual token if required
 
 export async function Midtrans(req: Request, res: Response) {
+  const token = Cookies.get('token');
+  console.log(token);
+
   // user_data.post("/save-data", (req, res) => {
   //   const req_user = req.body;
   //   console.log("data recieved: ", req_user);
@@ -117,7 +119,7 @@ export async function Midtrans(req: Request, res: Response) {
       return response.data;
     }
     const response_order = await get_biteship_order(data.order_id);
-
+    console.log('ini adalah response order: ', response_order);
     async function get_email_order(id: string) {
       const response = await axios.post(apiURL + `/order/get-email`, {
         id_order: id,
@@ -127,67 +129,102 @@ export async function Midtrans(req: Request, res: Response) {
     }
     const response_email = await get_email_order(data.order_id);
 
-    async function user_fetch() {
-      const user_response = await axios.get(apiURL + '/user', {
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtNzhwNWpsaTAwMDF0YW5rbTFnY3lqOXgiLCJmdWxsbmFtZSI6IkphY2tTcGFycm93IiwiZW1haWwiOiJqYWNrQG1haWwuY29tIiwiaWF0IjoxNzM5OTg2MTEyLCJleHAiOjE3NDAwMjkzMTJ9.BA0MUZQk3tLag1JxNIyCFC-Yl8eX1YwFjt1D-SftArw`,
-          'Content-Type': 'application/json',
-        },
-      });
-      return user_response.data.user[0];
-    }
-    const response_user = await user_fetch();
+    // async function user_fetch() {
+
+    //   const user_response = await axios.get(apiURL + '/user', {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //       'Content-Type': 'application/json',
+    //     },
+    //   });
+    //   return user_response.data.user[0];
+    // }
+    // const response_user = await user_fetch();
+
+    // async function fetch_store_location(){
+    //   const response = await axios.post(apiURL + '/stores/by-product',{
+    //     product_id: data.product_id
+    //   })
+
+    //   console.log(response);
+    //   return response.data;
+    // }
+    // const stores = fetch_store_location();
+
+    // async function user_store_fetch(){
+    //   const response = await axios.post(apiURL + '/user', {
+    //     storeId: ((await stores).store_id.id)
+    //   })
+    //   console.log("user res",response)
+    //   return response.data.user;
+    // }
+    // const storeUser_fetch = user_store_fetch();
 
     // console.log("data of biteship response: ", response_order);
 
     if (transactionStatus === 'capture' && fraudStatus === 'accept') {
       console.log(`Payment for order ${data.order_id} is captured.`);
-      const service_charge = (800000 * 2 * 1) / 100;
-      const invoice_response = await axios.post(
-        apiURL + '/invoice/create-invoice',
+
+      // const invoice_response = await axios.post(
+      //   apiURL + '/invoice/create-invoice',
+      //   {
+      //     status: 'success',
+      //     prices: Number(midtransResponse.data.gross_amount),
+
+      //     receiver_city: response_order.order.destination?.city_name,
+      //     receiver_province: response_order.order.destination?.province_name,
+
+      //     receiver_district: response_order.order.destination?.district_name,
+      //     receiver_phone: response_order.order.destination?.contact_phone,
+      //     receiver_name: response_order.order.destination?.contact_name,
+      //     receiver_postalCode:
+      //       (response_order.order.destination?.postal_code).toString(),
+      //     receiver_detailAddress: response_order.order.destination?.address,
+      //     receiver_email: response_email.data_response?.destination_email,
+      //     storeId: "",
+      //     order_id: data.order_id,
+      //   },
+      //   {
+      //     headers: {
+      //       // Authorization: `bearer ${token}`,
+      //       'Content-Type': 'application/json',
+      //     },
+      //   },
+      // );
+
+      const updateInvoice = await axios.put(
+        apiURL + '/invoice/update-invoice',
         {
-          status: 'success',
-          prices: Number(midtransResponse.data.gross_amount),
-          service_charge: service_charge,
-          receiver_city: response_order.order.destination?.city_name,
-          receiver_province: response_order.order.destination?.province_name,
-          receiver_subDistrict: 'jkt',
-          receiver_district: response_order.order.destination?.district_name,
-          receiver_phone: response_order.order.destination?.contact_phone,
-          receiver_name: response_order.order.destination?.contact_name,
-          receiver_postalCode:
-            (response_order.order.destination?.postal_code).toString(),
-          receiver_detailAddress: response_order.order.destination?.address,
-          receiver_email: response_email.data_response?.destination_email,
-          userId: response_user.id,
           order_id: data.order_id,
+          status: 'success',
         },
         {
           headers: {
-            // Authorization: `bearer ${token}`,
+            //   Authorization: `bearer ${token}`,
             'Content-Type': 'application/json',
           },
         },
       );
 
+      console.log('my data: ', updateInvoice.data.invoice_updated.storesId);
       // confirm order to biteship if is paid
-      // const draftOrdersId = '2131241';
-      // const orderBiteship = await axios.post(
-      //   `${apiURL}/order/confirm/${draftOrdersId}`,
-      // );
+      const draftOrdersId = data.order_id;
+      const orderBiteship = await axios.post(
+        `${apiURL}/order/confirm/${draftOrdersId}`,
+      );
 
-      //update order Status ke database
-      // const dbOrders = await prisma.orders.update({
-      //   where:{ midtrans_order_id: midtransResponse.data.},
-      //   data: {
-      //     status: 'Pesanan Baru',
-      //   },
-      // });
+      // update order Status ke database
+      const dbOrders = await prisma.orders.update({
+        where: { order_id: data.order_id },
+        data: {
+          status: 'Pesanan Baru',
+        },
+      });
 
       const invoice_history_response = await axios.post(
         apiURL + '/invoice-history/create-invoice-history',
         {
-          invoice_id: invoice_response.data.invoice_created.id,
+          invoice_id: updateInvoice.data.invoice_updated.id,
         },
       );
       console.log('invoice_history created: ', invoice_history_response.data);
@@ -198,8 +235,8 @@ export async function Midtrans(req: Request, res: Response) {
           gross_amount: Number(result.gross_amount),
           status_code: result.status_code,
           midtrans_transaction_id: result.transaction_id,
-          invoicesId: invoice_response.data.invoice_created.id,
-          userId: response_user.id,
+          invoicesId: updateInvoice.data.invoice_updated.id,
+          storeId: updateInvoice.data.invoice_updated.storesId,
         },
         {
           headers: {
@@ -212,53 +249,62 @@ export async function Midtrans(req: Request, res: Response) {
 
     if (transactionStatus === 'deny') {
       console.log(`Payment for order ${data.order_id} is deny.`);
-      const service_charge = (800000 * 2 * 1) / 100;
-      const invoice_response = await axios.post(
-        apiURL + '/invoice/create-invoice',
+
+      // const invoice_response = await axios.post(
+      //   apiURL + '/invoice/create-invoice',
+      //   {
+      //     status: 'failed',
+      //     prices: Number(midtransResponse.data.gross_amount),
+
+      //     receiver_city: response_order.order.destination?.city_name,
+      //     receiver_province: response_order.order.destination?.province_name,
+
+      //     receiver_district: response_order.order.destination?.district_name,
+      //     receiver_phone: response_order.order.destination?.contact_phone,
+      //     receiver_name: response_order.order.destination?.contact_name,
+      //     receiver_postalCode:
+      //       (response_order.order.destination?.postal_code).toString(),
+      //     receiver_detailAddress: response_order.order.destination?.address,
+      //     receiver_email: response_email.data_response?.destination_email,
+      //     userId: (await storeUser_fetch).id,
+      //     order_id: data.order_id,
+      //   },
+      //   {
+      //     headers: {
+      //       // Authorization: `bearer ${token}`,
+      //       'Content-Type': 'application/json',
+      //     },
+      //   },
+      // );
+
+      const updateInvoice = await axios.put(
+        apiURL + '/invoice/update-invoice',
         {
-          status: 'failed',
-          prices: Number(midtransResponse.data.gross_amount),
-          service_charge: service_charge,
-          receiver_city: response_order.order.destination?.city_name,
-          receiver_province: response_order.order.destination?.province_name,
-          receiver_subDistrict: 'jkt',
-          receiver_district: response_order.order.destination?.district_name,
-          receiver_phone: response_order.order.destination?.contact_phone,
-          receiver_name: response_order.order.destination?.contact_name,
-          receiver_postalCode:
-            (response_order.order.destination?.postal_code).toString(),
-          receiver_detailAddress: response_order.order.destination?.address,
-          receiver_email: response_email.data_response?.destination_email,
-          userId: response_user.id,
           order_id: data.order_id,
+          status: 'failed',
         },
         {
           headers: {
-            // Authorization: `bearer ${token}`,
+            //   Authorization: `bearer ${token}`,
             'Content-Type': 'application/json',
           },
         },
       );
 
       //=====================================
-      // confirm order to biteship if is paid
-      // const draftOrdersId = '2131241';
-      // const orderBiteship = await axios.post(
-      //   `${apiURL}/order/confirm/${draftOrdersId}`,
-      // );
-      //update order Status ke database
-      // const dbOrders = await prisma.orders.update({
-      //   where:{ midtrans_order_id: midtransResponse.data.},
-      //   data: {
-      //     status: 'Dibatalkan',
-      //   },
-      // });
+
+      const dbOrders = await prisma.orders.update({
+        where: { order_id: data.order_id },
+        data: {
+          status: 'Dibatalkan',
+        },
+      });
       //=====================================
 
       const invoice_history_response = await axios.post(
         apiURL + '/invoice-history/create-invoice-history',
         {
-          invoice_id: invoice_response.data.invoice_created.id,
+          invoice_id: updateInvoice.data.invoice_updated.id,
         },
       );
       console.log('invoice_history created: ', invoice_history_response.data);
@@ -270,8 +316,9 @@ export async function Midtrans(req: Request, res: Response) {
           gross_amount: Number(result.gross_amount),
           status_code: result.status_code,
           midtrans_transaction_id: result.transaction_id,
-          invoicesId: invoice_response.data.invoice_updated.id,
-          userId: response_user.id,
+          invoicesId: updateInvoice.data.invoice_updated.id,
+          storeId: updateInvoice.data.invoice_updated.storesId,
+          // userId: response_user.id,
         },
         {
           headers: {
@@ -300,19 +347,25 @@ export async function Midtrans(req: Request, res: Response) {
       );
 
       //=====================================
-      // confirm order to biteship if is paid
-      // const draftOrdersId = '2131241';
-      // const orderBiteship = await axios.post(
-      //   `${apiURL}/order/confirm/${draftOrdersId}`,
-      // );
-      //update order Status ke database
-      // const dbOrders = await prisma.orders.update({
-      //   where:{ midtrans_order_id: midtransResponse.data.},
-      //   data: {
-      //     status: 'Pesanan Baru',
-      //   },
-      // });
+
+      const draftOrdersId = data.order_id;
+      const orderBiteship = await axios.post(
+        `${apiURL}/order/confirm/${draftOrdersId}`,
+      );
+
+      const dbOrders = await prisma.orders.update({
+        where: { order_id: data.order_id },
+        data: {
+          status: 'Pesanan Baru',
+        },
+      });
       //=====================================
+
+      const invoice_store = await axios.post(apiURL + '/invoice/get-invoice', {
+        id: updateInvoice.data.invoice_updated.id,
+      });
+
+      const store_id = invoice_store.data.formattedInvoice.storesId;
 
       // Create payment record
       await axios.post(
@@ -323,7 +376,8 @@ export async function Midtrans(req: Request, res: Response) {
           status_code: result.status_code,
           midtrans_transaction_id: result.transaction_id,
           invoicesId: updateInvoice.data.invoice_updated.id,
-          userId: response_user.id,
+          storeId: updateInvoice.data.invoice_updated.storesId,
+          // userId: response_user.id,
         },
         {
           headers: {
@@ -348,49 +402,48 @@ export async function Midtrans(req: Request, res: Response) {
       console.log('invoice_history created: ', invoice_history_response.data);
     } else if (transactionStatus === 'pending') {
       console.log(`Payment for order ${data.order_id} is pending.`);
-      const service_charge = (800000 * 2 * 1) / 100;
 
-      const invoice_response = await axios.post(
-        apiURL + '/invoice/create-invoice',
-        {
-          status: 'pending',
-          prices: Number(midtransResponse.data.gross_amount),
-          service_charge: service_charge,
-          receiver_city: response_order.order.destination?.city_name,
-          receiver_province: response_order.order.destination?.province_name,
-          receiver_subDistrict: 'jkt',
-          receiver_district: response_order.order.destination?.district_name,
-          receiver_phone: response_order.order.destination?.contact_phone,
-          receiver_name: response_order.order.destination?.contact_name,
-          receiver_postalCode:
-            (response_order.order.destination?.postal_code).toString(),
-          receiver_detailAddress: response_order.order.destination?.address,
-          receiver_email: response_email.data_response?.destination_email,
-          userId: response_user.id,
-          order_id: data.order_id,
-        },
-        {
-          headers: {
-            // Authorization: `bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-      console.log('invoice created: ', invoice_response.data);
-      const invoice_history_response = await axios.post(
-        apiURL + '/invoice-history/create-invoice-history',
-        {
-          invoice_id: invoice_response.data.invoice_created.id,
-        },
-      );
-      console.log('invoice_history created: ', invoice_history_response.data);
+      // const invoice_response = await axios.post(
+      //   apiURL + '/invoice/create-invoice',
+      //   {
+      //     status: 'pending',
+      //     prices: Number(midtransResponse.data.gross_amount),
+
+      //     receiver_city: response_order.order.destination?.city_name,
+      //     receiver_province: response_order.order.destination?.province_name,
+
+      //     receiver_district: response_order.order.destination?.district_name,
+      //     receiver_phone: response_order.order.destination?.contact_phone,
+      //     receiver_name: response_order.order.destination?.contact_name,
+      //     receiver_postalCode:
+      //       (response_order.order.destination?.postal_code).toString(),
+      //     receiver_detailAddress: response_order.order.destination?.address,
+      //     receiver_email: response_email.data_response?.destination_email,
+      //     userId: (await storeUser_fetch).id,
+      //     order_id: data.order_id,
+      //   },
+      //   {
+      //     headers: {
+      //       // Authorization: `bearer ${token}`,
+      //       'Content-Type': 'application/json',
+      //     },
+      //   },
+      // );
+      // console.log('invoice created: ', invoice_response.data);
+      // const invoice_history_response = await axios.post(
+      //   apiURL + '/invoice-history/create-invoice-history',
+      //   {
+      //     invoice_id: invoice_response.data.invoice_created.id,
+      //   },
+      // );
+      // console.log('invoice_history created: ', invoice_history_response.data);
     } else if (
       transactionStatus === 'failure' ||
       transactionStatus === 'cancel' ||
       transactionStatus === 'expire'
     ) {
       console.log(`Payment for order ${data.order_id} failed.`);
-      await axios.put(
+      const updateInvoice = await axios.put(
         apiURL + '/invoice/update-invoice',
         {
           order_id: data.order_id,
@@ -399,6 +452,33 @@ export async function Midtrans(req: Request, res: Response) {
         {
           headers: {
             //   Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: updateInvoice.data.invoice_updated.id,
+        },
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
+
+      await axios.post(
+        `${apiURL}/payment/create-payment`,
+        {
+          bank: result.va_numbers?.[0]?.bank || 'unknown',
+          gross_amount: Number(result.gross_amount),
+          status_code: result.status_code,
+          midtrans_transaction_id: result.transaction_id,
+          invoicesId: updateInvoice.data.invoice_updated.id,
+          storeId: updateInvoice.data.invoice_updated.storesId,
+          // userId: response_user.id,
+        },
+        {
+          headers: {
+            // Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         },
