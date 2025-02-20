@@ -86,7 +86,7 @@ CREATE TABLE "Orders" (
     "midtrans_order_id" TEXT,
     "invoiceId" TEXT,
     "biteship_tracking_link" TEXT,
-    "storeId" TEXT,
+    "storeId" TEXT NOT NULL,
     "locationId" TEXT,
 
     CONSTRAINT "Orders_pkey" PRIMARY KEY ("id")
@@ -339,6 +339,22 @@ CREATE TABLE "Message_templates" (
 );
 
 -- CreateTable
+CREATE TABLE "Transaction" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "amount" INTEGER NOT NULL,
+    "bankId" TEXT,
+    "storeId" TEXT NOT NULL,
+    "orderId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_CategoriesToProduct" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -458,6 +474,12 @@ CREATE UNIQUE INDEX "Operation_hours_id_key" ON "Operation_hours"("id");
 CREATE UNIQUE INDEX "Message_templates_id_key" ON "Message_templates"("id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Transaction_id_key" ON "Transaction"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Transaction_orderId_key" ON "Transaction"("orderId");
+
+-- CreateIndex
 CREATE INDEX "_CategoriesToProduct_B_index" ON "_CategoriesToProduct"("B");
 
 -- AddForeignKey
@@ -552,6 +574,12 @@ ALTER TABLE "Operation_hours" ADD CONSTRAINT "Operation_hours_storesId_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "Message_templates" ADD CONSTRAINT "Message_templates_storesId_fkey" FOREIGN KEY ("storesId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_bankId_fkey" FOREIGN KEY ("bankId") REFERENCES "bank_accounts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CategoriesToProduct" ADD CONSTRAINT "_CategoriesToProduct_A_fkey" FOREIGN KEY ("A") REFERENCES "Categories"("id") ON DELETE CASCADE ON UPDATE CASCADE;

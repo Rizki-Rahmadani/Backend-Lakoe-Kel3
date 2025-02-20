@@ -1,12 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
-
-import express, { Request, Response, NextFunction } from 'express';
+import Cookies from 'js-cookie';
+import express, { Request, Response, NextFunction, response } from 'express';
 
 const prisma = new PrismaClient();
 
 const user_data = express.Router();
-
+const token = Cookies.get('token');
+console.log(token);
 export async function BiteshipTracking(req: Request, res: Response) {
   const event = req.body;
   console.log('Webhook Biteship diterima:', event);
@@ -110,6 +111,35 @@ export async function Midtrans(req: Request, res: Response) {
     const transactionStatus = result.transaction_status;
     const fraudStatus = result.fraud_status;
 
+    async function get_biteship_order(id: string) {
+      const response = await axios.get(apiURL + `/order/${id}`);
+      // console.log("data of biteship response: ", response.data);
+      return response.data;
+    }
+    const response_order = await get_biteship_order(data.order_id);
+
+    async function get_email_order(id: string) {
+      const response = await axios.post(apiURL + `/order/get-email`, {
+        id_order: id,
+      });
+      // console.log("data of email response: ", response.data);
+      return response.data;
+    }
+    const response_email = await get_email_order(data.order_id);
+
+    async function user_fetch() {
+      const user_response = await axios.get(apiURL + '/user', {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtNzhwNWpsaTAwMDF0YW5rbTFnY3lqOXgiLCJmdWxsbmFtZSI6IkphY2tTcGFycm93IiwiZW1haWwiOiJqYWNrQG1haWwuY29tIiwiaWF0IjoxNzM5OTg2MTEyLCJleHAiOjE3NDAwMjkzMTJ9.BA0MUZQk3tLag1JxNIyCFC-Yl8eX1YwFjt1D-SftArw`,
+          'Content-Type': 'application/json',
+        },
+      });
+      return user_response.data.user[0];
+    }
+    const response_user = await user_fetch();
+
+    // console.log("data of biteship response: ", response_order);
+
     if (transactionStatus === 'capture' && fraudStatus === 'accept') {
       console.log(`Payment for order ${data.order_id} is captured.`);
       const service_charge = (800000 * 2 * 1) / 100;
@@ -117,22 +147,20 @@ export async function Midtrans(req: Request, res: Response) {
         apiURL + '/invoice/create-invoice',
         {
           status: 'success',
-          prices: 800000 * 2,
+          prices: Number(midtransResponse.data.gross_amount),
           service_charge: service_charge,
-          receiver_city: 'jkt',
-          receiver_province: 'jkt',
+          receiver_city: response_order.order.destination?.city_name,
+          receiver_province: response_order.order.destination?.province_name,
           receiver_subDistrict: 'jkt',
-          receiver_district: 'jkt',
-          receiver_phone: '092131322',
-          receiver_name: 'sam',
-          receiver_postalCode: '12440',
-          receiver_detailAddress: 'ehiuewuhwuiehrweur',
-          receiver_email: 'sam@mail.com',
-          // cartsId: 'cdqdwir39232',
-          userId: 'cm71m960c0007tarc0pnj62eb',
+          receiver_district: response_order.order.destination?.district_name,
+          receiver_phone: response_order.order.destination?.contact_phone,
+          receiver_name: response_order.order.destination?.contact_name,
+          receiver_postalCode:
+            (response_order.order.destination?.postal_code).toString(),
+          receiver_detailAddress: response_order.order.destination?.address,
+          receiver_email: response_email.data_response?.destination_email,
+          userId: response_user.id,
           order_id: data.order_id,
-          // paymentsId: 'joewjfiewjfiwf',
-          // courierId: 'wqeijeiqejei',
         },
         {
           headers: {
@@ -171,6 +199,7 @@ export async function Midtrans(req: Request, res: Response) {
           status_code: result.status_code,
           midtrans_transaction_id: result.transaction_id,
           invoicesId: invoice_response.data.invoice_created.id,
+          userId: response_user.id,
         },
         {
           headers: {
@@ -188,22 +217,20 @@ export async function Midtrans(req: Request, res: Response) {
         apiURL + '/invoice/create-invoice',
         {
           status: 'failed',
-          prices: 800000 * 2,
+          prices: Number(midtransResponse.data.gross_amount),
           service_charge: service_charge,
-          receiver_city: 'jkt',
-          receiver_province: 'jkt',
+          receiver_city: response_order.order.destination?.city_name,
+          receiver_province: response_order.order.destination?.province_name,
           receiver_subDistrict: 'jkt',
-          receiver_district: 'jkt',
-          receiver_phone: '092131322',
-          receiver_name: 'sam',
-          receiver_postalCode: '12440',
-          receiver_detailAddress: 'ehiuewuhwuiehrweur',
-          receiver_email: 'sam@mail.com',
-          // cartsId: 'cdqdwir39232',
-          userId: 'cm71m960c0007tarc0pnj62eb',
+          receiver_district: response_order.order.destination?.district_name,
+          receiver_phone: response_order.order.destination?.contact_phone,
+          receiver_name: response_order.order.destination?.contact_name,
+          receiver_postalCode:
+            (response_order.order.destination?.postal_code).toString(),
+          receiver_detailAddress: response_order.order.destination?.address,
+          receiver_email: response_email.data_response?.destination_email,
+          userId: response_user.id,
           order_id: data.order_id,
-          // paymentsId: 'joewjfiewjfiwf',
-          // courierId: 'wqeijeiqejei',
         },
         {
           headers: {
@@ -244,6 +271,7 @@ export async function Midtrans(req: Request, res: Response) {
           status_code: result.status_code,
           midtrans_transaction_id: result.transaction_id,
           invoicesId: invoice_response.data.invoice_updated.id,
+          userId: response_user.id,
         },
         {
           headers: {
@@ -295,6 +323,7 @@ export async function Midtrans(req: Request, res: Response) {
           status_code: result.status_code,
           midtrans_transaction_id: result.transaction_id,
           invoicesId: updateInvoice.data.invoice_updated.id,
+          userId: response_user.id,
         },
         {
           headers: {
@@ -325,22 +354,20 @@ export async function Midtrans(req: Request, res: Response) {
         apiURL + '/invoice/create-invoice',
         {
           status: 'pending',
-          prices: 800000 * 2,
+          prices: Number(midtransResponse.data.gross_amount),
           service_charge: service_charge,
-          receiver_city: 'jkt',
-          receiver_province: 'jkt',
+          receiver_city: response_order.order.destination?.city_name,
+          receiver_province: response_order.order.destination?.province_name,
           receiver_subDistrict: 'jkt',
-          receiver_district: 'jkt',
-          receiver_phone: '092131322',
-          receiver_name: 'sam',
-          receiver_postalCode: '12440',
-          receiver_detailAddress: 'ehiuewuhwuiehrweur',
-          receiver_email: 'sam@mail.com',
-          // cartsId: 'cdqdwir39232',
-          userId: 'cm71m960c0007tarc0pnj62eb',
+          receiver_district: response_order.order.destination?.district_name,
+          receiver_phone: response_order.order.destination?.contact_phone,
+          receiver_name: response_order.order.destination?.contact_name,
+          receiver_postalCode:
+            (response_order.order.destination?.postal_code).toString(),
+          receiver_detailAddress: response_order.order.destination?.address,
+          receiver_email: response_email.data_response?.destination_email,
+          userId: response_user.id,
           order_id: data.order_id,
-          // paymentsId: 'joewjfiewjfiwf',
-          // courierId: 'wqeijeiqejei',
         },
         {
           headers: {
@@ -349,7 +376,7 @@ export async function Midtrans(req: Request, res: Response) {
           },
         },
       );
-
+      console.log('invoice created: ', invoice_response.data);
       const invoice_history_response = await axios.post(
         apiURL + '/invoice-history/create-invoice-history',
         {

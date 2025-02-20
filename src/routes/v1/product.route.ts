@@ -12,6 +12,7 @@ import {
   getProductByUrl,
   getProductWithVariants,
   getProductForCheckout,
+  updateProductWithVariants,
 } from '../../controllers/product.controller';
 import { upload } from '../../middlewares/upload-file';
 import { authentication } from '../../middlewares/authmiddleware';
@@ -34,11 +35,12 @@ app_product.put('/toggle-product', authentication, toggleActive);
 
 app_product.get('/search-product', search);
 
-app_product.put(
-  '/update-product',
-  authentication,
-  upload.array('attachments'),
-  updateProduct,
-);
+app_product.put('/update-product/:productId', updateProductWithVariants);
+// app_product.put(
+//   '/update-product',
+//   authentication,
+//   upload.array('attachments'),
+//   updateProduct,
+// );
 
 export default app_product;

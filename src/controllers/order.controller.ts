@@ -166,15 +166,18 @@ export const createDraftOrder = async (req: Request, res: Response) => {
     };
     console.log('this is biteship data', data);
     // Simpan orderId ke database
-    // await prisma.orders.create({
-    //   data: {
-    //     receiver_name: orderData.destination_contact_name,
-    //     // storeId: '',
-    //     // locationId: '',
-    //     order_id: data.id,
-    //     status: data.status,
-    //   },
-    // });
+
+    await prisma.orders.create({
+      data: {
+        receiver_name: orderData.destination_contact_name,
+        origin_email: data.origin.contact_email,
+        destination_email: data.destination.contact_email,
+        // storeId: '',
+        // locationId: '',
+        order_id: data.id,
+        status: data.status,
+      },
+    });
 
     console.log(data);
     // You can now store this order information in your database if needed
@@ -242,6 +245,23 @@ export const confirmDraftOrder = async (req: Request, res: Response) => {
         error: (error as Error).message || error,
       });
     }
+  }
+};
+
+export const retrieveEmailOrder = async (req: Request, res: Response) => {
+  const { id_order } = req.body;
+  try {
+    const response = await prisma.orders.findFirst({
+      where: { order_id: id_order },
+      select: {
+        origin_email: true,
+        destination_email: true,
+      },
+    });
+    console.log(response);
+    res.status(200).json({ message: 'success', data_response: response });
+  } catch (error) {
+    res.status(500).json({ message: 'error retrieve email ', error });
   }
 };
 
