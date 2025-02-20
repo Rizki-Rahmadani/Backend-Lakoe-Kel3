@@ -8,7 +8,7 @@
     "prepare": "husky",
     "lint": "eslint --fix",
     "build": "tsc",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && prisma migrate deploy",
     "format": "prettier --write \"src/**/*.ts\"",
     "swagger": "node src/swagger/swagger.js",
     "seed": "ts-node prisma/seed.ts"
