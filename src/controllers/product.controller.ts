@@ -216,6 +216,7 @@ export async function getProductbyStore(req: Request, res: Response) {
             },
           },
         },
+        Categories: true, // Include categories associated with the product
       },
       orderBy: {
         createdAt: 'desc',
@@ -754,23 +755,22 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Store not found' });
     }
 
-    // Fetch product details by URL and store ID
     const product = await prisma.product.findUnique({
       where: { url: url, storesId: store.id },
       select: {
-        id: true, // Include product ID
+        id: true,
         name: true,
         attachments: true,
         price: true,
         description: true,
-        minimum_order: true, // Include minimum order
-        stock: true, // Include stock
-        weight: true, // Include weight
-        length: true, // Include length
-        width: true, // Include width
-        height: true, // Include height
-        sku: true, // Include SKU
-        is_active: true, // Include active status
+        minimum_order: true,
+        stock: true,
+        weight: true,
+        length: true,
+        width: true,
+        height: true,
+        sku: true,
+        is_active: true,
         variants: {
           select: {
             id: true,
@@ -813,6 +813,8 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
 
     let price = product.price; // Default to product price
     let weight = product.weight;
+    let sku = product.sku;
+    let stock = product.stock;
 
     // Check if the product has variants
     if (product.variants && product.variants.length > 0) {
@@ -830,6 +832,8 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
             select: {
               price: true,
               weight: true,
+              sku: true,
+              stock: true,
             },
           },
         );
@@ -837,6 +841,8 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
         if (variantCombination) {
           price = variantCombination.price; // Update price if variant combination is found
           weight = variantCombination.weight;
+          sku = variantCombination.sku;
+          stock = variantCombination.stock;
         }
       }
     }
@@ -845,6 +851,8 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
       ...product,
       price,
       weight,
+      sku,
+      stock,
       priceRange: { min: minPrice, max: maxPrice },
     });
   } catch (error) {
@@ -858,7 +866,7 @@ export const updateProductWithVariants = async (
   res: Response,
 ) => {
   const { productId } = req.params;
-  const { price, stock, variants } = req.body;
+  const { name, description, price, stock, minimum_order, variants } = req.body;
 
   try {
     // Fetch the product
@@ -872,6 +880,10 @@ export const updateProductWithVariants = async (
 
     // Start a transaction to update product and its variants
     const updateData: any = {};
+
+    if (name) updateData.name = name;
+    if (description) updateData.description = description;
+    if (minimum_order !== undefined) updateData.minimum_order = minimum_order;
 
     if (price || stock) {
       updateData.price = price || product.price;
