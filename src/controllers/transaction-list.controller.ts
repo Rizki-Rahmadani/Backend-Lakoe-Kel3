@@ -108,6 +108,9 @@ export async function getStoreTransaction(req: Request, res: Response) {
       where: {
         storeId: findStore.id,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     return res
       .status(200)
