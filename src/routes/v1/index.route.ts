@@ -31,7 +31,7 @@ import adminRoute from './admin.route';
 import { checkout } from './checkout.route';
 import bankUpdateRoute from './bank-update.route';
 import { transaction_listRoute } from './transaction-list.route';
-
+import { dashboardRoute } from './dashboard.route';
 
 const router = express.Router();
 
@@ -69,5 +69,6 @@ router.use('/tracking', trackingRoute);
 router.use('/courier', courierRoute);
 router.use('/webhook', webhookRoute);
 router.use('/checkout', checkout);
+router.use('/dashboard', dashboardRoute);
 
 export default router;

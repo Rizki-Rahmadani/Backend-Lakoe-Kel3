@@ -166,15 +166,15 @@ export const createDraftOrder = async (req: Request, res: Response) => {
     };
     console.log('this is biteship data', data);
     // Simpan orderId ke database
-    await prisma.orders.create({
-      data: {
-        receiver_name: orderData.destination_contact_name,
-        // storeId: '',
-        // locationId: '',
-        order_id: data.id,
-        status: data.status,
-      },
-    });
+    // await prisma.orders.create({
+    //   data: {
+    //     receiver_name: orderData.destination_contact_name,
+    //     // storeId: '',
+    //     // locationId: '',
+    //     order_id: data.id,
+    //     status: data.status,
+    //   },
+    // });
 
     console.log(data);
     // You can now store this order information in your database if needed
