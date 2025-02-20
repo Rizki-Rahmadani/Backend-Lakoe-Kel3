@@ -23,30 +23,109 @@ export const createVariantOptions = async (req: Request, res: Response) => {
     if (!name || !variantId) {
       return res.status(400).json({ error: 'All fields required' });
     }
-    const checkProduct = await prisma.variants.findUnique({
+
+
+    if (!variantId) {
+      console.error('Variant ID is missing!');
+      return;
+    }
+
+    const checkVariant = await prisma.variants.findUnique({
       where: { id: variantId },
     });
 
-    if (!checkProduct) {
-      return res.status(404).json({ error: "Variants doesn't exist" });
+    if (!checkVariant) {
+      return res.status(404).json({ error: "Variant doesn't exist" });
     }
 
-    const newVariant = await prisma.variant_options.create({
-      data: {
-        name,
-        variantsId: variantId,
-      },
-    });
-    res.status(201).json({
-      message: 'Variant created successfully',
-      variant_options: newVariant,
-    });
+    let newVariants;
+
+    if (Array.isArray(name)) {
+      // Jika name adalah array, gunakan Promise.all untuk memastikan ID dikembalikan
+      newVariants = await Promise.all(
+        name.map(async (variantName) => {
+          return await prisma.variant_options.create({
+            data: {
+              name: variantName,
+              variantsId: variantId,
+            },
+            select: { id: true, name: true, variantsId: true }, // ✅ Pastikan ID dikembalikan
+          });
+        }),
+      );
+
+      res.status(201).json({
+        message: 'Variants created successfully',
+        variant_options: Array.isArray(newVariants)
+          ? newVariants
+          : [newVariants],
+      });
+    } else {
+      // Jika hanya satu varian, buat satu entry
+      newVariants = await prisma.variant_options.create({
+        data: {
+          name,
+          variantsId: variantId,
+        },
+        select: { id: true, name: true, variantsId: true },
+      });
+
+      res.status(201).json({
+        message: 'Variant created successfully',
+        variant_options: newVariants,
+      });
+    }
   } catch (error) {
     res
       .status(500)
-      .json({ error: 'An error occurred while creating the variant' });
+      .json({ error: 'An error occurred while creating the variant option' });
   }
 };
+
+// export const createVariantOptions = async (req: Request, res: Response) => {
+//   /*
+//         #swagger.tags = ['Variant-Options']
+//         #swagger.requestBody = {
+//             required: true,
+//             content: {
+//                 "application/json": {
+//                     schema: {
+//                         $ref: "#/components/schemas/CreateVariantOptionsDTO"
+//                     }
+//                 }
+//             }
+//         }
+//     */
+//   try {
+//     const { name, variantId } = req.body;
+
+//     if (!name || !variantId) {
+//       return res.status(400).json({ error: 'All fields required' });
+//     }
+//     const checkProduct = await prisma.variants.findUnique({
+//       where: { id: variantId },
+//     });
+
+//     if (!checkProduct) {
+//       return res.status(404).json({ error: "Variants doesn't exist" });
+//     }
+
+//     const newVariant = await prisma.variant_options.create({
+//       data: {
+//         name,
+//         variantsId: variantId,
+//       },
+//     });
+//     res.status(201).json({
+//       message: 'Variant created successfully',
+//       variant_options: newVariant,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ error: 'An error occurred while creating the variant' });
+//   }
+// };
 
 export async function getVariantOptionsById(req: Request, res: Response) {
   /*  

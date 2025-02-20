@@ -1,13 +1,14 @@
 {
   "name": "express-dw-boilerplate",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
+    "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
     "prepare": "husky",
     "lint": "eslint --fix",
     "build": "tsc",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && prisma migrate deploy && prisma db seed",
     "format": "prettier --write \"src/**/*.ts\"",
     "swagger": "node src/swagger/swagger.js",
     "seed": "ts-node prisma/seed.ts"
@@ -18,12 +19,17 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.2.1",
+    "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "midtrans-client": "^1.4.2",
+    "midtrans-node-client": "^0.0.6",
     "multer": "^1.4.5-lts.1",
     "swagger-autogen": "^2.23.7"
   },
@@ -31,6 +37,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.0.0",
+    "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.9.0",
@@ -53,6 +60,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.15.0"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "lint-staged": {
     "src/**/*.ts": [

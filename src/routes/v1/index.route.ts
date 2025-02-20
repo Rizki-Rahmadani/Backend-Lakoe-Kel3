@@ -7,7 +7,7 @@ import locationRoute from './locations.route';
 import app_store from './store.route';
 import variantOptionRoutes from './variant-options.route';
 import variantOptionValueRoutes from './variant-options-value.route';
-import { authentication } from '../../middlewares/authmiddleware';
+
 import app_product from './product.route';
 
 import app_bank from './bank.route';
@@ -17,20 +17,47 @@ import cartsRoute from './carts.route';
 import cartsitemsRoute from './carts-items.route';
 import categoryRoute from './category.route';
 import variantRoutes from './variants.route';
+import app_transaction from './transaction.route';
+import app_payment from './payment.route';
+import app_invoice from './invoice.route';
+import app_invoice_history from './invoice_history.route';
+import orderRoute from './order.route';
+import trackingRoute from './tracking.route';
+import { courierRoute } from './courier.route';
+// import webhook_midtrans from './webhook.route';
+import webhookRoute from './webhook.route';
+import app_user from './user.route';
+import adminRoute from './admin.route';
+import { checkout } from './checkout.route';
+import bankUpdateRoute from './bank-update.route';
+import { transaction_listRoute } from './transaction-list.route';
+import { dashboardRoute } from './dashboard.route';
 
 const router = express.Router();
+
+// router.post("/webhook-midtrans", (req, res)=>{
+//     console.log(req.body);
+//     res.status(200).json({message: "hello"})
+// })
 
 router.use('/role', roleRoute);
 router.use('/auth', authRoute);
 router.use('/profile', profileRoute);
-
-router.use('/product', authentication, app_product);
-router.use('/message', authentication, app_message);
-
+router.use('/admin', adminRoute);
+router.use('/transaction', app_transaction);
+router.use('/invoice', app_invoice);
+router.use('/invoice-history', app_invoice_history);
+router.use('/payment', app_payment);
+router.use('/product', app_product);
+router.use('/message', app_message);
+router.use('/transaction-list', transaction_listRoute);
+// router.use('/web', webhook_midtrans);
 router.use('/stores', app_store);
+router.use('/user', app_user);
 router.use('/bank', app_bank);
+router.use('/update-bank', bankUpdateRoute);
 router.use('/operation-hour', app_hour);
-
+router.use('/order', orderRoute);
 router.use('/category', categoryRoute);
 router.use('/variant', variantRoutes);
 router.use('/variant-options', variantOptionRoutes);
@@ -38,5 +65,10 @@ router.use('/variant-option-values', variantOptionValueRoutes);
 router.use('/carts', cartsRoute);
 router.use('/cart-items', cartsitemsRoute);
 router.use('/locations', locationRoute);
+router.use('/tracking', trackingRoute);
+router.use('/courier', courierRoute);
+router.use('/webhook', webhookRoute);
+router.use('/checkout', checkout);
+router.use('/dashboard', dashboardRoute);
 
 export default router;

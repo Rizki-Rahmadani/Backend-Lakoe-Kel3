@@ -67,12 +67,137 @@ export async function createStore(req: Request, res: Response) {
   }
 }
 
-export async function getStoreByLogin(req: Request, res: Response) {
-  const userId = (req as any).user.id;
+// export async function getStoreByLogin(req: Request, res: Response) {
+//   const userId = (req as any).user.id;
 
+//   try {
+//     const findStore = await prisma.user.findUnique({
+//       where: { id: userId },
+//     });
+//     if (!findStore) {
+//       return res.status(404).json({ message: 'User' });
+//     }
+//     return res.status(200).json({ message: 'Store Found', store: findStore });
+//   } catch (error) {
+//     return res.status(500).json({ message: 'error fetching store', error });
+//   }
+// }
+
+export async function getStoreByProduct(req: Request, res: Response) {
+  const { product_id } = req.body; // Ensure correct destructuring
+  if (!product_id) {
+    res.status(400).json({ message: 'no product id' });
+  }
+
+  try {
+    const productExist = await prisma.product.findUnique({
+      where: { id: product_id }, // Ensure correct ID structure
+      include: {
+        variants: {
+          include: {
+            Variant_options: {
+              include: {
+                variant_values: {
+                  include: {
+                    variant_option_value: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        store_id: {
+          include: {
+            Location: true,
+          },
+        },
+      },
+    });
+
+    if (!productExist) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    if (productExist.variants && productExist.variants.length > 0) {
+      // Ambil semua kombinasi varian berdasarkan variant_option_values
+      const variantCombinations = await prisma.variant_option_values.findMany({
+        where: {
+          variant_options: {
+            some: {
+              variant_option: {
+                variantsId: {
+                  in: productExist.variants.map((v) => v.id),
+                },
+              },
+            },
+          },
+        },
+        include: {
+          variant_options: {
+            include: {
+              variant_option: true,
+            },
+          },
+        },
+      });
+
+      // Format response agar mudah digunakan di frontend
+      const formattedCombinations = variantCombinations.map((variant) => ({
+        id: variant.id,
+        sku: variant.sku,
+        price: variant.price,
+        stock: variant.stock,
+        weight: variant.weight,
+        is_active: variant.is_active,
+        options: variant.variant_options.map((option) => ({
+          id: option.variant_option.id,
+          name: option.variant_option.name,
+        })),
+      }));
+
+      return res.status(200).json({
+        message: 'Variant combinations retrieved successfully',
+        store_id: productExist.store_id,
+        location_store: productExist.store_id.Location,
+        product_name: productExist.name,
+        product_url: productExist.url,
+        product_description: productExist.description,
+        attachments: productExist.attachments,
+        variant_combinations: formattedCombinations,
+      });
+    } else {
+      // Jika tidak ada variant, ambil stock dan price dari produk
+      return res.status(200).json({
+        message: 'Product retrieved successfully',
+        products: productExist,
+        attachments: productExist.attachments,
+        price: productExist.price,
+        stock: productExist.stock,
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching variant combinations:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+export async function currentStore(req: Request, res: Response) {
+  const userId = (req as any).user.id;
   try {
     const findStore = await prisma.stores.findUnique({
       where: { userId: userId },
+    });
+    return res.status(200).json({ message: 'Store found', store: findStore });
+  } catch (error) {
+    return res.status(500).json({ message: error });
+  }
+}
+export async function getStoreByUsername(req: Request, res: Response) {
+  const { username } = req.params;
+
+  try {
+    const findStore = await prisma.stores.findUnique({
+      where: { username: username },
     });
     if (!findStore) {
       return res.status(404).json({ message: 'Store not found' });
@@ -91,6 +216,7 @@ export async function getAllStore(
     const allStore = prisma.stores.findMany({
       select: {
         name: true,
+        username: true,
         slogan: true,
         description: true,
         domain: true,
@@ -105,7 +231,9 @@ export async function getAllStore(
       };
     });
 
-    res.status(200).json({ message: 'store fetched: ', formattedStore });
+    res
+      .status(200)
+      .json({ message: 'store fetched: ', stores: formattedStore });
   } catch (error) {
     res.send(500).json({ message: 'error getting stores.', error });
   }

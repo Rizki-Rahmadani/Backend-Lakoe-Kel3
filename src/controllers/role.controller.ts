@@ -83,7 +83,7 @@ export async function getAllRole(req: Request, res: Response) {
       return res.status(404).json({ message: 'No roles found' });
     }
 
-    return res.status(200).json(roles);
+    return res.status(200).json({ message: 'Fetching success', roles: roles });
   } catch (error) {
     return res.status(500).json({ error: 'Error fetching roles' });
   }

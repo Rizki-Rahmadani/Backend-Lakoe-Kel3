@@ -25,9 +25,9 @@ export async function register(req: Request, res: Response) {
             }
         } 
     */
-  const { fullname, email, password } = req.body;
+  const { fullname, email, phone_number, password } = req.body;
 
-  if (!fullname || !email || !password) {
+  if (!fullname || !email || !phone_number || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -49,7 +49,7 @@ export async function register(req: Request, res: Response) {
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [{ email }],
+        OR: [{ email, phone_number }],
       },
     });
 
@@ -74,6 +74,7 @@ export async function register(req: Request, res: Response) {
       data: {
         fullname,
         email,
+        phone_number: phone_number,
         password: hashedPassword,
         rolesId: addroles.id,
       },
@@ -89,6 +90,12 @@ export async function register(req: Request, res: Response) {
     });
     function formatString(input: string): string {
       return input.toLowerCase().replace(/\s+/g, '');
+    }
+    const findStore = await prisma.stores.findUnique({
+      where: { username: formatString(fullname) },
+    });
+    if (findStore) {
+      return res.status(403).json({ message: 'Store Name already taken' });
     }
     const addstore = await prisma.stores.create({
       data: {
@@ -162,5 +169,26 @@ export async function login(req: Request, res: Response) {
     }
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
+  }
+}
+
+export async function currentUser(req: Request, res: Response) {
+  const id = (req as any).user.id;
+  try {
+    const getUser = await prisma.user.findUnique({
+      where: { id: id },
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        role_id: true,
+      },
+    });
+    if (!getUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    return res.status(200).json({ message: 'User found', user: getUser });
+  } catch {
+    return res.status(400).json({ message: 'Error fetching User' });
   }
 }
