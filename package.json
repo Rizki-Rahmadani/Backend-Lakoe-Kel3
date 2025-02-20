@@ -8,7 +8,7 @@
     "prepare": "husky",
     "lint": "eslint --fix",
     "build": "tsc",
-    "postinstall": "prisma generate && prisma migrate deploy",
+    "postinstall": "prisma generate && prisma migrate deploy && prisma db seed",
     "format": "prettier --write \"src/**/*.ts\"",
     "swagger": "node src/swagger/swagger.js",
     "seed": "ts-node prisma/seed.ts"
@@ -59,6 +59,9 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.15.0"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "lint-staged": {
     "src/**/*.ts": [
