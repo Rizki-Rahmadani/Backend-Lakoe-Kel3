@@ -166,6 +166,7 @@ export const createDraftOrder = async (req: Request, res: Response) => {
     };
     console.log('this is biteship data', data);
     // Simpan orderId ke database
+
     await prisma.orders.create({
       data: {
         receiver_name: orderData.destination_contact_name,
