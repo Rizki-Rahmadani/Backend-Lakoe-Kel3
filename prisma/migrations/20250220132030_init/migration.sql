@@ -50,7 +50,7 @@ CREATE TABLE "Product" (
     "height" INTEGER,
     "weight" INTEGER,
     "minimum_order" INTEGER,
-    "storesId" TEXT,
+    "storesId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -219,10 +219,8 @@ CREATE TABLE "Invoices" (
     "id" TEXT NOT NULL,
     "prices" INTEGER NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
-    "service_charge" INTEGER NOT NULL,
     "receiver_city" TEXT NOT NULL,
     "receiver_province" TEXT NOT NULL,
-    "receiver_subDistrict" TEXT NOT NULL,
     "receiver_district" TEXT NOT NULL,
     "receiver_phone" TEXT NOT NULL,
     "receiver_name" TEXT NOT NULL,
@@ -232,8 +230,9 @@ CREATE TABLE "Invoices" (
     "order_id" TEXT,
     "receiver_biteship_area_id" TEXT,
     "invoice_number" TEXT,
+    "storesId" TEXT NOT NULL,
     "cartsId" TEXT,
-    "userId" TEXT NOT NULL,
+    "userId" TEXT,
     "paymentsId" TEXT,
     "courierId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -273,7 +272,7 @@ CREATE TABLE "Payments" (
     "amount" INTEGER NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "midtrans_transaction_id" TEXT,
-    "userId" TEXT NOT NULL,
+    "storeId" TEXT NOT NULL,
     "invoicesId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -493,7 +492,7 @@ ALTER TABLE "User" ADD CONSTRAINT "User_rolesId_fkey" FOREIGN KEY ("rolesId") RE
 ALTER TABLE "Profiles" ADD CONSTRAINT "Profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Product" ADD CONSTRAINT "Product_storesId_fkey" FOREIGN KEY ("storesId") REFERENCES "Stores"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Product" ADD CONSTRAINT "Product_storesId_fkey" FOREIGN KEY ("storesId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Stores" ADD CONSTRAINT "Stores_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -556,6 +555,9 @@ ALTER TABLE "Cart_items" ADD CONSTRAINT "Cart_items_variant_option_valuesId_fkey
 ALTER TABLE "Invoices" ADD CONSTRAINT "Invoices_cartsId_fkey" FOREIGN KEY ("cartsId") REFERENCES "Carts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Invoices" ADD CONSTRAINT "Invoices_storesId_fkey" FOREIGN KEY ("storesId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Invoices" ADD CONSTRAINT "Invoices_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -568,7 +570,7 @@ ALTER TABLE "Confirmation_payment" ADD CONSTRAINT "Confirmation_payment_invoices
 ALTER TABLE "Invoice_histories" ADD CONSTRAINT "Invoice_histories_invoicesId_fkey" FOREIGN KEY ("invoicesId") REFERENCES "Invoices"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Payments" ADD CONSTRAINT "Payments_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Couriers" ADD CONSTRAINT "Couriers_invoicesId_fkey" FOREIGN KEY ("invoicesId") REFERENCES "Invoices"("id") ON DELETE CASCADE ON UPDATE CASCADE;
