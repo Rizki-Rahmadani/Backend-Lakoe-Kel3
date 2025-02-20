@@ -25,9 +25,6 @@ export const getDataDashboard = async (req: Request, res: Response) => {
     const dataOrders = await prisma.orders.findMany({
       where: { storeId: findStore.id },
     });
-    //    if(!dataOrders){
-    //     return res.status(404).json({message:"Data order tidak ditemukan"})
-    //   }
 
     // Hitung jumlah orders
     const totalOrders = await prisma.orders.count({
@@ -41,9 +38,6 @@ export const getDataDashboard = async (req: Request, res: Response) => {
     });
 
     console.log('banyak order', totalOrders);
-    //   if(totalOrders === 0){
-    //     return res.status(200).json({message:"Belum ada order"})
-    //   }
 
     //Data produk
     const dataProduk = await prisma.product.findMany({
@@ -95,18 +89,12 @@ export const getDataDashboard = async (req: Request, res: Response) => {
       },
     });
     console.log('banyak produk', dataProduk);
-    //   if(!dataProduk){
-    //     return res.status(200).json({message:"Belum ada order"})
-    //   }
 
     //hitung jumlah prdouk
     const totalProduk = await prisma.product.count({
       where: { storesId: findStore.id },
     });
     console.log('banyak produk', totalProduk);
-    //   if(totalProduk === 0){
-    //     return res.status(200).json({message:"Belum ada order"})
-    //   }
 
     const findTransaction = await prisma.transaction.findFirst({
       where: { storeId: findStore.id },
