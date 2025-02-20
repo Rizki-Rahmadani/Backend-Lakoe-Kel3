@@ -8,4 +8,7 @@ orderRoute.post('/confirm/:id', orders.confirmDraftOrder);
 orderRoute.post('/draft-order', orders.createDraftOrder);
 orderRoute.post('/', authentication, orders.retrieveOrder);
 orderRoute.post('/tableOrder/create', orders.tableCreateOrder);
+orderRoute.post('/add-order', orders.createDraftOrder);
+orderRoute.get('/:id', orders.retrieveOrder);
+
 export default orderRoute;

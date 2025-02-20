@@ -30,6 +30,7 @@ import app_user from './user.route';
 import adminRoute from './admin.route';
 import { checkout } from './checkout.route';
 import bankUpdateRoute from './bank-update.route';
+import { transaction_listRoute } from './transaction-list.route';
 
 
 const router = express.Router();
@@ -49,6 +50,7 @@ router.use('/invoice-history', app_invoice_history);
 router.use('/payment', app_payment);
 router.use('/product', app_product);
 router.use('/message', app_message);
+router.use('/transaction-list', transaction_listRoute);
 // router.use('/web', webhook_midtrans);
 router.use('/stores', app_store);
 router.use('/user', app_user);
