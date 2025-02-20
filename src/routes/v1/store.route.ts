@@ -10,6 +10,7 @@ import {
   // getStoreByLogin,
   getStoreByUsername,
   currentStore,
+  getStoreByProduct,
 } from '../../controllers/store.controller';
 
 app_store.post(
@@ -29,6 +30,7 @@ app_store.post(
 );
 app_store.get('/logged-in-store', authentication, currentStore);
 app_store.get('/:username', getStoreByUsername);
+app_store.post('/by-product', getStoreByProduct);
 // app_store.get('/current-store', authentication, getStoreByLogin);
 app_store.get('/', getAllStore, (req, res) => {
   /*

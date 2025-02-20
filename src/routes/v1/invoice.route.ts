@@ -12,6 +12,6 @@ import {
 // app_transaction.post('/create-transaction', createTransaction);
 
 app_invoice.post('/create-invoice', createInvoice);
-app_invoice.get('/get-invoice', getInvoice);
+app_invoice.post('/get-invoice', getInvoice);
 app_invoice.put('/update-invoice', updateInvoice);
 export default app_invoice;

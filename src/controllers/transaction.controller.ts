@@ -18,8 +18,9 @@ export default async function createTransaction(req: Request, res: Response) {
     const { id, productName, price, quantity, service_charge, shipment } =
       req.body;
     const amount = price * quantity + service_charge + shipment;
-    console.log(amount);
+
     // Construct parameter object for Midtrans
+
     const parameter = {
       item_details: [
         {
@@ -29,7 +30,7 @@ export default async function createTransaction(req: Request, res: Response) {
         },
         {
           name: 'service charge',
-          price: service_charge,
+          price: Math.floor(service_charge),
           quantity: 1,
         },
         {
@@ -41,14 +42,12 @@ export default async function createTransaction(req: Request, res: Response) {
 
       transaction_details: {
         order_id: id,
-        gross_amount: amount,
+        gross_amount: Math.floor(amount),
       },
       credit_card: {
         secure: true,
       },
     };
-    // console.log(id);
-    // console.log(price);
 
     // Create transaction token using Midtrans
     const token = await snap.createTransaction(parameter);
