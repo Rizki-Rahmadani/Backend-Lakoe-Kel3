@@ -7,4 +7,5 @@ orderRoute.put('/update-order', orders.updateOrder);
 orderRoute.post('/confirm/:id', orders.confirmDraftOrder);
 orderRoute.post('/draft-order', orders.createDraftOrder);
 orderRoute.post('/', authentication, orders.retrieveOrder);
+orderRoute.post('/tableOrder/create', orders.tableCreateOrder);
 export default orderRoute;

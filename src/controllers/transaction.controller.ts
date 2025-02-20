@@ -38,7 +38,6 @@ export default async function createTransaction(req: Request, res: Response) {
           quantity: 1,
         },
       ],
-
       transaction_details: {
         order_id: id,
         gross_amount: amount,
@@ -53,7 +52,15 @@ export default async function createTransaction(req: Request, res: Response) {
     // Create transaction token using Midtrans
     const token = await snap.createTransaction(parameter);
 
-    console.log('Transaction Token:', token); // Log the token for debugging
+    // Ambil URL pembayaran dari response Midtrans
+    const redirectUrl = token.redirect_url;
+
+    console.log('Transaction Token:', token.token);
+    console.log('URL Pembayaran:', redirectUrl);
+    // //dibawah ini untuk mengirim pembayaran ke wa
+    // const waMessage = `Halo, saya ingin melakukan pembayaran. Klik link berikut untuk melanjutkan: ${redirectUrl}`;
+    //  // Encode pesan untuk URL WhatsApp
+    //  const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`;
 
     // Respond with the token
     res.status(200).json({ token });
