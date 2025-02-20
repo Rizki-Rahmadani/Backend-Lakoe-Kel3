@@ -240,7 +240,47 @@ export async function getProductforName(req: Request, res: Response) {
       return res.status(404).json({ message: 'Store Not Found' });
     }
     const product = await prisma.product.findMany({
-      where: { storesId: getStore.id },
+      where: { storesId: getStore.id, is_active: true },
+      select: {
+        id: true, // Include product ID
+        name: true,
+        attachments: true,
+        price: true,
+        description: true,
+        minimum_order: true, // Include minimum order
+        stock: true, // Include stock
+        weight: true, // Include weight
+        length: true, // Include length
+        width: true, // Include width
+        height: true, // Include height
+        sku: true, // Include SKU
+        is_active: true, // Include active status
+        variants: {
+          select: {
+            id: true,
+            name: true,
+            Variant_options: {
+              select: {
+                id: true,
+                name: true,
+                variant_values: {
+                  select: {
+                    variant_option_value: {
+                      select: {
+                        price: true,
+                        weight: true,
+                        sku: true,
+                        stock: true,
+                        is_active: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
     res.status(200).json({
       message: 'successfully fetched products',
@@ -259,9 +299,16 @@ export async function getProductByUrl(req: Request, res: Response) {
     if (!findStore) {
       return res.status(404).json({ message: 'Store not found' });
     }
-    const findProduct = await prisma.product.findUnique({
-      where: { url: url, storesId: findStore.id },
+    //tampilkan semua produk yang aktif di setiap store
+    const findProduct = await prisma.product.findMany({
+      where: {
+        storesId: findStore.id,
+        is_active: true,
+      },
     });
+    // const findProduct = await prisma.product.findUnique({
+    //   where: { url: url, storesId: findStore.id },
+    // });
     if (!findProduct) {
       return res.status(404).json({ message: 'Product Not Available' });
     }
@@ -635,110 +682,63 @@ export const getProductWithVariants = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Ambil semua kombinasi varian berdasarkan variant_option_values
-    const variantCombinations = await prisma.variant_option_values.findMany({
-      where: {
-        variant_options: {
-          some: {
-            variant_option: {
-              variantsId: {
-                in: product.variants.map((v) => v.id),
+    // Cek apakah produk memiliki variant
+    if (product.variants && product.variants.length > 0) {
+      // Ambil semua kombinasi varian berdasarkan variant_option_values
+      const variantCombinations = await prisma.variant_option_values.findMany({
+        where: {
+          variant_options: {
+            some: {
+              variant_option: {
+                variantsId: {
+                  in: product.variants.map((v) => v.id),
+                },
               },
             },
           },
         },
-      },
-      include: {
-        variant_options: {
-          include: {
-            variant_option: true,
+        include: {
+          variant_options: {
+            include: {
+              variant_option: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Format response agar mudah digunakan di frontend
-    const formattedCombinations = variantCombinations.map((variant) => ({
-      id: variant.id,
-      sku: variant.sku,
-      price: variant.price,
-      stock: variant.stock,
-      weight: variant.weight,
-      is_active: variant.is_active,
-      options: variant.variant_options.map((option) => ({
-        id: option.variant_option.id,
-        name: option.variant_option.name,
-      })),
-    }));
+      // Format response agar mudah digunakan di frontend
+      const formattedCombinations = variantCombinations.map((variant) => ({
+        id: variant.id,
+        sku: variant.sku,
+        price: variant.price,
+        stock: variant.stock,
+        weight: variant.weight,
+        is_active: variant.is_active,
+        options: variant.variant_options.map((option) => ({
+          id: option.variant_option.id,
+          name: option.variant_option.name,
+        })),
+      }));
 
-    res.status(200).json({
-      message: 'Variant combinations retrieved successfully',
-      attachments: product.attachments,
-      variant_combinations: formattedCombinations,
-    });
+      return res.status(200).json({
+        message: 'Variant combinations retrieved successfully',
+        attachments: product.attachments,
+        variant_combinations: formattedCombinations,
+      });
+    } else {
+      // Jika tidak ada variant, ambil stock dan price dari produk
+      return res.status(200).json({
+        message: 'Product retrieved successfully',
+        attachments: product.attachments,
+        price: product.price,
+        stock: product.stock,
+      });
+    }
   } catch (error) {
     console.error('Error fetching variant combinations:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-// export const checkoutProduct = async (req: Request, res: Response) => {
-//   try {
-//     const { productId } = req.params;
-//     const { selectedOptions } = req.body;
-
-//     // Fetch product details
-//     const product = await prisma.product.findUnique({
-//       where: { id: productId },
-//       select: {
-//         name: true,
-//         attachments: true,
-//         variants: {
-//           select: {
-//             id: true,
-//             name: true,
-//             Variant_options: {
-//               select: {
-//                 id: true,
-//                 name: true,
-//               },
-//             },
-//           },
-//         },
-//       },
-//     });
-
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-
-//     // Fetch variant price if selected options are provided
-//     let price = null;
-//     if (selectedOptions && selectedOptions.length > 0) {
-//       const variantCombination = await prisma.variant_option_values.findFirst({
-//         where: {
-//           variant_options: {
-//             every: {
-//               variant_option_id: { in: selectedOptions },
-//             },
-//           },
-//         },
-//         select: {
-//           price: true,
-//         },
-//       });
-
-//       if (variantCombination) {
-//         price = variantCombination.price;
-//       }
-//     }
-
-//     res.status(200).json({ ...product, price });
-//   } catch (error) {
-//     console.error('Failed to fetch product for checkout:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
 
 export const getProductForCheckout = async (req: Request, res: Response) => {
   try {
@@ -785,6 +785,9 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
                       select: {
                         price: true,
                         weight: true,
+                        sku: true,
+                        stock: true,
+                        is_active: true,
                       },
                     },
                   },
@@ -847,5 +850,56 @@ export const getProductForCheckout = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Failed to fetch product for checkout:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updateProductWithVariants = async (
+  req: Request,
+  res: Response,
+) => {
+  const { productId } = req.params;
+  const { price, stock, variants } = req.body;
+
+  try {
+    // Fetch the product
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Start a transaction to update product and its variants
+    const updateData: any = {};
+
+    if (price || stock) {
+      updateData.price = price || product.price;
+      updateData.stock = stock || product.stock;
+    }
+
+    // Perform update only if data is present
+    const updatedProduct = await prisma.product.update({
+      where: { id: productId },
+      data: updateData,
+    });
+
+    // If variants data exists, update each variant
+    if (variants && variants.length > 0) {
+      const updatedVariantsPromises = variants.map((variantData: any) => {
+        const { id, price, stock } = variantData;
+        return prisma.variant_option_values.update({
+          where: { id },
+          data: { price, stock },
+        });
+      });
+
+      await Promise.all(updatedVariantsPromises); // Update variants concurrently
+    }
+
+    res.status(200).json({ message: 'Product updated successfully' });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ message: 'Error updating product' });
   }
 };

@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import axios, { AxiosError } from 'axios';
 import { OrderItem, OrderRequest } from '../types/order';
 import dotenv from 'dotenv';
+import { trace } from 'console';
 dotenv.config();
 const prisma = new PrismaClient();
 
@@ -163,13 +164,18 @@ export const createDraftOrder = async (req: Request, res: Response) => {
         contact_email: orderData.origin_contact_email,
       },
     };
+
     // console.log("this is biteship data",data.destination);
+
+    console.log('this is biteship data', data);
+
     // Simpan orderId ke database
     await prisma.orders.create({
       data: {
         receiver_name: orderData.destination_contact_name,
         origin_email: data.origin.contact_email,
         destination_email: data.destination.contact_email,
+
         // storeId: '',
         // locationId: '',
         order_id: data.id,
@@ -255,6 +261,71 @@ export const retrieveEmailOrder = async (req: Request, res: Response) => {
         origin_email: true,
         destination_email: true,
       },
+    }),
+          console.log(response);
+    res.status(200).json({message: 'succes', data_response: response)};
+                         } catch (error) {
+      res.status(500).json({message: 'error retrieve email', error)};
+                           }
+};
+
+export const retrieveOrder = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    // Send the request to create an order on Biteship
+    const response = await biteshipClient.get('/draft_orders/' + id);
+
+    // Handle the successful response
+    const order = response.data;
+    // You can now store this order information in your database if needed
+    res.status(201).json({
+      message: 'Order Retrieved successfully!',
+      order,
+    });
+  } catch (error: unknown) {
+    // Type narrowing for the Axios error
+    if (axios.isAxiosError(error)) {
+      // If the error is an AxiosError, we can safely access properties like response
+      const errorMessage = error.response?.data || error.message;
+      console.error('Error creating order:', errorMessage);
+      return res.status(500).json({
+        message: 'Failed to create order',
+        error: errorMessage,
+      });
+    } else {
+      // For non-Axios errors
+      console.error('Unexpected error:', error);
+      return res.status(500).json({
+        message: 'An unexpected error occurred',
+        error: (error as Error).message || error,
+      });
+    }
+  }
+};
+
+export const tableCreateOrder = async (req: Request, res: Response) => {
+  const {
+    id,
+    name,
+    biteship_order_id,
+    midtrans_order_id,
+    storeId,
+    locationId,
+  } = req.body;
+  try {
+    const dbOrders = await prisma.orders.create({
+      data: {
+        order_id: id,
+        receiver_name: name,
+        status: 'Menunggu Pembayaran',
+        biteship_order_id: biteship_order_id,
+        midtrans_order_id: midtrans_order_id,
+        storeId: storeId,
+        locationId: locationId,
+        invoiceId: '',
+        biteship_tracking_link: '',
+      },
     });
     console.log(response);
     res.status(200).json({ message: 'success', data_response: response });
@@ -262,6 +333,7 @@ export const retrieveEmailOrder = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'error retrieve email ', error });
   }
 };
+
 
 export const retrieveOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -295,6 +367,7 @@ export const retrieveOrder = async (req: Request, res: Response) => {
         error: (error as Error).message || error,
       });
     }
+
   }
 };
 
