@@ -248,6 +248,7 @@ export async function getProductforName(req: Request, res: Response) {
         attachments: true,
         price: true,
         description: true,
+        url: true,
         minimum_order: true, // Include minimum order
         stock: true, // Include stock
         weight: true, // Include weight

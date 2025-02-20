@@ -193,6 +193,11 @@ export async function showAllRequest(req: Request, res: Response) {
           mode: 'insensitive',
         },
       },
+      include: {
+        store: true,
+        bank: true,
+      },
+      orderBy: { createdAt: 'desc' },
     });
     return res
       .status(200)
@@ -235,7 +240,7 @@ export async function showPendingRequest(req: Request, res: Response) {
           mode: 'insensitive',
         },
       },
-      include: { store: true },
+      include: { store: true, bank: true },
     });
     return res
       .status(200)
@@ -278,6 +283,10 @@ export async function showAcceptedRequest(req: Request, res: Response) {
           mode: 'insensitive',
         },
       },
+      include: {
+        store: true,
+        bank: true,
+      },
     });
     return res
       .status(200)
@@ -319,6 +328,10 @@ export async function showRejectedRequest(req: Request, res: Response) {
           equals: 'rejected',
           mode: 'insensitive',
         },
+      },
+      include: {
+        store: true,
+        bank: true,
       },
     });
     return res
