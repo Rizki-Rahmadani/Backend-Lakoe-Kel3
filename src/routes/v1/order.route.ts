@@ -9,4 +9,5 @@ orderRoute.post('/confirm/:id', orders.confirmDraftOrder);
 orderRoute.post('/get-email', orders.retrieveEmailOrder);
 // orderRoute.post('/draft-order', orders.createDraftOrder);
 orderRoute.get('/:id', orders.retrieveOrder);
+
 export default orderRoute;

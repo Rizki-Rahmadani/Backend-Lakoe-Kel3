@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import axios, { AxiosError } from 'axios';
 import { OrderItem, OrderRequest } from '../types/order';
 import dotenv from 'dotenv';
+import { trace } from 'console';
 dotenv.config();
 const prisma = new PrismaClient();
 
@@ -163,8 +164,9 @@ export const createDraftOrder = async (req: Request, res: Response) => {
         contact_email: orderData.origin_contact_email,
       },
     };
-    // console.log("this is biteship data",data.destination);
+    console.log('this is biteship data', data);
     // Simpan orderId ke database
+
     await prisma.orders.create({
       data: {
         receiver_name: orderData.destination_contact_name,
@@ -265,7 +267,7 @@ export const retrieveEmailOrder = async (req: Request, res: Response) => {
 
 export const retrieveOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log(id);
+
   try {
     // Send the request to create an order on Biteship
     const response = await biteshipClient.get('/draft_orders/' + id);
@@ -295,6 +297,40 @@ export const retrieveOrder = async (req: Request, res: Response) => {
         error: (error as Error).message || error,
       });
     }
+  }
+};
+
+export const tableCreateOrder = async (req: Request, res: Response) => {
+  const {
+    id,
+    name,
+    biteship_order_id,
+    midtrans_order_id,
+    storeId,
+    locationId,
+  } = req.body;
+  try {
+    const dbOrders = await prisma.orders.create({
+      data: {
+        order_id: id,
+        receiver_name: name,
+        status: 'Menunggu Pembayaran',
+        biteship_order_id: biteship_order_id,
+        midtrans_order_id: midtrans_order_id,
+        storeId: storeId,
+        locationId: locationId,
+        invoiceId: '',
+        biteship_tracking_link: '',
+      },
+    });
+
+    res.status(500).json({ message: 'Success create order', order: dbOrders });
+  } catch (error) {
+    console.error('Error retrieving orders and invoices:', error);
+    return res.status(500).json({
+      message: 'An unexpected error occurred',
+      error: (error as Error).message || error,
+    });
   }
 };
 

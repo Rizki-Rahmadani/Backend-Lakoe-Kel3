@@ -1,6 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
+
+const SALT_ROUNDS = 10;
 
 async function main() {
   // Seed Roles
@@ -8,6 +11,9 @@ async function main() {
 
   // Seed Categories
   await seedCategories();
+
+  // Add Admin User
+  await seedAdminUser();
 }
 
 async function seedRoles() {
@@ -105,6 +111,42 @@ async function seedCategories() {
       console.log(`Subcategory '${subcategory.name}' already exists`);
     }
   }
+}
+
+async function seedAdminUser() {
+  const adminRole = await prisma.roles.findFirst({
+    where: { name: 'admin' },
+  });
+
+  if (!adminRole) {
+    console.log('Admin role not found, skipping admin user creation.');
+    return;
+  }
+
+  // Check if the admin user already exists
+  const existingAdminUser = await prisma.user.findFirst({
+    where: { email: 'admin@administrator.com' },
+  });
+
+  if (existingAdminUser) {
+    console.log('Admin user already exists.');
+    return;
+  }
+
+  // Hash the password before saving it
+  const hashedPassword = await bcrypt.hash('adminpass', SALT_ROUNDS);
+
+  const newAdminUser = await prisma.user.create({
+    data: {
+      fullname: 'Admin User',
+      email: 'admin@administrator.com',
+      phone_number: '1234567890', // Use a placeholder or modify as needed
+      password: hashedPassword,
+      rolesId: adminRole.id,
+    },
+  });
+
+  console.log('Admin user created:', newAdminUser);
 }
 
 async function getCategoryId(categoryName: string) {

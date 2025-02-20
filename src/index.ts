@@ -31,6 +31,8 @@ app.get('/', (request: Request, response: Response) => {
 app.listen(PORT, () => {
   console.log('Server running at PORT:', PORT);
 });
+
+export default app;
 // .on('error', (error) => {
 //   throw new Error(error.message);
 // });

@@ -75,6 +75,24 @@ CREATE TABLE "Stores" (
 );
 
 -- CreateTable
+CREATE TABLE "Orders" (
+    "id" TEXT NOT NULL,
+    "order_id" TEXT,
+    "receiver_name" TEXT,
+    "status" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "biteship_order_id" TEXT,
+    "midtrans_order_id" TEXT,
+    "invoiceId" TEXT,
+    "biteship_tracking_link" TEXT,
+    "storeId" TEXT NOT NULL,
+    "locationId" TEXT,
+
+    CONSTRAINT "Orders_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "bank_accounts" (
     "id" TEXT NOT NULL,
     "bank" TEXT NOT NULL,
@@ -99,7 +117,8 @@ CREATE TABLE "Location" (
     "latitude" TEXT NOT NULL,
     "storesId" TEXT,
     "profilesId" TEXT,
-    "biteshipId" TEXT,
+    "biteship_location_id" TEXT,
+    "biteship_area_id" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -195,18 +214,24 @@ CREATE TABLE "Cart_items" (
 CREATE TABLE "Invoices" (
     "id" TEXT NOT NULL,
     "prices" INTEGER NOT NULL,
-    "status" BOOLEAN NOT NULL DEFAULT false,
-    "receiver_longitude" TEXT NOT NULL,
-    "receiver_latitude" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "service_charge" INTEGER NOT NULL,
+    "receiver_city" TEXT NOT NULL,
+    "receiver_province" TEXT NOT NULL,
+    "receiver_subDistrict" TEXT NOT NULL,
     "receiver_district" TEXT NOT NULL,
     "receiver_phone" TEXT NOT NULL,
-    "receiver_address" TEXT NOT NULL,
     "receiver_name" TEXT NOT NULL,
-    "invoice_number" TEXT NOT NULL,
-    "cartsId" TEXT NOT NULL,
+    "receiver_postalCode" TEXT NOT NULL,
+    "receiver_detailAddress" TEXT NOT NULL,
+    "receiver_email" TEXT NOT NULL,
+    "order_id" TEXT,
+    "receiver_biteship_area_id" TEXT,
+    "invoice_number" TEXT,
+    "cartsId" TEXT,
     "userId" TEXT NOT NULL,
-    "paymentsId" TEXT NOT NULL,
-    "courierId" TEXT NOT NULL,
+    "paymentsId" TEXT,
+    "courierId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -228,7 +253,7 @@ CREATE TABLE "Confirmation_payment" (
 -- CreateTable
 CREATE TABLE "Invoice_histories" (
     "id" TEXT NOT NULL,
-    "status" BOOLEAN NOT NULL DEFAULT false,
+    "status" TEXT NOT NULL DEFAULT 'pending',
     "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "invoicesId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -242,10 +267,10 @@ CREATE TABLE "Payments" (
     "id" TEXT NOT NULL,
     "bank" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
-    "status" BOOLEAN NOT NULL DEFAULT false,
-    "moota_transaction_id" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "midtrans_transaction_id" TEXT,
     "userId" TEXT NOT NULL,
-    "invoicesId" TEXT NOT NULL,
+    "invoicesId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -314,6 +339,22 @@ CREATE TABLE "Message_templates" (
 );
 
 -- CreateTable
+CREATE TABLE "Transaction" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "amount" INTEGER NOT NULL,
+    "bankId" TEXT,
+    "storeId" TEXT NOT NULL,
+    "orderId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_CategoriesToProduct" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -356,6 +397,18 @@ CREATE UNIQUE INDEX "Stores_username_key" ON "Stores"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Stores_userId_key" ON "Stores"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Orders_id_key" ON "Orders"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Orders_order_id_key" ON "Orders"("order_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Orders_biteship_order_id_key" ON "Orders"("biteship_order_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Orders_midtrans_order_id_key" ON "Orders"("midtrans_order_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "bank_accounts_id_key" ON "bank_accounts"("id");
@@ -421,6 +474,12 @@ CREATE UNIQUE INDEX "Operation_hours_id_key" ON "Operation_hours"("id");
 CREATE UNIQUE INDEX "Message_templates_id_key" ON "Message_templates"("id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Transaction_id_key" ON "Transaction"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Transaction_orderId_key" ON "Transaction"("orderId");
+
+-- CreateIndex
 CREATE INDEX "_CategoriesToProduct_B_index" ON "_CategoriesToProduct"("B");
 
 -- AddForeignKey
@@ -434,6 +493,15 @@ ALTER TABLE "Product" ADD CONSTRAINT "Product_storesId_fkey" FOREIGN KEY ("store
 
 -- AddForeignKey
 ALTER TABLE "Stores" ADD CONSTRAINT "Stores_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Orders" ADD CONSTRAINT "Orders_invoiceId_fkey" FOREIGN KEY ("invoiceId") REFERENCES "Invoices"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Orders" ADD CONSTRAINT "Orders_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Orders" ADD CONSTRAINT "Orders_locationId_fkey" FOREIGN KEY ("locationId") REFERENCES "Location"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "bank_accounts" ADD CONSTRAINT "bank_accounts_storesId_fkey" FOREIGN KEY ("storesId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -506,6 +574,12 @@ ALTER TABLE "Operation_hours" ADD CONSTRAINT "Operation_hours_storesId_fkey" FOR
 
 -- AddForeignKey
 ALTER TABLE "Message_templates" ADD CONSTRAINT "Message_templates_storesId_fkey" FOREIGN KEY ("storesId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_bankId_fkey" FOREIGN KEY ("bankId") REFERENCES "bank_accounts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Stores"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CategoriesToProduct" ADD CONSTRAINT "_CategoriesToProduct_A_fkey" FOREIGN KEY ("A") REFERENCES "Categories"("id") ON DELETE CASCADE ON UPDATE CASCADE;

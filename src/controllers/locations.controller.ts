@@ -456,42 +456,40 @@ export const updateLocation = async (req: Request, res: Response) => {
 };
 
 export const deleteLocation = async (req: Request, res: Response) => {
-  /*  
-        #swagger.tags = ['Location']
-        #swagger.requestBody = {
-            required: true,
-            content: {
-                "application/json": {
-                    schema: {
-                        $ref: "#/components/schemas/DeleteLocationDTO"
-                    }  
-                }
-            }
-        } 
-    */
   try {
     const { id } = req.params;
-    const findLocation = await prisma.location.delete({
+
+    // Cari lokasi yang akan dihapus
+    const findLocation = await prisma.location.findUnique({
       where: { id },
     });
 
-    const biteshipId = findLocation.biteship_location_id;
-    const apiBiteship = `https://api.biteship.com/v1/locations/${biteshipId}`;
+    if (!findLocation) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
 
-    // Buat request ke Biteship API
-    const biteShip = await fetch(apiBiteship, {
-      method: `DELETE`,
-      headers: {
-        Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
-        'Content-Type': 'application/json',
-      },
-    });
+    // Hapus lokasi dari database
+    await prisma.location.delete({ where: { id } });
 
-    const data = await biteShip.json();
+    // Jika lokasi yang dihapus adalah `is_main: true`
+    if (findLocation.is_main_location) {
+      // Cari lokasi lain yang tersedia, order by `createdAt` paling awal
+      const newMainLocation = await prisma.location.findFirst({
+        where: { is_main_location: false }, // Cari lokasi yang bukan is_main
+        orderBy: { createdAt: 'asc' }, // Urutkan dari yang paling awal
+      });
+
+      // Jika ada lokasi lain, jadikan lokasi pertama sebagai is_main
+      if (newMainLocation) {
+        await prisma.location.update({
+          where: { id: newMainLocation.id },
+          data: { is_main_location: true },
+        });
+      }
+    }
 
     res.status(200).json({
-      message: 'Locations deleted successfully',
-      biteshipResponse: data,
+      message: 'Location deleted successfully',
     });
   } catch (error) {
     res
@@ -499,6 +497,50 @@ export const deleteLocation = async (req: Request, res: Response) => {
       .json({ error: 'An error occurred while deleting the location' });
   }
 };
+// export const deleteLocation = async (req: Request, res: Response) => {
+//   /*
+//         #swagger.tags = ['Location']
+//         #swagger.requestBody = {
+//             required: true,
+//             content: {
+//                 "application/json": {
+//                     schema: {
+//                         $ref: "#/components/schemas/DeleteLocationDTO"
+//                     }
+//                 }
+//             }
+//         }
+//     */
+//   try {
+//     const { id } = req.params;
+//     const findLocation = await prisma.location.delete({
+//       where: { id },
+//     });
+
+//     const biteshipId = findLocation.biteship_location_id;
+//     const apiBiteship = `https://api.biteship.com/v1/locations/${biteshipId}`;
+
+//     // Buat request ke Biteship API
+//     const biteShip = await fetch(apiBiteship, {
+//       method: `DELETE`,
+//       headers: {
+//         Authorization: `Bearer ${process.env.API_BITESHIP_TEST}`, // Pastikan API key valid
+//         'Content-Type': 'application/json',
+//       },
+//     });
+
+//     const data = await biteShip.json();
+
+//     res.status(200).json({
+//       message: 'Locations deleted successfully',
+//       biteshipResponse: data,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ error: 'An error occurred while deleting the location' });
+//   }
+// };
 
 // export const deleteLocation = async (req: Request, res: Response) => {
 //   /*
