@@ -169,6 +169,11 @@ export async function getStoreByProduct(req: Request, res: Response) {
       // Jika tidak ada variant, ambil stock dan price dari produk
       return res.status(200).json({
         message: 'Product retrieved successfully',
+        store_id: productExist.store_id,
+        location_store: productExist.store_id.Location,
+        product_name: productExist.name,
+        product_url: productExist.url,
+        product_description: productExist.description,
         products: productExist,
         attachments: productExist.attachments,
         price: productExist.price,

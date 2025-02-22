@@ -77,7 +77,7 @@ export async function BiteshipTracking(req: Request, res: Response) {
   res.status(200).send('Webhook received');
 }
 
-const apiURL = 'http://localhost:3000/api'; // Replace with your actual API URL
+const apiURL = process.env.API_URL || 'http://localhost:3000/api'; // Replace with your actual API URL
 // const token = 'YOUR_AUTH_TOKEN'; // Replace with actual token if required
 
 export async function Midtrans(req: Request, res: Response) {
@@ -218,6 +218,7 @@ export async function Midtrans(req: Request, res: Response) {
         where: { order_id: data.order_id },
         data: {
           status: 'Pesanan Baru',
+          storeId: updateInvoice.data.invoice_updated.storesId
         },
       });
 
@@ -297,6 +298,7 @@ export async function Midtrans(req: Request, res: Response) {
         where: { order_id: data.order_id },
         data: {
           status: 'Dibatalkan',
+          storeId: updateInvoice.data.invoice_updated.storesId
         },
       });
       //=====================================
@@ -353,10 +355,13 @@ export async function Midtrans(req: Request, res: Response) {
         `${apiURL}/order/confirm/${draftOrdersId}`,
       );
 
+      console.log("got store id: ", updateInvoice.data.invoice_updated.storesId);
+
       const dbOrders = await prisma.orders.update({
         where: { order_id: data.order_id },
         data: {
           status: 'Pesanan Baru',
+          storeId: updateInvoice.data.invoice_updated.storesId
         },
       });
       //=====================================
