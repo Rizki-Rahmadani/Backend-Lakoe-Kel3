@@ -82,7 +82,7 @@ export async function BiteshipTracking(req: Request, res: Response) {
   res.status(200).send('Webhook received');
 }
 
-const apiURL = 'http://localhost:3000/api'; // Replace with your actual API URL
+const apiURL = 'https://backend-lakoe.vercel.app/api'; // Replace with your actual API URL
 // const token = 'YOUR_AUTH_TOKEN'; // Replace with actual token if required
 
 export async function Midtrans(req: Request, res: Response) {
