@@ -334,6 +334,45 @@ export const tableCreateOrder = async (req: Request, res: Response) => {
   }
 };
 
+export const retrieveOrderByUser = async (req: Request, res: Response) => {
+  const  userId  = (req as any).user.id;
+  // console.log("this is user", );
+  try {
+
+    // Cari Store berdasarkan userId
+    const findStore = await prisma.stores.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!findStore) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Cari Orders berdasarkan storeId
+    const findOrder = await prisma.orders.findMany({
+      where: { storeId: findStore.id },
+    });
+
+    // Cari Invoices berdasarkan userId
+    // const findInvoice = await prisma.invoices.findMany({
+    //   where: { order_id: findOrder.id },
+    // });
+
+    // Kirim response dengan findOrder dan findInvoice
+    return res.json({
+      store: findStore,
+      orders: findOrder,
+      // invoices: findInvoice,
+    });
+  } catch (error: unknown) {
+    console.error('Error retrieving orders and invoices:', error);
+    return res.status(500).json({
+      message: 'An unexpected error occurred',
+      error: (error as Error).message || error,
+    });
+  }
+};
+
 // export const retrieveOrder = async (req: Request, res: Response) => {
 //   const { userId } = (req as any).user;
 //   try {
