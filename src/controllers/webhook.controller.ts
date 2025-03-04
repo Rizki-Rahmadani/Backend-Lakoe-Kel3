@@ -3,6 +3,11 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import express, { Request, Response, NextFunction, response } from 'express';
 export const app_temporary = express();
+import dotenv from 'dotenv';
+dotenv.config();
+
+const serverKey = process.env.SERVER_KEY;
+const clientKey = process.env.CLIENT_KEY;
 const prisma = new PrismaClient();
 
 // const user_data = express.Router();
@@ -99,10 +104,7 @@ export async function Midtrans(req: Request, res: Response) {
       {
         headers: {
           Authorization:
-            'Basic ' +
-            Buffer.from('SB-Mid-server-HTB5WCLALgagfSdtqzJVMkgB').toString(
-              'base64',
-            ),
+            'Basic ' + Buffer.from(String(serverKey)).toString('base64'),
           'Content-Type': 'application/json',
         },
       },
