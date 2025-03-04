@@ -1,14 +1,15 @@
 import express, { Request, Response } from 'express';
 import { MidtransClient } from 'midtrans-node-client';
-
+import dotenv from 'dotenv';
 const app = express();
 app.use(express.json()); // Middleware to parse JSON requests
+dotenv.config();
 
 // Initialize Midtrans Snap client
 const snap = new MidtransClient.Snap({
   isProduction: false,
-  serverKey: 'SB-Mid-server-HTB5WCLALgagfSdtqzJVMkgB', // Replace with your Midtrans server key
-  clientKey: 'SB-Mid-client-4omBGFxKlAqOqhRu', // Replace with your Midtrans client key
+  serverKey: process.env.CLIENT_KEY, // Replace with your Midtrans server key
+  clientKey: process.env.SERVER_KEY, // Replace with your Midtrans client key
 });
 
 // Define the POST endpoint
