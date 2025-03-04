@@ -109,6 +109,7 @@ export async function getStoreByProduct(req: Request, res: Response) {
         store_id: {
           include: {
             Location: true,
+            user: true,
           },
         },
       },
@@ -157,7 +158,8 @@ export async function getStoreByProduct(req: Request, res: Response) {
 
       return res.status(200).json({
         message: 'Variant combinations retrieved successfully',
-        store_id: productExist.store_id,
+        user: productExist.store_id.user,
+        store: productExist.store_id,
         location_store: productExist.store_id.Location,
         product_name: productExist.name,
         product_url: productExist.url,
@@ -169,6 +171,9 @@ export async function getStoreByProduct(req: Request, res: Response) {
       // Jika tidak ada variant, ambil stock dan price dari produk
       return res.status(200).json({
         message: 'Product retrieved successfully',
+        user: productExist.store_id.user,
+        store: productExist.store_id,
+        location_store: productExist.store_id.Location,
         products: productExist,
         attachments: productExist.attachments,
         price: productExist.price,
