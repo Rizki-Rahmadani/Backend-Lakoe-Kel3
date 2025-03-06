@@ -51,4 +51,5 @@ export type OrderRequest = {
   cash_on_delivery?: number;
   external_id?: string;
   label?: string;
+  storeId?: string;
 };
