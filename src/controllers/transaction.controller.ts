@@ -18,6 +18,9 @@ export default async function createTransaction(req: Request, res: Response) {
     // Destructure incoming request body
     const { id, productName, price, quantity, service_charge, shipment } =
       req.body;
+    if(!id || !productName || !price || !quantity || !service_charge || !shipment){
+      res.status(400).json({message: "error not enough data"})
+    }
     const amount = price * quantity + service_charge + shipment;
 
     // Construct parameter object for Midtrans
