@@ -172,7 +172,7 @@ export const createDraftOrder = async (req: Request, res: Response) => {
         receiver_name: orderData.destination_contact_name,
         origin_email: data.origin.contact_email,
         destination_email: data.destination.contact_email,
-        // storeId: '',
+        storeId: orderData.storeId
         // locationId: '',
         order_id: data.id,
         status: data.status,
