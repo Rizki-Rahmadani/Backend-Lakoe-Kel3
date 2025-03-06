@@ -8,8 +8,8 @@ dotenv.config();
 // Initialize Midtrans Snap client
 const snap = new MidtransClient.Snap({
   isProduction: false,
-  serverKey: process.env.CLIENT_KEY, // Replace with your Midtrans server key
-  clientKey: process.env.SERVER_KEY, // Replace with your Midtrans client key
+  serverKey: process.env.SERVER_KEY, // Replace with your Midtrans server key
+  clientKey: process.env.CLIENT_KEY, // Replace with your Midtrans client key
 });
 
 // Define the POST endpoint
